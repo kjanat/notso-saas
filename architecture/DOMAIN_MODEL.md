@@ -3,104 +3,123 @@
 ## Bounded Contexts
 
 ### 1. Tenant Management Context
+
 **Purpose**: Manage multi-tenancy, subscriptions, and platform-level user access
 
 **Aggregates**:
-- **Tenant** (Aggregate Root)
-  - TenantId (Value Object)
-  - TenantSlug (Value Object)
-  - SubscriptionPlan (Value Object)
-  - DatabaseCredentials (Value Object)
-  - BillingInformation (Entity)
+
+- **`Tenant`** (Aggregate Root)
+  - `TenantId` (Value Object)
+  - `TenantSlug` (Value Object)
+  - `SubscriptionPlan` (Value Object)
+  - `DatabaseCredentials` (Value Object)
+  - `BillingInformation` (Entity)
 
 **Domain Events**:
-- TenantCreated
-- TenantUpgraded
-- TenantSuspended
-- TenantReactivated
+
+- `TenantCreated`
+- `TenantUpgraded`
+- `TenantSuspended`
+- `TenantReactivated`
 
 ### 2. Chatbot Configuration Context
+
 **Purpose**: Manage chatbot instances, avatars, and deployment configurations
 
 **Aggregates**:
-- **Chatbot** (Aggregate Root)
-  - ChatbotId (Value Object)
-  - DeploymentKey (Value Object)
-  - PersonalityProfile (Entity)
-  - AvatarConfiguration (Entity)
-  - KnowledgeBase (Entity)
+
+- **`Chatbot`** (Aggregate Root)
+  - `ChatbotId` (Value Object)
+  - `DeploymentKey` (Value Object)
+  - `PersonalityProfile` (Entity)
+  - `AvatarConfiguration` (Entity)
+  - `KnowledgeBase` (Entity)
 
 **Domain Events**:
-- ChatbotCreated
-- ChatbotDeployed
-- ChatbotConfigurationUpdated
-- AvatarChanged
+
+- `ChatbotCreated`
+- `ChatbotDeployed`
+- `ChatbotConfigurationUpdated`
+- `AvatarChanged`
 
 ### 3. Conversation Context
+
 **Purpose**: Handle real-time chat sessions and message processing
 
 **Aggregates**:
-- **Conversation** (Aggregate Root)
-  - ConversationId (Value Object)
-  - Visitor (Entity)
-  - MessageThread (Entity Collection)
-  - ConversationMetrics (Value Object)
+
+- **`Conversation`** (Aggregate Root)
+  - `ConversationId` (Value Object)
+  - `Visitor` (Entity)
+  - `MessageThread` (Entity Collection)
+  - `ConversationMetrics` (Value Object)
 
 **Domain Events**:
-- ConversationStarted
-- MessageReceived
-- MessageSent
-- ConversationEnded
-- SentimentAnalyzed
+
+- `ConversationStarted`
+- `MessageReceived`
+- `MessageSent`
+- `ConversationEnded`
+- `SentimentAnalyzed`
 
 ### 4. AI Processing Context
+
 **Purpose**: Handle AI/ML operations, sentiment analysis, and response generation
 
 **Aggregates**:
-- **AIJob** (Aggregate Root)
-  - JobId (Value Object)
-  - ProcessingPipeline (Entity)
-  - ModelConfiguration (Value Object)
-  - ResponseStrategy (Entity)
+
+- **`AIJob`** (Aggregate Root)
+  - `JobId` (Value Object)
+  - `ProcessingPipeline` (Entity)
+  - `ModelConfiguration` (Value Object)
+  - `ResponseStrategy` (Entity)
 
 **Domain Events**:
-- AIJobQueued
-- ProcessingStarted
-- ResponseGenerated
-- SentimentCalculated
+
+- `AIJobQueued`
+- `ProcessingStarted`
+- `ResponseGenerated`
+- `SentimentCalculated`
 
 ### 5. Analytics Context
+
 **Purpose**: Aggregate and report on chatbot performance and conversations
 
 **Aggregates**:
-- **AnalyticsReport** (Aggregate Root)
-  - ReportId (Value Object)
-  - MetricsCollection (Entity)
-  - TimeRange (Value Object)
-  - Aggregations (Entity Collection)
+
+- **`AnalyticsReport`** (Aggregate Root)
+  - `ReportId` (Value Object)
+  - `MetricsCollection` (Entity)
+  - `TimeRange` (Value Object)
+  - `Aggregations` (Entity Collection)
 
 **Read Models**:
-- ConversationSummaryView
-- ChatbotPerformanceView
-- VisitorInsightsView
+
+- `ConversationSummaryView`
+- `ChatbotPerformanceView`
+- `VisitorInsightsView`
 
 ### 6. Platform Administration Context
+
 **Purpose**: System-wide administration, monitoring, and compliance
 
 **Aggregates**:
-- **SystemConfiguration** (Aggregate Root)
-  - SecuritySettings (Entity)
-  - ComplianceRules (Entity)
-  - SystemLimits (Value Object)
+
+- **`SystemConfiguration`** (Aggregate Root)
+  - `SecuritySettings` (Entity)
+  - `ComplianceRules` (Entity)
+  - `SystemLimits` (Value Object)
 
 **Domain Events**:
-- SecurityPolicyUpdated
-- ComplianceRuleAdded
-- SystemLimitChanged
+
+- `SecurityPolicyUpdated`
+- `ComplianceRuleAdded`
+- `SystemLimitChanged`
 
 ## Cross-Context Integration
 
 ### Domain Services
+
 ```typescript
 interface TenantProvisioningService {
   provisionNewTenant(command: CreateTenantCommand): Promise<TenantId>
@@ -120,6 +139,7 @@ interface MultiTenantDataService {
 ```
 
 ### Anti-Corruption Layers
+
 ```typescript
 // Legacy CSV Import Adapter
 interface LegacyDataAdapter {
@@ -199,16 +219,16 @@ class TenantOnboardingSaga {
   async handle(command: CreateTenantCommand): Promise<void> {
     // 1. Create tenant in platform DB
     const tenantId = await this.tenantService.createTenant(command)
-    
+
     // 2. Provision tenant database
     await this.databaseService.createTenantDatabase(tenantId)
-    
+
     // 3. Create default chatbot
     await this.chatbotService.createDefaultChatbot(tenantId)
-    
+
     // 4. Setup billing
     await this.billingService.createCustomer(tenantId)
-    
+
     // 5. Send welcome email
     await this.notificationService.sendWelcome(tenantId)
   }
@@ -219,19 +239,19 @@ class ConversationProcessingSaga {
   async handle(event: MessageReceivedEvent): Promise<void> {
     // 1. Analyze sentiment
     const sentiment = await this.aiService.analyzeSentiment(event.message)
-    
+
     // 2. Generate AI response
     const response = await this.aiService.generateResponse(event)
-    
+
     // 3. Store in conversation
     await this.conversationService.appendMessages(event.conversationId, [
       event.message,
       response
     ])
-    
+
     // 4. Send via WebSocket
     await this.realtimeService.sendMessage(event.visitorId, response)
-    
+
     // 5. Update analytics
     await this.analyticsService.trackInteraction(event)
   }

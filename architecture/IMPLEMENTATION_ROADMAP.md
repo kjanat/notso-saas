@@ -1,9 +1,11 @@
 # Implementation Roadmap
 
 ## Phase 1: Foundation (Week 1)
+
 Focus: Core infrastructure and development environment
 
 ### Completed ✅
+
 - [x] Docker development environment configuration
 - [x] Domain model and bounded contexts
 - [x] Core aggregates and entities design
@@ -11,6 +13,7 @@ Focus: Core infrastructure and development environment
 - [x] Database schema design
 
 ### Next Steps
+
 - [ ] Set up monorepo structure with pnpm workspaces
 - [ ] Initialize TypeScript projects for each service
 - [ ] Implement database migration tooling (Prisma/TypeORM)
@@ -18,15 +21,18 @@ Focus: Core infrastructure and development environment
 - [ ] Set up basic CI/CD pipeline
 
 ### Deliverables
+
 - Working development environment
 - Database migrations ready
 - Basic project structure
 - Shared TypeScript types
 
 ## Phase 2: Core Infrastructure (Week 2)
+
 Focus: Security, authentication, and core services
 
 ### Priority Tasks
+
 1. **Authentication Service**
    - JWT implementation with refresh tokens
    - Multi-tenant user management
@@ -50,15 +56,18 @@ Focus: Security, authentication, and core services
    - Error tracking integration
 
 ### Deliverables
+
 - Auth service with JWT
 - Tenant isolation working
 - Rate limiting implemented
 - Error handling framework
 
 ## Phase 3: API & Communication (Week 3)
+
 Focus: REST APIs, WebSocket, and real-time features
 
 ### Priority Tasks
+
 1. **API Gateway Setup**
    - Traefik configuration
    - Request routing
@@ -83,15 +92,18 @@ Focus: REST APIs, WebSocket, and real-time features
    - Event subscription management
 
 ### Deliverables
+
 - Working API gateway
 - Core REST endpoints
 - Real-time chat functioning
 - Webhook system ready
 
 ## Phase 4: AI Integration (Week 4)
+
 Focus: AI processing, job queues, and integrations
 
 ### Priority Tasks
+
 1. **Job Queue System**
    - Bull queue setup
    - Priority queue management
@@ -116,15 +128,18 @@ Focus: AI processing, job queues, and integrations
    - Real-time dashboard data
 
 ### Deliverables
+
 - AI processing working
 - CSV import functional
 - Cost tracking active
 - Basic analytics flowing
 
 ## Phase 5: Frontend & Deployment (Week 5)
+
 Focus: User interfaces and production readiness
 
 ### Priority Tasks
+
 1. **Chat Widget**
    - Embeddable JavaScript SDK
    - Widget customization API
@@ -150,6 +165,7 @@ Focus: User interfaces and production readiness
    - Backup automation
 
 ### Deliverables
+
 - Chat widget live
 - Admin portals functional
 - 3D avatars working
@@ -158,6 +174,7 @@ Focus: User interfaces and production readiness
 ## Quick Wins (Can be done anytime)
 
 ### Development Experience
+
 ```bash
 # Create these npm scripts in package.json
 "scripts": {
@@ -178,6 +195,7 @@ Focus: User interfaces and production readiness
 ```
 
 ### Project Structure
+
 ```
 saas/
 ├── packages/
@@ -199,6 +217,7 @@ saas/
 ```
 
 ### Environment Setup
+
 ```bash
 # Create .env files for each environment
 .env.local          # Local development
@@ -214,11 +233,13 @@ pnpm dotenv -e .env.staging -- pnpm start
 ## Risk Mitigation Strategies
 
 ### 1. Start with Monolith
+
 - Build everything in one codebase initially
 - Extract microservices only when needed
 - Use feature flags to control rollout
 
 ### 2. Mock External Services
+
 ```typescript
 // Create mock providers for development
 class MockOpenAIProvider implements AIProvider {
@@ -234,11 +255,13 @@ class MockOpenAIProvider implements AIProvider {
 ```
 
 ### 3. Progressive Enhancement
+
 - Start with basic chat, add 3D avatars later
 - Begin with simple analytics, enhance over time
 - Launch with core features, iterate based on feedback
 
 ### 4. Cost Controls from Day 1
+
 - Implement spending limits per tenant
 - Add circuit breakers for external APIs
 - Monitor and alert on unusual usage
@@ -246,26 +269,31 @@ class MockOpenAIProvider implements AIProvider {
 ## Success Metrics
 
 ### Week 1 Success
+
 - [ ] Can spin up full dev environment with one command
 - [ ] Database migrations run successfully
 - [ ] Can create a tenant programmatically
 
 ### Week 2 Success
+
 - [ ] Can authenticate and get JWT token
 - [ ] Tenant isolation verified with tests
 - [ ] Rate limiting prevents abuse
 
 ### Week 3 Success
+
 - [ ] Can send/receive chat messages in real-time
 - [ ] REST APIs return correct data
 - [ ] Webhooks deliver events successfully
 
 ### Week 4 Success
+
 - [ ] AI responses generated and cached
 - [ ] CSV import processes 1000 records
 - [ ] Cost tracking accurate to $0.01
 
 ### Week 5 Success
+
 - [ ] Widget embeds on test site
 - [ ] Admin can view all tenants
 - [ ] System handles 100 concurrent chats
@@ -273,6 +301,7 @@ class MockOpenAIProvider implements AIProvider {
 ## Critical Path Items
 
 These MUST be done in order:
+
 1. Database setup and migrations
 2. Authentication system
 3. Tenant isolation
@@ -284,17 +313,20 @@ Everything else can be parallelized or deferred.
 ## Budget Considerations
 
 ### Development Costs
+
 - OpenAI API: ~$500/month for development
 - Infrastructure: ~$200/month for dev/staging
 - Monitoring tools: ~$100/month
 
 ### Production Estimates (100 tenants)
+
 - OpenAI API: $2,000-5,000/month
 - Infrastructure: $1,000-2,000/month
 - CDN: $200-500/month
 - Backups: $100-200/month
 
 ### Cost Optimization
+
 - Cache aggressively (80% cache hit target)
 - Use GPT-3.5 for most queries
 - Implement spending caps per tenant

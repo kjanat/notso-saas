@@ -48,20 +48,20 @@ graph TB
     WS --> RABBITMQ
     CSV --> RABBITMQ
     API --> RABBITMQ
-    
+
     RABBITMQ --> DISPATCHER
     DISPATCHER --> WORKERS
     WORKERS --> CACHE
     WORKERS --> RATE
-    
+
     RATE --> OPENAI
     RATE --> FALLBACK
     RATE --> LOCAL
-    
+
     WORKERS --> TRACKER
     TRACKER --> LIMITER
     LIMITER --> ALERTS
-    
+
     WORKERS --> POSTGRES
     CACHE --> REDIS
     WORKERS --> S3
@@ -98,7 +98,7 @@ export interface AIJob {
 
 export class AIJobQueue {
   private queues: Map<string, Bull.Queue> = new Map()
-  
+
   constructor(private redis: Redis) {
     this.initializeQueues()
   }
@@ -146,7 +146,7 @@ export class AIJobQueue {
 
   async addJob(job: AIJob): Promise<Bull.Job> {
     const queue = this.selectQueue(job)
-    
+
     // Check tenant budget before queuing
     const canProcess = await this.checkTenantBudget(job.tenantId, job.metadata.costEstimate)
     if (!canProcess) {
@@ -208,20 +208,20 @@ export class AIProcessor {
 
       // Select provider based on tenant config and availability
       const provider = await this.selectProvider(tenantId)
-      
+
       // Prepare context
       const context = await this.prepareContext(conversationId, payload)
-      
+
       // Generate response
       const response = await this.generateResponse(provider, context)
-      
+
       // Post-process response
       const processed = await this.postProcess(response, job.data)
-      
+
       // Track costs
       const cost = provider.calculateCost(context, response)
       await this.costTracker.track(tenantId, cost, provider.name)
-      
+
       // Cache response
       await this.responseCache.set(
         this.generateCacheKey(payload.content, payload.chatbotConfig),
@@ -259,19 +259,19 @@ export class AIProcessor {
         return await provider.generateResponse(context)
       } catch (error) {
         lastError = error as Error
-        
+
         // If rate limited, wait and retry
         if (error instanceof RateLimitError) {
           await this.wait(error.retryAfter)
           continue
         }
-        
+
         // If provider error, try fallback
         if (error instanceof ProviderError && i < maxRetries - 1) {
           provider = await this.getFallbackProvider(provider.name)
           continue
         }
-        
+
         throw error
       }
     }
@@ -337,8 +337,8 @@ export class CostTracker {
   ): Promise<void> {
     await this.postgres.query(`
       INSERT INTO ai_usage_logs (
-        tenant_id, provider, model, 
-        input_tokens, output_tokens, 
+        tenant_id, provider, model,
+        input_tokens, output_tokens,
         total_cost, timestamp
       ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
     `, [
@@ -352,7 +352,7 @@ export class CostTracker {
 
     // Update tenant's daily/monthly usage
     await this.updateTenantUsage(tenantId, cost.totalCost)
-    
+
     // Check if approaching limits
     await this.checkUsageLimits(tenantId)
   }
@@ -387,24 +387,24 @@ export class CostTracker {
   async enforceRateLimit(tenantId: string): Promise<boolean> {
     const key = `ai:rate:${tenantId}`
     const limit = await this.getTenantRateLimit(tenantId)
-    
+
     // Sliding window rate limiting
     const now = Date.now()
     const window = 60000 // 1 minute
-    
+
     // Get current window count
     const count = await this.redis.eval(`
       local key = KEYS[1]
       local now = tonumber(ARGV[1])
       local window = tonumber(ARGV[2])
       local limit = tonumber(ARGV[3])
-      
+
       -- Remove old entries
       redis.call('ZREMRANGEBYSCORE', key, 0, now - window)
-      
+
       -- Count current entries
       local current = redis.call('ZCARD', key)
-      
+
       if current < limit then
         -- Add new entry
         redis.call('ZADD', key, now, now)
@@ -426,7 +426,7 @@ export class CostTracker {
 // ai-service/src/cache/response-cache.ts
 export class ResponseCache {
   private readonly CACHE_VERSION = 'v1'
-  
+
   constructor(private redis: Redis) {}
 
   async get(key: string): Promise<AIResponse | null> {
@@ -434,13 +434,13 @@ export class ResponseCache {
     if (!cached) return null
 
     const parsed = JSON.parse(cached)
-    
+
     // Validate cache version
     if (parsed.version !== this.CACHE_VERSION) return null
-    
+
     // Check if still valid
     if (Date.now() > parsed.expiresAt) return null
-    
+
     return parsed.data
   }
 
@@ -472,14 +472,14 @@ export class ResponseCache {
     context?: Message[]
   ): string {
     const hash = crypto.createHash('sha256')
-    
+
     hash.update(content)
     hash.update(JSON.stringify({
       personality: config.personality,
       temperature: config.temperature,
       maxTokens: config.maxTokens,
     }))
-    
+
     if (context && context.length > 0) {
       // Include last 3 messages for context
       const recentContext = context.slice(-3).map(m => ({
@@ -488,7 +488,7 @@ export class ResponseCache {
       }))
       hash.update(JSON.stringify(recentContext))
     }
-    
+
     return hash.digest('hex')
   }
 
@@ -514,10 +514,10 @@ export class CSVBatchProcessor {
   async processCSVImport(importJob: ImportJob): Promise<ImportResult> {
     const csvPath = await this.storage.download(importJob.fileUrl)
     const records = await this.parseCSV(csvPath)
-    
+
     // Split into batches
     const batches = this.createBatches(records, this.BATCH_SIZE)
-    
+
     // Process batches concurrently
     const results = await this.processBatchesConcurrently(
       batches,
@@ -527,10 +527,10 @@ export class CSVBatchProcessor {
 
     // Aggregate results
     const summary = this.aggregateResults(results)
-    
+
     // Store processed data
     await this.storeProcessedData(importJob.tenantId, results)
-    
+
     // Generate report
     const report = await this.generateImportReport(importJob, summary)
     await this.storage.upload(report.path, report.content)
@@ -555,10 +555,10 @@ export class CSVBatchProcessor {
       try {
         // Transform CSV record to conversation
         const conversation = await this.transformRecord(record, importJob.mapping)
-        
+
         // Enrich with AI
         const enriched = await this.enrichConversation(conversation, importJob.tenantId)
-        
+
         results.push({
           originalId: record.id,
           conversation: enriched,
@@ -619,7 +619,7 @@ export class CSVBatchProcessor {
       priority: 3,
       payload: {
         content: `Summarize this conversation: ${JSON.stringify(conversation.messages)}`,
-        chatbotConfig: { 
+        chatbotConfig: {
           model: 'gpt-3.5-turbo',
           systemPrompt: 'You are a conversation summarizer. Provide brief, insightful summaries.',
         },

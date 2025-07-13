@@ -1,0 +1,227 @@
+{
+  "name": "SaaS Chatbot Platform",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  
+  // Features to add to the dev container
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true,
+      "username": "vscode",
+      "userUid": "1000",
+      "userGid": "1000"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "nodeGypDependencies": true
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11",
+      "installTools": true
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": true
+    },
+    "ghcr.io/devcontainers/features/git-lfs:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true,
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "version": "latest",
+      "helm": "latest",
+      "minikube": "latest"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:1": {
+      "version": "latest"
+    }
+  },
+
+  // Configure VS Code settings
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "/usr/bin/zsh"
+          }
+        },
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/.git": true,
+          "**/.DS_Store": true,
+          "**/dist": true,
+          "**/build": true,
+          "**/.next": true,
+          "**/coverage": true
+        },
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/build": true,
+          "**/.next": true,
+          "**/coverage": true,
+          "pnpm-lock.yaml": true
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[yaml]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[markdown]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "git.autofetch": true,
+        "git.confirmSync": false,
+        "git.enableSmartCommit": true,
+        "npm.packageManager": "pnpm",
+        "eslint.packageManager": "pnpm"
+      },
+      
+      // Extensions to install
+      "extensions": [
+        // Core development
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "prisma.prisma",
+        
+        // React/Next.js
+        "dsznajder.es7-react-js-snippets",
+        "burkeholland.simple-react-snippets",
+        "styled-components.vscode-styled-components",
+        
+        // Testing
+        "orta.vscode-jest",
+        "ms-playwright.playwright",
+        "hbenl.vscode-test-explorer",
+        
+        // Database
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "mongodb.mongodb-vscode",
+        
+        // DevOps
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "hashicorp.terraform",
+        
+        // AI/Productivity
+        "github.copilot",
+        "github.copilot-chat",
+        "christian-kohler.npm-intellisense",
+        "christian-kohler.path-intellisense",
+        "formulahendry.auto-rename-tag",
+        "formulahendry.auto-close-tag",
+        "steoates.autoimport",
+        
+        // Git
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        
+        // API Development
+        "humao.rest-client",
+        "42crunch.vscode-openapi",
+        "arjun.swagger-viewer",
+        
+        // Documentation
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+        "shd101wyy.markdown-preview-enhanced",
+        
+        // Other utilities
+        "gruntfuggly.todo-tree",
+        "wayou.vscode-todo-highlight",
+        "mikestead.dotenv",
+        "editorconfig.editorconfig",
+        "streetsidesoftware.code-spell-checker",
+        "usernamehw.errorlens",
+        "naumovs.color-highlight",
+        "oderwat.indent-rainbow",
+        "2gua.rainbow-brackets"
+      ]
+    }
+  },
+
+  // Port forwarding
+  "forwardPorts": [
+    3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009,
+    5432, 6379, 9000, 9001, 9200, 15672, 5050, 8081, 8025, 8888
+  ],
+  
+  "portsAttributes": {
+    "3000": { "label": "Main API", "onAutoForward": "notify" },
+    "3001": { "label": "Customer Portal", "onAutoForward": "notify" },
+    "3002": { "label": "Platform Admin", "onAutoForward": "notify" },
+    "3008": { "label": "WebSocket Service", "onAutoForward": "notify" },
+    "5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
+    "6379": { "label": "Redis", "onAutoForward": "silent" },
+    "9000": { "label": "MinIO S3", "onAutoForward": "silent" },
+    "9001": { "label": "MinIO Console", "onAutoForward": "notify" },
+    "9200": { "label": "Elasticsearch", "onAutoForward": "silent" },
+    "15672": { "label": "RabbitMQ Management", "onAutoForward": "notify" },
+    "5050": { "label": "pgAdmin", "onAutoForward": "notify" },
+    "8081": { "label": "Redis Commander", "onAutoForward": "notify" },
+    "8025": { "label": "MailHog", "onAutoForward": "notify" },
+    "8888": { "label": "Traefik Dashboard", "onAutoForward": "notify" }
+  },
+
+  // Startup commands
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "postAttachCommand": "bash .devcontainer/post-attach.sh",
+
+  // Environment variables
+  "remoteEnv": {
+    "NODE_ENV": "development",
+    "DOCKER_BUILDKIT": "1",
+    "COMPOSE_DOCKER_CLI_BUILD": "1"
+  },
+
+  // Mounts
+  "mounts": [
+    "source=${localWorkspaceFolder}/.devcontainer/bash_history,target=/home/vscode/.bash_history,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/.devcontainer/zsh_history,target=/home/vscode/.zsh_history,type=bind,consistency=cached"
+  ],
+
+  // Run as non-root user
+  "remoteUser": "vscode"
+}

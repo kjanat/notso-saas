@@ -152,7 +152,7 @@ export class ConnectionHandler {
     try {
       // Validate deployment key and get chatbot info
       const chatbot = await this.validateDeploymentKey(deploymentKey)
-      
+
       // Create or restore session
       const session = await this.createOrRestoreSession(socket, {
         tenantId: chatbot.tenantId,
@@ -163,7 +163,7 @@ export class ConnectionHandler {
       // Join tenant and conversation rooms
       socket.join(`tenant:${chatbot.tenantId}`)
       socket.join(`visitor:${visitorId}`)
-      
+
       if (session.conversationId) {
         socket.join(`conversation:${session.conversationId}`)
       }
@@ -415,7 +415,7 @@ export class PresenceService {
   async getActiveVisitors(tenantId: string): Promise<string[]> {
     const pattern = `presence:*`
     const keys = await this.redis.keys(pattern)
-    
+
     const activeVisitors = []
     for (const key of keys) {
       const data = await this.redis.get(key)
@@ -626,12 +626,12 @@ export class ChatbotClient {
   private getOrCreateVisitorId(): string {
     const key = 'chatbot_visitor_id'
     let visitorId = localStorage.getItem(key)
-    
+
     if (!visitorId) {
       visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       localStorage.setItem(key, visitorId)
     }
-    
+
     return visitorId
   }
 }

@@ -3,6 +3,7 @@
 ## Overview
 
 Our platform uses a **hybrid multi-tenancy approach** combining:
+
 - **Shared platform database** for tenant registry and system-wide data
 - **Database-per-tenant isolation** for complete data segregation
 - **Row-level security** for shared resources (e.g., 3D models)
@@ -123,8 +124,8 @@ export class DatabaseProvisioner {
 
       // 1. Create database from template
       await this.adminDb.query(`
-        CREATE DATABASE "${dbName}" 
-        WITH TEMPLATE tenant_template_db 
+        CREATE DATABASE "${dbName}"
+        WITH TEMPLATE tenant_template_db
         OWNER postgres
       `)
 
@@ -171,11 +172,11 @@ export class DatabaseProvisioner {
     try {
       // Enable RLS on sensitive tables
       const tables = ['chatbots', 'conversations', 'messages', 'team_members']
-      
+
       for (const table of tables) {
         await tenantDb.query(`
           ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY;
-          
+
           CREATE POLICY ${table}_tenant_isolation ON ${table}
           FOR ALL TO "${dbUser}"
           USING (true)
@@ -213,14 +214,14 @@ export class TenantContextMiddleware {
     try {
       // Extract tenant from various sources
       const tenantIdentifier = this.extractTenantIdentifier(req)
-      
+
       if (!tenantIdentifier) {
         throw new Error('Tenant identifier not found')
       }
 
       // Load tenant configuration
       const tenant = await this.tenantService.getTenant(tenantIdentifier)
-      
+
       if (!tenant || tenant.status !== 'active') {
         throw new Error('Invalid or inactive tenant')
       }
@@ -296,7 +297,7 @@ export class ConnectionManager {
     // Check if pool exists
     if (this.pools.has(tenantId)) {
       const pool = this.pools.get(tenantId)!
-      
+
       // Verify pool health
       try {
         await pool.query('SELECT 1')
@@ -421,7 +422,7 @@ export class ChatbotRepository extends BaseTenantRepository<Chatbot> {
       'SELECT * FROM chatbots WHERE id = $1',
       [id]
     )
-    
+
     return result.rows[0] ? this.mapToChatbot(result.rows[0]) : null
   }
 
@@ -432,10 +433,10 @@ export class ChatbotRepository extends BaseTenantRepository<Chatbot> {
         VALUES ($1, $2, $3, $4)
         RETURNING *
       `, [chatbot.name, chatbot.slug, chatbot.deploymentKey, chatbot.avatarConfig])
-      
+
       // Also create in search index
       await this.indexService.indexChatbot(context.tenantId, result.rows[0])
-      
+
       return this.mapToChatbot(result.rows[0])
     })
   }
@@ -459,16 +460,16 @@ export class TenantMigrationService {
     try {
       // 1. Export schema and data
       const dump = await this.exportTenantData(sourceContext)
-      
+
       // 2. Import to target
       await this.importTenantData(targetDb, dump)
-      
+
       // 3. Verify data integrity
       await this.verifyMigration(sourceContext, targetDb)
-      
+
       // 4. Update routing
       await this.updateTenantRouting(sourceTenantId, targetDb)
-      
+
       return { success: true, targetDatabase: targetDb.name }
     } catch (error) {
       await this.rollbackMigration(targetDb)
@@ -532,25 +533,25 @@ spec:
               # Get all active tenants
               TENANTS=$(psql -h $PLATFORM_DB_HOST -U postgres -d platform_db -t -c \
                 "SELECT database_name FROM tenants WHERE status = 'active'")
-              
+
               # Backup each tenant
               for TENANT_DB in $TENANTS; do
                 echo "Backing up $TENANT_DB"
-                
+
                 # Create backup
                 pg_dump -h $TENANT_DB_HOST -U postgres -d $TENANT_DB \
                   --format=custom --verbose \
                   -f /tmp/$TENANT_DB-$(date +%Y%m%d-%H%M%S).dump
-                
+
                 # Upload to S3
                 aws s3 cp /tmp/$TENANT_DB-*.dump \
                   s3://$S3_BUCKET/$(date +%Y/%m/%d)/ \
                   --storage-class GLACIER_IR
-                
+
                 # Clean up
                 rm /tmp/$TENANT_DB-*.dump
               done
-              
+
               # Remove old backups
               aws s3 ls s3://$S3_BUCKET/ --recursive | \
                 awk '{print $4}' | \
@@ -558,7 +559,7 @@ spec:
                   CREATE_DATE=$(aws s3api head-object \
                     --bucket $S3_BUCKET --key $KEY \
                     --query LastModified --output text)
-                  
+
                   if [ $(date -d "$CREATE_DATE" +%s) -lt \
                        $(date -d "$RETENTION_DAYS days ago" +%s) ]; then
                     aws s3 rm s3://$S3_BUCKET/$KEY
@@ -596,10 +597,10 @@ export class QueryRouter {
     // Round-robin between read replicas
     const replicas = this.readReplicas.get(tenantId) || []
     const index = this.roundRobinIndex.get(tenantId) || 0
-    
+
     const replica = replicas[index % replicas.length]
     this.roundRobinIndex.set(tenantId, index + 1)
-    
+
     return replica
   }
 }
@@ -633,7 +634,7 @@ export class TenantCacheService {
   async invalidateTenant(tenantId: string): Promise<void> {
     const pattern = this.cacheKeyPrefix(tenantId) + '*'
     const keys = await this.redis.keys(pattern)
-    
+
     if (keys.length > 0) {
       await this.redis.del(...keys)
     }

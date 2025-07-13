@@ -77,8 +77,10 @@ graph TB
 ## Service Definitions
 
 ### 1. Auth Service (Node.js + TypeScript)
+
 **Port**: 3001  
 **Responsibilities**:
+
 - JWT token generation and validation
 - OAuth2/SAML integration
 - Multi-tenant user authentication
@@ -86,6 +88,7 @@ graph TB
 - Session management via Redis
 
 **Key Endpoints**:
+
 ```yaml
 POST   /auth/login
 POST   /auth/logout
@@ -96,14 +99,17 @@ DELETE /auth/api-keys/{id}
 ```
 
 ### 2. Tenant Service (Node.js + TypeScript)
+
 **Port**: 3002  
 **Responsibilities**:
+
 - Tenant provisioning and management
 - Database isolation and routing
 - Subscription management
 - Tenant-specific configuration
 
 **Key Endpoints**:
+
 ```yaml
 POST   /tenants
 GET    /tenants/{id}
@@ -114,14 +120,17 @@ GET    /tenants/{id}/limits
 ```
 
 ### 3. Chatbot Service (Node.js + TypeScript)
+
 **Port**: 3003  
 **Responsibilities**:
+
 - Chatbot CRUD operations
 - Deployment key generation
 - Configuration management
 - Knowledge base management
 
 **Key Endpoints**:
+
 ```yaml
 GET    /chatbots
 POST   /chatbots
@@ -133,14 +142,17 @@ GET    /chatbots/widget/{deploymentKey}
 ```
 
 ### 4. Conversation Service (Node.js + TypeScript)
+
 **Port**: 3004  
 **Responsibilities**:
+
 - Conversation lifecycle management
 - Message routing and storage
 - Real-time message delivery
 - Conversation history
 
 **Key Endpoints**:
+
 ```yaml
 POST   /conversations
 GET    /conversations/{id}
@@ -151,14 +163,17 @@ GET    /conversations/visitor/{visitorId}
 ```
 
 ### 5. AI Processing Service (Python + FastAPI)
+
 **Port**: 3005  
 **Responsibilities**:
+
 - NLP and intent recognition
 - Response generation
 - Sentiment analysis
 - Model management
 
 **Key Endpoints**:
+
 ```yaml
 POST   /ai/generate-response
 POST   /ai/analyze-sentiment
@@ -169,14 +184,17 @@ PUT    /ai/models/{id}/activate
 ```
 
 ### 6. Analytics Service (Node.js + TypeScript)
+
 **Port**: 3006  
 **Responsibilities**:
+
 - Event aggregation
 - Metrics calculation
 - Report generation
 - Real-time dashboards
 
 **Key Endpoints**:
+
 ```yaml
 GET    /analytics/conversations/summary
 GET    /analytics/chatbots/{id}/performance
@@ -186,14 +204,17 @@ GET    /analytics/reports/generate
 ```
 
 ### 7. Avatar Service (Node.js + TypeScript)
+
 **Port**: 3007  
 **Responsibilities**:
+
 - 3D model management
 - Avatar customization
 - Animation controls
 - Asset delivery via CDN
 
 **Key Endpoints**:
+
 ```yaml
 GET    /avatars
 POST   /avatars
@@ -204,14 +225,17 @@ POST   /avatars/upload
 ```
 
 ### 8. WebSocket Service (Node.js + Socket.io)
+
 **Port**: 3008  
 **Responsibilities**:
+
 - Real-time bidirectional communication
 - Connection management
 - Message broadcasting
 - Presence tracking
 
 **Events**:
+
 ```yaml
 connection
 disconnect
@@ -223,14 +247,17 @@ conversation:end
 ```
 
 ### 9. Billing Service (Node.js + TypeScript)
+
 **Port**: 3009  
 **Responsibilities**:
+
 - Subscription management
 - Usage tracking
 - Invoice generation
 - Payment processing (Stripe integration)
 
 **Key Endpoints**:
+
 ```yaml
 POST   /billing/subscriptions
 GET    /billing/subscriptions/{tenantId}
@@ -243,6 +270,7 @@ POST   /billing/webhooks/stripe
 ## Service Communication Patterns
 
 ### Synchronous Communication
+
 ```typescript
 // HTTP Client with Circuit Breaker
 class ServiceClient {
@@ -276,15 +304,16 @@ class ServiceClient {
 ```
 
 ### Asynchronous Communication
+
 ```typescript
 // RabbitMQ Message Publisher
 class MessagePublisher {
   async publishEvent(event: DomainEvent): Promise<void> {
     const channel = await this.connection.createChannel()
     const exchange = `${event.aggregateType}.events`
-    
+
     await channel.assertExchange(exchange, 'topic', { durable: true })
-    
+
     channel.publish(
       exchange,
       event.eventType,
@@ -310,10 +339,10 @@ class EventConsumer {
   async consume(queue: string, handler: EventHandler): Promise<void> {
     const channel = await this.connection.createChannel()
     await channel.assertQueue(queue, { durable: true })
-    
+
     channel.consume(queue, async (msg) => {
       if (!msg) return
-      
+
       try {
         const event = JSON.parse(msg.content.toString())
         await handler.handle(event)
@@ -419,7 +448,7 @@ processors:
   batch:
     timeout: 1s
     send_batch_size: 1024
-  
+
   attributes:
     actions:
       - key: environment
@@ -432,12 +461,12 @@ processors:
 exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
-  
+
   jaeger:
     endpoint: jaeger-collector:14250
     tls:
       insecure: true
-  
+
   elasticsearch:
     endpoints: ["http://elasticsearch:9200"]
     index: "services-logs"
@@ -448,12 +477,12 @@ service:
       receivers: [otlp]
       processors: [batch, attributes]
       exporters: [jaeger]
-    
+
     metrics:
       receivers: [otlp]
       processors: [batch, attributes]
       exporters: [prometheus]
-    
+
     logs:
       receivers: [otlp]
       processors: [batch, attributes]
