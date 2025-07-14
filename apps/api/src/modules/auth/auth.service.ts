@@ -1,5 +1,6 @@
-import { getDatabase } from '../../shared/database/index.js'
 import bcrypt from 'bcryptjs'
+
+import { getDatabase } from '../../shared/database/index.js'
 import { logger } from '../../shared/utils/logger.js'
 
 export class AuthService {
@@ -9,15 +10,15 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.db.user.findUnique({
-      where: { email },
       include: { tenant: true },
+      where: { email },
     })
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return null
     }
 
-    logger.info('User logged in', { userId: user.id, tenantId: user.tenantId })
+    logger.info('User logged in', { tenantId: user.tenantId, userId: user.id })
     return { user }
   }
 
@@ -38,20 +39,23 @@ export class AuthService {
     const user = await this.db.user.create({
       data: {
         email: data.email,
-        passwordHash,
         name: data.name || data.email.split('@')[0],
+        passwordHash,
         tenantId: data.tenantId,
       },
     })
 
-    logger.info('User registered', { userId: user.id, tenantId: user.tenantId })
+    logger.info('User registered', {
+      tenantId: user.tenantId,
+      userId: user.id,
+    })
     return user
   }
 
   async getUserById(id: string) {
     return this.db.user.findUnique({
-      where: { id },
       include: { tenant: true },
+      where: { id },
     })
   }
 }

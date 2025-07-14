@@ -1,7 +1,7 @@
-import { injectable, inject } from 'tsyringe'
-import { FastifyRequest, FastifyReply } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
+import { inject, injectable } from 'tsyringe'
+import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
 import type { ITenantService } from './tenant.interfaces.js'
-import { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
 
 @injectable()
 export class TenantController {
@@ -25,8 +25,14 @@ export class TenantController {
     reply: FastifyReply
   ) {
     const { page = 1, limit = 10 } = request.query
-    const tenants = await this.tenantService.findAll({ page, limit })
-    return tenants
+    const result = await this.tenantService.findAll({ limit, page })
+
+    // Set pagination headers
+    reply.header('X-Total-Count', result.total.toString())
+    reply.header('X-Page', page.toString())
+    reply.header('X-Limit', limit.toString())
+
+    return result.data
   }
 
   async update(

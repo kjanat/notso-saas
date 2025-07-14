@@ -1,17 +1,18 @@
 import 'reflect-metadata'
-import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import jwt from '@fastify/jwt'
 import rateLimit from '@fastify/rate-limit'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
+import Fastify from 'fastify'
+
 import { config } from './config/index.js'
 import { registerModules } from './modules/index.js'
-import { setupDatabase } from './shared/database/index.js'
 import { setupCache } from './shared/cache/index.js'
-import { setupQueues } from './shared/queue/index.js'
+import { setupDatabase } from './shared/database/index.js'
 import { setupContainer } from './shared/di/container.js'
+import { setupQueues } from './shared/queue/index.js'
 import { logger } from './shared/utils/logger.js'
 
 async function bootstrap() {
@@ -35,8 +36,8 @@ async function bootstrap() {
   })
 
   await app.register(cors, {
-    origin: config.cors.origins,
     credentials: true,
+    origin: config.cors.origins,
   })
 
   await app.register(jwt, {
@@ -53,8 +54,8 @@ async function bootstrap() {
     await app.register(swagger, {
       openapi: {
         info: {
-          title: 'SaaS 3D Avatar Chatbot API',
           description: 'API for multi-tenant 3D avatar chatbot platform',
+          title: 'SaaS 3D Avatar Chatbot API',
           version: '1.0.0',
         },
         servers: [{ url: config.api.url }],
@@ -71,16 +72,16 @@ async function bootstrap() {
 
   // Health check
   app.get('/health', async () => ({
+    environment: config.env,
     status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: config.env,
   }))
 
   // Start server
   try {
     await app.listen({
-      port: config.api.port,
       host: '0.0.0.0',
+      port: config.api.port,
     })
     logger.info(`Server listening on http://0.0.0.0:${config.api.port}`)
   } catch (err) {

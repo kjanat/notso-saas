@@ -1,4 +1,4 @@
-export * from './tenant'
+export * from './ai-processing'
 export * from './chatbot'
 export * from './conversation'
-export * from './ai-processing'
+export * from './tenant'

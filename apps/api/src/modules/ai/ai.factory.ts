@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe'
 import type { IAIProvider, IAIProviderFactory } from './ai.interfaces.js'
-import { OpenAIProvider } from './providers/openai.provider.js'
 import { AnthropicProvider } from './providers/anthropic.provider.js'
+import { OpenAIProvider } from './providers/openai.provider.js'
 
 @injectable()
 export class AIProviderFactory implements IAIProviderFactory {

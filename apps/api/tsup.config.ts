@@ -1,13 +1,14 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/main.ts'],
-  format: ['esm'],
-  dts: true,
-  sourcemap: true,
+  bundle: true,
   clean: true,
+  dts: false,
+  entry: ['src/main.ts'],
+  external: ['@prisma/client', '@saas/database'],
+  format: ['esm'],
   minify: process.env.NODE_ENV === 'production',
+  sourcemap: true,
   splitting: false,
   target: 'node22',
-  external: ['@prisma/client'],
 })

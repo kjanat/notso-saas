@@ -1,12 +1,13 @@
-import { injectable, inject } from 'tsyringe'
-import type { ITenantRepository, ITenantService } from './tenant.interfaces.js'
-import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
+import { inject, injectable } from 'tsyringe'
+
+import { Tenant } from '../../domain/entities/tenant.entity.js'
 import type {
   ICacheService,
-  IQueueService,
   ILogger,
+  IQueueService,
 } from '../../shared/interfaces/base.interfaces.js'
-import { Tenant } from '../../domain/entities/tenant.entity.js'
+import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
+import type { ITenantRepository, ITenantService } from './tenant.interfaces.js'
 
 @injectable()
 export class TenantService implements ITenantService {
@@ -29,14 +30,14 @@ export class TenantService implements ITenantService {
 
     // Queue provisioning job
     await this.queue.addJob('tenant-provisioning', 'provision-database', {
-      tenantId: tenant.id,
       slug: tenant.slug,
+      tenantId: tenant.id,
     })
 
     // Clear events after persisting
     tenant.clearEvents()
 
-    this.logger.info('Tenant created', { tenantId: tenant.id, slug: tenant.slug })
+    this.logger.info('Tenant created', { slug: tenant.slug, tenantId: tenant.id })
     return tenant
   }
 
@@ -59,14 +60,14 @@ export class TenantService implements ITenantService {
     await this.cache.set(
       cacheKey,
       {
+        apiKey: tenant.apiKey,
+        currentChatbots: tenant.currentChatbots,
         id: tenant.id,
+        isActive: tenant.isActive,
+        maxChatbots: tenant.maxChatbots,
         name: tenant.name,
         slug: tenant.slug,
-        apiKey: tenant.apiKey,
         subscriptionPlan: tenant.subscriptionPlan,
-        maxChatbots: tenant.maxChatbots,
-        currentChatbots: tenant.currentChatbots,
-        isActive: tenant.isActive,
       },
       300
     ) // Cache for 5 minutes
@@ -82,8 +83,12 @@ export class TenantService implements ITenantService {
     return tenant
   }
 
-  async findAll(filters?: Record<string, any>): Promise<Tenant[]> {
-    return this.repository.findAll(filters)
+  async findAll(filters?: Record<string, any>): Promise<{ data: Tenant[]; total: number }> {
+    const [data, total] = await Promise.all([
+      this.repository.findAll(filters),
+      this.repository.count(filters),
+    ])
+    return { data, total }
   }
 
   async update(id: string, dto: UpdateTenantDto): Promise<Tenant> {
@@ -124,9 +129,9 @@ export class TenantService implements ITenantService {
 
     // Queue analytics job
     await this.queue.addJob('analytics', 'track-usage', {
-      tenantId: id,
-      metric,
       amount,
+      metric,
+      tenantId: id,
       timestamp: new Date(),
     })
   }

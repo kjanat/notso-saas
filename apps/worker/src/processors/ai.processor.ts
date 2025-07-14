@@ -1,4 +1,4 @@
-import { Job } from 'bullmq'
+import type { Job } from 'bullmq'
 import OpenAI from 'openai'
 import { logger } from '../logger.js'
 
@@ -9,24 +9,24 @@ const openai = new OpenAI({
 export async function aiProcessor(job: Job) {
   const { conversationId, message, chatbotId, context } = job.data
 
-  logger.info('Processing AI job', { conversationId, chatbotId })
+  logger.info('Processing AI job', { chatbotId, conversationId })
 
   try {
     // Generate response using OpenAI
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      max_tokens: 500,
       messages: [
         {
-          role: 'system',
           content: context.systemPrompt || 'You are a helpful assistant.',
+          role: 'system',
         },
         {
-          role: 'user',
           content: message,
+          role: 'user',
         },
       ],
+      model: 'gpt-4-turbo-preview',
       temperature: 0.7,
-      max_tokens: 500,
     })
 
     const response = completion.choices[0]?.message?.content || ''
@@ -36,8 +36,8 @@ export async function aiProcessor(job: Job) {
 
     return {
       conversationId,
-      response,
       model: 'gpt-4-turbo-preview',
+      response,
       tokens: completion.usage,
     }
   } catch (error) {

@@ -10,34 +10,7 @@ interface SubscriptionPlanProps {
 
 export class SubscriptionPlan extends ValueObject<SubscriptionPlanProps> {
   private static readonly PLANS: Record<string, Omit<SubscriptionPlanProps, 'name'>> = {
-    free: {
-      maxChatbots: 1,
-      maxMessagesPerDay: 100,
-      maxKnowledgeBaseSize: 10,
-      features: ['basic_avatar', 'basic_analytics'],
-    },
-    starter: {
-      maxChatbots: 5,
-      maxMessagesPerDay: 1000,
-      maxKnowledgeBaseSize: 100,
-      features: ['custom_avatar', 'advanced_analytics', 'custom_branding'],
-    },
-    professional: {
-      maxChatbots: 20,
-      maxMessagesPerDay: 10000,
-      maxKnowledgeBaseSize: 1000,
-      features: [
-        'custom_avatar',
-        'advanced_analytics',
-        'custom_branding',
-        'priority_support',
-        'api_access',
-      ],
-    },
     enterprise: {
-      maxChatbots: -1, // unlimited
-      maxMessagesPerDay: -1, // unlimited
-      maxKnowledgeBaseSize: -1, // unlimited
       features: [
         'custom_avatar',
         'advanced_analytics',
@@ -47,6 +20,33 @@ export class SubscriptionPlan extends ValueObject<SubscriptionPlanProps> {
         'sla',
         'custom_integrations',
       ],
+      maxChatbots: -1, // unlimited
+      maxKnowledgeBaseSize: -1, // unlimited
+      maxMessagesPerDay: -1, // unlimited
+    },
+    free: {
+      features: ['basic_avatar', 'basic_analytics'],
+      maxChatbots: 1,
+      maxKnowledgeBaseSize: 10,
+      maxMessagesPerDay: 100,
+    },
+    professional: {
+      features: [
+        'custom_avatar',
+        'advanced_analytics',
+        'custom_branding',
+        'priority_support',
+        'api_access',
+      ],
+      maxChatbots: 20,
+      maxKnowledgeBaseSize: 1000,
+      maxMessagesPerDay: 10000,
+    },
+    starter: {
+      features: ['custom_avatar', 'advanced_analytics', 'custom_branding'],
+      maxChatbots: 5,
+      maxKnowledgeBaseSize: 100,
+      maxMessagesPerDay: 1000,
     },
   }
 
@@ -75,11 +75,11 @@ export class SubscriptionPlan extends ValueObject<SubscriptionPlanProps> {
   }
 
   static create(planName: string): SubscriptionPlan {
-    const plan = this.PLANS[planName.toLowerCase()]
+    const plan = SubscriptionPlan.PLANS[planName.toLowerCase()]
 
     if (!plan) {
       throw new Error(
-        `Invalid subscription plan: ${planName}. Valid plans are: ${Object.keys(this.PLANS).join(', ')}`
+        `Invalid subscription plan: ${planName}. Valid plans are: ${Object.keys(SubscriptionPlan.PLANS).join(', ')}`
       )
     }
 

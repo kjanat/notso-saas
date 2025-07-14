@@ -1,19 +1,19 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node.js TypeScript Config",
-  "extends": "./base.json",
   "compilerOptions": {
-    "target": "ES2024",
-    "lib": ["ES2024"],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["ES2024", "DOM"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "outDir": "./dist",
-    "rootDir": "./src",
     "noEmit": false,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "types": ["node"],
+    "outDir": "./dist",
+    "removeComments": true,
+    "rootDir": "./src",
     "sourceMap": true,
-    "removeComments": true
-  }
+    "target": "ES2024",
+    "types": ["node"]
+  },
+  "display": "Node.js TypeScript Config",
+  "extends": "./base.json"
 }

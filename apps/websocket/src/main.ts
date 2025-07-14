@@ -1,6 +1,8 @@
-import { Server } from 'socket.io'
 import { createServer } from 'http'
-import Redis from 'ioredis'
+
+import { Redis } from 'ioredis'
+import { Server } from 'socket.io'
+
 import { logger } from './logger.js'
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
@@ -10,8 +12,8 @@ const subClient = redis.duplicate()
 const httpServer = createServer()
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
     credentials: true,
+    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
   },
 })
 
@@ -21,12 +23,15 @@ io.on('connection', socket => {
 
   // Join conversation room
   socket.on('join:conversation', async data => {
-    const { conversationId, token } = data
+    const { conversationId, token: _token } = data
 
     // TODO: Validate token
 
     socket.join(`conversation:${conversationId}`)
-    logger.info('Socket joined conversation', { socketId: socket.id, conversationId })
+    logger.info('Socket joined conversation', {
+      conversationId,
+      socketId: socket.id,
+    })
   })
 
   // Handle chat messages
@@ -35,11 +40,22 @@ io.on('connection', socket => {
 
     // Broadcast to conversation room
     io.to(`conversation:${conversationId}`).emit('message:received', {
-      id: Date.now().toString(),
       conversationId,
+      id: Date.now().toString(),
       message,
       timestamp: new Date().toISOString(),
     })
+
+    // Publish to Redis for other services
+    await pubClient.publish(
+      'chat:messages',
+      JSON.stringify({
+        conversationId,
+        message,
+        timestamp: new Date().toISOString(),
+        userId: socket.data.userId,
+      })
+    )
   })
 
   // Handle typing indicators
@@ -64,9 +80,11 @@ io.on('connection', socket => {
 
 // Redis pub/sub for cross-server communication
 subClient.subscribe('chat:messages')
-subClient.on('message', (channel, message) => {
-  const data = JSON.parse(message)
-  io.to(`conversation:${data.conversationId}`).emit('message:ai', data)
+subClient.on('message', (channel: string, message: string) => {
+  if (channel === 'chat:messages') {
+    const data = JSON.parse(message)
+    io.to(`conversation:${data.conversationId}`).emit('message:ai', data)
+  }
 })
 
 const PORT = process.env.WEBSOCKET_PORT || 3001

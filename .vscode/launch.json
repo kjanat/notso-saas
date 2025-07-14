@@ -1,53 +1,53 @@
 {
-  "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug API Service",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["run", "dev:api"],
-      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}",
       "env": {
-        "NODE_ENV": "development",
-        "DEBUG": "*"
-      }
+        "DEBUG": "*",
+        "NODE_ENV": "development"
+      },
+      "internalConsoleOptions": "neverOpen",
+      "name": "Debug API Service",
+      "request": "launch",
+      "runtimeArgs": ["run", "dev:api"],
+      "runtimeExecutable": "pnpm",
+      "type": "node"
     },
     {
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
       "name": "Debug Customer Portal",
-      "type": "node",
       "request": "launch",
-      "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "dev:web"],
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
+      "runtimeExecutable": "pnpm",
       "serverReadyAction": {
+        "action": "openExternally",
         "pattern": "started server on .+, url: (https?://.+)",
-        "uriFormat": "%s",
-        "action": "openExternally"
-      }
+        "uriFormat": "%s"
+      },
+      "type": "node"
     },
     {
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "internalConsoleOptions": "neverOpen",
       "name": "Debug Jest Tests",
-      "type": "node",
       "request": "launch",
-      "runtimeExecutable": "pnpm",
       "runtimeArgs": ["test", "--runInBand", "--watchAll=false"],
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "runtimeExecutable": "pnpm",
+      "type": "node"
     },
     {
-      "name": "Debug Current Test File",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["test", "${relativeFile}", "--runInBand", "--watchAll=false"],
-      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "cwd": "${workspaceFolder}",
+      "internalConsoleOptions": "neverOpen",
+      "name": "Debug Current Test File",
+      "request": "launch",
+      "runtimeArgs": ["test", "${relativeFile}", "--runInBand", "--watchAll=false"],
+      "runtimeExecutable": "pnpm",
+      "type": "node"
     }
-  ]
+  ],
+  "version": "0.2.0"
 }

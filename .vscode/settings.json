@@ -1,35 +1,25 @@
 {
+  "eslint.workingDirectories": [{ "mode": "auto" }],
   "files.exclude": {
-    "**/.git": true,
     "**/.DS_Store": true,
-    "**/node_modules": true,
-    "**/dist": true,
-    "**/build": true,
+    "**/.git": true,
     "**/.next": true,
-    "**/coverage": true
-  },
-  "search.exclude": {
-    "**/node_modules": true,
-    "**/dist": true,
     "**/build": true,
-    "**/.next": true,
     "**/coverage": true,
-    "pnpm-lock.yaml": true
+    "**/dist": true,
+    "**/node_modules": true
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "eslint.workingDirectories": [
-    { "mode": "auto" }
-  ],
   "jest.jestCommandLine": "pnpm test",
   "jest.rootPath": "./",
+  "search.exclude": {
+    "**/.next": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "pnpm-lock.yaml": true
+  },
+  "todo-tree.general.tags": ["BUG", "HACK", "FIXME", "TODO", "XXX", "[ ]", "[x]"],
   "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^[ \\t]*(-|\\d+.))\\s*($TAGS)",
-  "todo-tree.general.tags": [
-    "BUG",
-    "HACK",
-    "FIXME",
-    "TODO",
-    "XXX",
-    "[ ]",
-    "[x]"
-  ]
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

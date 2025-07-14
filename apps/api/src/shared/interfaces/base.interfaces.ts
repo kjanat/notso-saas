@@ -2,6 +2,7 @@ export interface IBaseRepository<T, CreateDTO = any, UpdateDTO = any> {
   create(data: CreateDTO): Promise<T>
   findById(id: string): Promise<T | null>
   findAll(filters?: Record<string, any>): Promise<T[]>
+  count(filters?: Record<string, any>): Promise<number>
   update(id: string, data: UpdateDTO): Promise<T>
   delete(id: string): Promise<void>
 }

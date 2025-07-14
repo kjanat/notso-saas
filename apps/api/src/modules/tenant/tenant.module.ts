@@ -1,9 +1,9 @@
-import { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync } from 'fastify'
 import { container } from '../../shared/di/container.js'
 import { TenantController } from './tenant.controller.js'
-import { TenantService } from './tenant.service.js'
-import { TenantRepository } from './tenant.repository.js'
 import type { ITenantRepository, ITenantService } from './tenant.interfaces.js'
+import { TenantRepository } from './tenant.repository.js'
+import { TenantService } from './tenant.service.js'
 
 export const tenantModule: FastifyPluginAsync = async fastify => {
   // Register tenant-specific dependencies
@@ -18,72 +18,72 @@ export const tenantModule: FastifyPluginAsync = async fastify => {
 
   // Register routes
   fastify.post('/', {
+    handler: tenantController.create.bind(tenantController),
     schema: {
       body: {
-        type: 'object',
-        required: ['name', 'slug'],
         properties: {
+          email: { format: 'email', type: 'string' },
           name: { type: 'string' },
-          slug: { type: 'string', pattern: '^[a-z0-9-]+$' },
-          email: { type: 'string', format: 'email' },
+          slug: { pattern: '^[a-z0-9-]+$', type: 'string' },
         },
+        required: ['name', 'slug'],
+        type: 'object',
       },
       response: {
         201: {
-          type: 'object',
           properties: {
+            createdAt: { type: 'string' },
             id: { type: 'string' },
             name: { type: 'string' },
             slug: { type: 'string' },
-            createdAt: { type: 'string' },
           },
+          type: 'object',
         },
       },
     },
-    handler: tenantController.create.bind(tenantController),
   })
 
   fastify.get('/:id', {
+    handler: tenantController.findOne.bind(tenantController),
     schema: {
       params: {
-        type: 'object',
         properties: {
           id: { type: 'string' },
         },
+        type: 'object',
       },
     },
-    handler: tenantController.findOne.bind(tenantController),
   })
 
   fastify.get('/', {
+    handler: tenantController.findAll.bind(tenantController),
     schema: {
       querystring: {
-        type: 'object',
         properties: {
-          page: { type: 'number', default: 1 },
-          limit: { type: 'number', default: 10 },
+          limit: { default: 10, type: 'number' },
+          page: { default: 1, type: 'number' },
         },
+        type: 'object',
       },
     },
-    handler: tenantController.findAll.bind(tenantController),
   })
 
   fastify.patch('/:id', {
+    handler: tenantController.update.bind(tenantController),
     schema: {
-      params: {
-        type: 'object',
-        properties: {
-          id: { type: 'string' },
-        },
-      },
       body: {
-        type: 'object',
         properties: {
           name: { type: 'string' },
           settings: { type: 'object' },
         },
+        type: 'object',
+      },
+      params: {
+        properties: {
+          id: { type: 'string' },
+        },
+        type: 'object',
       },
     },
-    handler: tenantController.update.bind(tenantController),
   })
 }

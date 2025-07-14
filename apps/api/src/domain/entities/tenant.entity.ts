@@ -1,9 +1,9 @@
 import { AggregateRoot } from '../base/entity.base.js'
+import { ApiKey } from '../value-objects/api-key.value-object.js'
+import { SubscriptionPlan } from '../value-objects/subscription-plan.value-object.js'
 import { TenantId } from '../value-objects/tenant-id.value-object.js'
 import { TenantName } from '../value-objects/tenant-name.value-object.js'
 import { TenantSlug } from '../value-objects/tenant-slug.value-object.js'
-import { ApiKey } from '../value-objects/api-key.value-object.js'
-import { SubscriptionPlan } from '../value-objects/subscription-plan.value-object.js'
 
 export interface TenantProps {
   name: TenantName
@@ -22,7 +22,7 @@ export class Tenant extends AggregateRoot<TenantProps> {
     super(props, id.value)
   }
 
-  static create(name: string, slug: string, apiKey: string, plan: string = 'free'): Tenant {
+  static create(name: string, slug: string, apiKey: string, plan = 'free'): Tenant {
     const tenantId = TenantId.create()
     const tenantName = TenantName.create(name)
     const tenantSlug = TenantSlug.create(slug)
@@ -31,14 +31,14 @@ export class Tenant extends AggregateRoot<TenantProps> {
 
     const tenant = new Tenant(
       {
-        name: tenantName,
-        slug: tenantSlug,
         apiKey: apiKeyVO,
-        subscriptionPlan,
-        maxChatbots: subscriptionPlan.maxChatbots,
+        createdAt: new Date(),
         currentChatbots: 0,
         isActive: true,
-        createdAt: new Date(),
+        maxChatbots: subscriptionPlan.maxChatbots,
+        name: tenantName,
+        slug: tenantSlug,
+        subscriptionPlan,
         updatedAt: new Date(),
       },
       tenantId
@@ -50,8 +50,8 @@ export class Tenant extends AggregateRoot<TenantProps> {
       occurredOn: new Date(),
       payload: {
         name: name,
-        slug: slug,
         plan: plan,
+        slug: slug,
       },
     })
 
@@ -74,14 +74,14 @@ export class Tenant extends AggregateRoot<TenantProps> {
   ): Tenant {
     return new Tenant(
       {
-        name: TenantName.create(props.name),
-        slug: TenantSlug.create(props.slug),
         apiKey: ApiKey.create(props.apiKey),
-        subscriptionPlan: SubscriptionPlan.create(props.subscriptionPlan),
-        maxChatbots: props.maxChatbots,
+        createdAt: props.createdAt,
         currentChatbots: props.currentChatbots,
         isActive: props.isActive,
-        createdAt: props.createdAt,
+        maxChatbots: props.maxChatbots,
+        name: TenantName.create(props.name),
+        slug: TenantSlug.create(props.slug),
+        subscriptionPlan: SubscriptionPlan.create(props.subscriptionPlan),
         updatedAt: props.updatedAt,
       },
       TenantId.create(id)
@@ -152,9 +152,9 @@ export class Tenant extends AggregateRoot<TenantProps> {
       eventName: 'SubscriptionUpdated',
       occurredOn: new Date(),
       payload: {
-        oldPlan,
-        newPlan: plan,
         newMaxChatbots: newPlan.maxChatbots,
+        newPlan: plan,
+        oldPlan,
       },
     })
   }

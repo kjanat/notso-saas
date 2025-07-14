@@ -1,10 +1,11 @@
 import { injectable } from 'tsyringe'
-import { getDatabase } from '../../shared/database/index.js'
-import { Prisma } from '@prisma/client'
-import type { ITenantRepository } from './tenant.interfaces.js'
-import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
+
 import { Tenant } from '../../domain/entities/tenant.entity.js'
 import { ApiKey } from '../../domain/value-objects/api-key.value-object.js'
+import { getDatabase } from '../../shared/database/index.js'
+
+import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
+import type { ITenantRepository } from './tenant.interfaces.js'
 
 @injectable()
 export class TenantRepository implements ITenantRepository {
@@ -18,24 +19,24 @@ export class TenantRepository implements ITenantRepository {
 
     const dbTenant = await this.db.tenant.create({
       data: {
-        id: tenant.id,
-        name: tenant.name,
-        slug: tenant.slug,
         apiKey: tenant.apiKey,
-        plan: tenant.subscriptionPlan,
+        id: tenant.id,
         maxChatbots: tenant.maxChatbots,
+        name: tenant.name,
+        plan: tenant.subscriptionPlan,
+        slug: tenant.slug,
       },
     })
 
     return Tenant.reconstitute(dbTenant.id, {
-      name: dbTenant.name,
-      slug: dbTenant.slug,
       apiKey: dbTenant.apiKey,
-      subscriptionPlan: dbTenant.plan || 'free',
-      maxChatbots: dbTenant.maxChatbots || 1,
+      createdAt: dbTenant.createdAt,
       currentChatbots: await this.getChatbotCount(dbTenant.id),
       isActive: dbTenant.isActive,
-      createdAt: dbTenant.createdAt,
+      maxChatbots: dbTenant.maxChatbots || 1,
+      name: dbTenant.name,
+      slug: dbTenant.slug,
+      subscriptionPlan: dbTenant.plan || 'free',
       updatedAt: dbTenant.updatedAt,
     })
   }
@@ -50,14 +51,14 @@ export class TenantRepository implements ITenantRepository {
     const currentChatbots = await this.getChatbotCount(id)
 
     return Tenant.reconstitute(dbTenant.id, {
-      name: dbTenant.name,
-      slug: dbTenant.slug,
       apiKey: dbTenant.apiKey,
-      subscriptionPlan: dbTenant.plan || 'free',
-      maxChatbots: dbTenant.maxChatbots || 1,
+      createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      createdAt: dbTenant.createdAt,
+      maxChatbots: dbTenant.maxChatbots || 1,
+      name: dbTenant.name,
+      slug: dbTenant.slug,
+      subscriptionPlan: dbTenant.plan || 'free',
       updatedAt: dbTenant.updatedAt,
     })
   }
@@ -72,14 +73,14 @@ export class TenantRepository implements ITenantRepository {
     const currentChatbots = await this.getChatbotCount(dbTenant.id)
 
     return Tenant.reconstitute(dbTenant.id, {
-      name: dbTenant.name,
-      slug: dbTenant.slug,
       apiKey: dbTenant.apiKey,
-      subscriptionPlan: dbTenant.plan || 'free',
-      maxChatbots: dbTenant.maxChatbots || 1,
+      createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      createdAt: dbTenant.createdAt,
+      maxChatbots: dbTenant.maxChatbots || 1,
+      name: dbTenant.name,
+      slug: dbTenant.slug,
+      subscriptionPlan: dbTenant.plan || 'free',
       updatedAt: dbTenant.updatedAt,
     })
   }
@@ -94,36 +95,42 @@ export class TenantRepository implements ITenantRepository {
     const currentChatbots = await this.getChatbotCount(dbTenant.id)
 
     return Tenant.reconstitute(dbTenant.id, {
-      name: dbTenant.name,
-      slug: dbTenant.slug,
       apiKey: dbTenant.apiKey,
-      subscriptionPlan: dbTenant.plan || 'free',
-      maxChatbots: dbTenant.maxChatbots || 1,
+      createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      createdAt: dbTenant.createdAt,
+      maxChatbots: dbTenant.maxChatbots || 1,
+      name: dbTenant.name,
+      slug: dbTenant.slug,
+      subscriptionPlan: dbTenant.plan || 'free',
       updatedAt: dbTenant.updatedAt,
+    })
+  }
+
+  async count(filters?: Record<string, any>): Promise<number> {
+    return this.db.tenant.count({
+      where: filters,
     })
   }
 
   async findAll(filters?: Record<string, any>): Promise<Tenant[]> {
     const tenants = await this.db.tenant.findMany({
-      where: filters,
       orderBy: { createdAt: 'desc' },
+      where: filters,
     })
 
     return Promise.all(
       tenants.map(async dbTenant => {
         const currentChatbots = await this.getChatbotCount(dbTenant.id)
         return Tenant.reconstitute(dbTenant.id, {
-          name: dbTenant.name,
-          slug: dbTenant.slug,
           apiKey: dbTenant.apiKey,
-          subscriptionPlan: dbTenant.plan || 'free',
-          maxChatbots: dbTenant.maxChatbots || 1,
+          createdAt: dbTenant.createdAt,
           currentChatbots,
           isActive: dbTenant.isActive,
-          createdAt: dbTenant.createdAt,
+          maxChatbots: dbTenant.maxChatbots || 1,
+          name: dbTenant.name,
+          slug: dbTenant.slug,
+          subscriptionPlan: dbTenant.plan || 'free',
           updatedAt: dbTenant.updatedAt,
         })
       })
@@ -132,45 +139,45 @@ export class TenantRepository implements ITenantRepository {
 
   async update(id: string, data: UpdateTenantDto): Promise<Tenant> {
     const dbTenant = await this.db.tenant.update({
-      where: { id },
       data: {
         name: data.name,
         plan: data.plan,
       },
+      where: { id },
     })
 
     const currentChatbots = await this.getChatbotCount(id)
 
     return Tenant.reconstitute(dbTenant.id, {
-      name: dbTenant.name,
-      slug: dbTenant.slug,
       apiKey: dbTenant.apiKey,
-      subscriptionPlan: dbTenant.plan || 'free',
-      maxChatbots: dbTenant.maxChatbots || 1,
+      createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      createdAt: dbTenant.createdAt,
+      maxChatbots: dbTenant.maxChatbots || 1,
+      name: dbTenant.name,
+      slug: dbTenant.slug,
+      subscriptionPlan: dbTenant.plan || 'free',
       updatedAt: dbTenant.updatedAt,
     })
   }
 
   async updateSubscription(id: string, plan: string): Promise<Tenant> {
     const dbTenant = await this.db.tenant.update({
-      where: { id },
       data: { plan },
+      where: { id },
     })
 
     const currentChatbots = await this.getChatbotCount(id)
 
     return Tenant.reconstitute(dbTenant.id, {
-      name: dbTenant.name,
-      slug: dbTenant.slug,
       apiKey: dbTenant.apiKey,
-      subscriptionPlan: dbTenant.plan || 'free',
-      maxChatbots: dbTenant.maxChatbots || 1,
+      createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      createdAt: dbTenant.createdAt,
+      maxChatbots: dbTenant.maxChatbots || 1,
+      name: dbTenant.name,
+      slug: dbTenant.slug,
+      subscriptionPlan: dbTenant.plan || 'free',
       updatedAt: dbTenant.updatedAt,
     })
   }

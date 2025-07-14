@@ -1,6 +1,6 @@
-import { z } from 'zod'
 import type { ValidationError, ValidationResult } from '@saas/types'
 import { REGEX_PATTERNS } from '@saas/types'
+import { z } from 'zod'
 
 export const emailSchema = z.string().email()
 export const slugSchema = z.string().regex(REGEX_PATTERNS.slug)
@@ -30,17 +30,17 @@ export function validatePhoneNumber(phone: string): boolean {
 
 export function parseZodError(error: z.ZodError): ValidationError[] {
   return error.issues.map(issue => ({
+    code: issue.code,
     field: issue.path.join('.'),
     message: issue.message,
-    code: issue.code,
     value: issue.path.reduce((obj, key) => obj?.[key], {} as any),
   }))
 }
 
 export function createValidationResult(errors: ValidationError[]): ValidationResult {
   return {
-    isValid: errors.length === 0,
     errors,
+    isValid: errors.length === 0,
   }
 }
 
@@ -81,11 +81,11 @@ export function validatePasswordStrength(password: string): {
   }
 } {
   const requirements = {
-    minLength: password.length >= 8,
-    hasUppercase: /[A-Z]/.test(password),
     hasLowercase: /[a-z]/.test(password),
     hasNumber: /\d/.test(password),
     hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    hasUppercase: /[A-Z]/.test(password),
+    minLength: password.length >= 8,
   }
 
   const score = Object.values(requirements).filter(Boolean).length
@@ -93,7 +93,7 @@ export function validatePasswordStrength(password: string): {
 
   return {
     isValid: requirements.minLength && score >= 3,
-    strength,
     requirements,
+    strength,
   }
 }

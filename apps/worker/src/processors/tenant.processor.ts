@@ -1,5 +1,5 @@
-import { Job } from 'bullmq'
 import { PrismaClient } from '@prisma/client'
+import type { Job } from 'bullmq'
 import { logger } from '../logger.js'
 
 const prisma = new PrismaClient()
@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 export async function tenantProcessor(job: Job) {
   const { tenantId, databaseName } = job.data
 
-  logger.info('Processing tenant provisioning', { tenantId, databaseName })
+  logger.info('Processing tenant provisioning', { databaseName, tenantId })
 
   try {
     // In a real app, you would:
@@ -17,20 +17,20 @@ export async function tenantProcessor(job: Job) {
     // 4. Create default chatbot
 
     // For now, just simulate the work
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => globalThis.setTimeout(resolve, 2000))
 
     // Update tenant status
     await prisma.tenant.update({
-      where: { id: tenantId },
       data: {
-        status: 'active',
         provisionedAt: new Date(),
+        status: 'active',
       },
+      where: { id: tenantId },
     })
 
     logger.info('Tenant provisioning completed', { tenantId })
 
-    return { tenantId, status: 'provisioned' }
+    return { status: 'provisioned', tenantId }
   } catch (error) {
     logger.error('Tenant provisioning failed', error)
     throw error

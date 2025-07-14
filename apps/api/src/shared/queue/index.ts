@@ -1,5 +1,6 @@
-import { Queue, Worker, QueueEvents } from 'bullmq'
-import Redis from 'ioredis'
+import { Queue, Worker } from 'bullmq'
+import { Redis } from 'ioredis'
+
 import { config } from '../../config/index.js'
 import { logger } from '../utils/logger.js'
 
@@ -9,8 +10,8 @@ const workers = new Map<string, Worker>()
 export async function setupQueues() {
   // Create Redis connection for BullMQ
   const connection = new Redis(config.redis.url, {
-    maxRetriesPerRequest: null,
     enableOfflineQueue: false,
+    maxRetriesPerRequest: null,
   })
 
   // Create main queues
@@ -20,13 +21,13 @@ export async function setupQueues() {
     const queue = new Queue(name, {
       connection,
       defaultJobOptions: {
-        removeOnComplete: 100,
-        removeOnFail: 500,
         attempts: 3,
         backoff: {
-          type: 'exponential',
           delay: 2000,
+          type: 'exponential',
         },
+        removeOnComplete: 100,
+        removeOnFail: 500,
       },
     })
     queues.set(name, queue)
@@ -49,19 +50,21 @@ export class QueueService {
   async addJob<T>(queueName: string, jobName: string, data: T, options?: any) {
     const queue = getQueue(queueName)
     const job = await queue.add(jobName, data, options)
-    logger.debug(`Job ${jobName} added to queue ${queueName}`, { jobId: job.id })
+    logger.debug(`Job ${jobName} added to queue ${queueName}`, {
+      jobId: job.id,
+    })
     return job
   }
 
   registerWorker<T>(queueName: string, processor: (job: any) => Promise<T>) {
     const connection = new Redis(config.redis.url, {
-      maxRetriesPerRequest: null,
       enableOfflineQueue: false,
+      maxRetriesPerRequest: null,
     })
 
     const worker = new Worker(queueName, processor, {
-      connection,
       concurrency: 5,
+      connection,
     })
 
     worker.on('completed', job => {
@@ -69,7 +72,10 @@ export class QueueService {
     })
 
     worker.on('failed', (job, err) => {
-      logger.error(`Job ${job?.name} failed`, { jobId: job?.id, error: err.message })
+      logger.error(`Job ${job?.name} failed`, {
+        error: err.message,
+        jobId: job?.id,
+      })
     })
 
     workers.set(queueName, worker)

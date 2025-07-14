@@ -1,4 +1,5 @@
 import pino from 'pino'
+
 import { config } from '../../config/index.js'
 
 export const logger = pino({
@@ -6,12 +7,12 @@ export const logger = pino({
   transport:
     config.env === 'development'
       ? {
-          target: 'pino-pretty',
           options: {
             colorize: true,
-            translateTime: 'HH:MM:ss Z',
             ignore: 'pid,hostname',
+            translateTime: 'HH:MM:ss Z',
           },
+          target: 'pino-pretty',
         }
       : undefined,
 })

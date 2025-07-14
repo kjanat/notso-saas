@@ -2,7 +2,7 @@
  * Chatbot-related types and interfaces
  */
 
-import type { BaseEntity, ChatbotId, TenantId, DeploymentKey } from './base'
+import type { BaseEntity, ChatbotId, DeploymentKey, TenantId } from './base'
 
 export interface Chatbot extends BaseEntity {
   id: ChatbotId

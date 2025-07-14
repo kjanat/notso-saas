@@ -1,7 +1,7 @@
 import { AggregateRoot } from '../base/entity.base.js'
 import { ChatbotId } from '../value-objects/chatbot-id.value-object.js'
-import { TenantId } from '../value-objects/tenant-id.value-object.js'
 import { EmbedId } from '../value-objects/embed-id.value-object.js'
+import { TenantId } from '../value-objects/tenant-id.value-object.js'
 
 export interface AvatarConfiguration {
   modelUrl: string
@@ -66,29 +66,29 @@ export class Chatbot extends AggregateRoot<ChatbotProps> {
 
     const chatbot = new Chatbot(
       {
-        tenantId: TenantId.create(tenantId),
-        embedId,
-        name,
-        purpose,
+        aiModel: 'gpt-4',
         avatar: avatarConfig,
-        personality: personalityConfig,
         behavior: {
           greetingDelay: 3000,
           idleAnimationInterval: 15000,
           lookAtCursor: true,
-          respondToScroll: true,
           proximityReactions: true,
+          respondToScroll: true,
         },
+        createdAt: new Date(),
+        embedId,
+        isActive: true,
+        name,
+        personality: personalityConfig,
         placement: {
+          mobilePosition: 'bottom-center',
           pages: ['/*'],
           position: 'bottom-right',
-          mobilePosition: 'bottom-center',
           zIndex: 9999,
         },
-        aiModel: 'gpt-4',
+        purpose,
         temperature: 0.7,
-        isActive: true,
-        createdAt: new Date(),
+        tenantId: TenantId.create(tenantId),
         updatedAt: new Date(),
       },
       chatbotId
@@ -99,10 +99,10 @@ export class Chatbot extends AggregateRoot<ChatbotProps> {
       eventName: 'ChatbotCreated',
       occurredOn: new Date(),
       payload: {
-        tenantId,
+        embedId: embedId.value,
         name,
         purpose,
-        embedId: embedId.value,
+        tenantId,
       },
     })
 
@@ -130,19 +130,19 @@ export class Chatbot extends AggregateRoot<ChatbotProps> {
   ): Chatbot {
     return new Chatbot(
       {
-        tenantId: TenantId.create(props.tenantId),
-        embedId: EmbedId.create(props.embedId),
-        name: props.name,
-        purpose: props.purpose,
-        avatar: props.avatar,
-        personality: props.personality,
-        behavior: props.behavior,
-        placement: props.placement,
         aiModel: props.aiModel,
-        temperature: props.temperature,
-        knowledgeBaseId: props.knowledgeBaseId,
-        isActive: props.isActive,
+        avatar: props.avatar,
+        behavior: props.behavior,
         createdAt: props.createdAt,
+        embedId: EmbedId.create(props.embedId),
+        isActive: props.isActive,
+        knowledgeBaseId: props.knowledgeBaseId,
+        name: props.name,
+        personality: props.personality,
+        placement: props.placement,
+        purpose: props.purpose,
+        temperature: props.temperature,
+        tenantId: TenantId.create(props.tenantId),
         updatedAt: props.updatedAt,
       },
       ChatbotId.create(id)
@@ -178,8 +178,8 @@ export class Chatbot extends AggregateRoot<ChatbotProps> {
       eventName: 'ChatbotAvatarUpdated',
       occurredOn: new Date(),
       payload: {
-        chatbotId: this.id,
         avatarConfig: config,
+        chatbotId: this.id,
       },
     })
   }

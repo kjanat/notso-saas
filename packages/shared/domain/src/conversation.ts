@@ -1,14 +1,13 @@
-import { generateId } from '@saas/utils'
-
 import type {
   Conversation,
   ConversationId,
+  ConversationMetrics,
+  IntentClassification,
   Message,
   MessageType,
-  ConversationMetrics,
   SentimentAnalysis,
-  IntentClassification,
 } from '@saas/types'
+import { generateId } from '@saas/utils'
 
 export class ConversationDomain {
   private static readonly INACTIVE_THRESHOLD_MINUTES = 5
@@ -30,12 +29,12 @@ export class ConversationDomain {
   }
 
   static isInactive(lastMessageTime: Date): boolean {
-    const inactiveThreshold = this.INACTIVE_THRESHOLD_MINUTES * 60 * 1000
+    const inactiveThreshold = ConversationDomain.INACTIVE_THRESHOLD_MINUTES * 60 * 1000
     return Date.now() - lastMessageTime.getTime() > inactiveThreshold
   }
 
   static isAbandoned(lastMessageTime: Date): boolean {
-    const abandonmentThreshold = this.ABANDONMENT_THRESHOLD_MINUTES * 60 * 1000
+    const abandonmentThreshold = ConversationDomain.ABANDONMENT_THRESHOLD_MINUTES * 60 * 1000
     return Date.now() - lastMessageTime.getTime() > abandonmentThreshold
   }
 
@@ -85,9 +84,9 @@ export class ConversationDomain {
 
     if (sentiments.length === 0) {
       return {
-        score: 0,
         confidence: 0,
         label: 'neutral',
+        score: 0,
       }
     }
 
@@ -95,9 +94,9 @@ export class ConversationDomain {
     const label = avgScore > 0.3 ? 'positive' : avgScore < -0.3 ? 'negative' : 'neutral'
 
     return {
-      score: avgScore,
       confidence: 0.8, // Simplified confidence calculation
       label,
+      score: avgScore,
     }
   }
 
@@ -107,7 +106,10 @@ export class ConversationDomain {
     messages.forEach(msg => {
       if (msg.intentClassification) {
         const intent = msg.intentClassification.intent
-        const current = intentMap.get(intent) || { count: 0, totalConfidence: 0 }
+        const current = intentMap.get(intent) || {
+          count: 0,
+          totalConfidence: 0,
+        }
 
         intentMap.set(intent, {
           count: current.count + 1,
@@ -118,9 +120,9 @@ export class ConversationDomain {
 
     return Array.from(intentMap.entries())
       .map(([intent, data]) => ({
-        intent,
         confidence: data.totalConfidence / data.count,
         entities: [],
+        intent,
       }))
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, 5)
@@ -153,12 +155,12 @@ export class ConversationDomain {
       .map(msg => msg.content)
       .join(' ')
 
-    const topics = this.extractTopIntents(messages)
+    const topics = ConversationDomain.extractTopIntents(messages)
       .map(intent => intent.intent)
       .slice(0, 3)
       .join(', ')
 
-    const sentiment = this.aggregateSentiment(messages).label
+    const sentiment = ConversationDomain.aggregateSentiment(messages).label
 
     return `Topics: ${topics || 'General inquiry'}. Sentiment: ${sentiment}. Preview: ${visitorMessages.substring(0, 100)}...`
   }
@@ -174,24 +176,24 @@ export class ConversationDomain {
   }
 
   static calculateMetrics(conversation: Conversation, messages: Message[]): ConversationMetrics {
-    const duration = this.calculateDuration(conversation)
+    const duration = ConversationDomain.calculateDuration(conversation)
     const visitorMessages = messages.filter(msg => msg.sender === 'visitor')
     const botMessages = messages.filter(msg => msg.sender === 'bot')
 
     return {
+      averageResponseTime: ConversationDomain.calculateAverageResponseTime(messages),
+      botMessageCount: botMessages.length,
       conversationId: conversation.id,
       duration,
       messageCount: messages.length,
-      visitorMessageCount: visitorMessages.length,
-      botMessageCount: botMessages.length,
-      averageResponseTime: this.calculateAverageResponseTime(messages),
+      resolutionStatus: ConversationDomain.determineResolutionStatus(messages),
       sentimentTrend: messages
         .filter(msg => msg.sentimentScore !== undefined)
         .map(msg => ({
-          timestamp: msg.createdAt,
           score: msg.sentimentScore!,
+          timestamp: msg.createdAt,
         })),
-      resolutionStatus: this.determineResolutionStatus(messages),
+      visitorMessageCount: visitorMessages.length,
     }
   }
 }

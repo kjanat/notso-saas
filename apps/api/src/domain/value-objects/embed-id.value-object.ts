@@ -1,5 +1,6 @@
-import { ValueObject } from '../base/value-object.base.js'
 import { randomBytes } from 'crypto'
+
+import { ValueObject } from '../base/value-object.base.js'
 
 interface EmbedIdProps {
   value: string

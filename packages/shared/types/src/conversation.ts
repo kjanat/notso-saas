@@ -2,7 +2,7 @@
  * Conversation and messaging types
  */
 
-import type { BaseEntity, ConversationId, ChatbotId, MessageId, TenantId, UserId } from './base'
+import type { BaseEntity, ChatbotId, ConversationId, MessageId, TenantId, UserId } from './base'
 
 export interface Conversation extends BaseEntity {
   id: ConversationId

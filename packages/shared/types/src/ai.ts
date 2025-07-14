@@ -2,7 +2,7 @@
  * AI/ML processing types
  */
 
-import type { TenantId, ConversationId, MessageId, JobId } from './base'
+import type { ConversationId, JobId, MessageId, TenantId } from './base'
 
 export interface AIJob {
   id: JobId

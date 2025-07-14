@@ -1,16 +1,4 @@
 {
-  "name": "@saas/websocket",
-  "version": "0.0.1",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "tsx watch src/main.ts",
-    "build": "tsup",
-    "start": "node dist/main.js",
-    "test": "vitest",
-    "lint": "eslint .",
-    "type-check": "tsc --noEmit"
-  },
   "dependencies": {
     "@fastify/websocket": "^11.2.0",
     "@saas/types": "workspace:*",
@@ -21,10 +9,23 @@
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
+    "@saas/tsconfig": "workspace:*",
     "@types/node": "^24.0.13",
     "tsup": "^8.5.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
-  }
+  },
+  "name": "@saas/websocket",
+  "private": true,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx watch src/main.ts",
+    "lint": "eslint .",
+    "start": "node dist/main.js",
+    "test": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.1"
 }

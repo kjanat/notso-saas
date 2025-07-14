@@ -1,5 +1,6 @@
-import { ValueObject } from '../base/value-object.base.js'
 import { randomUUID } from 'crypto'
+
+import { ValueObject } from '../base/value-object.base.js'
 
 interface TenantIdProps {
   value: string

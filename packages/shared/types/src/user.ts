@@ -2,7 +2,7 @@
  * User and authentication types
  */
 
-import type { BaseEntity, UserId, TenantId } from './base'
+import type { BaseEntity, TenantId, UserId } from './base'
 
 export type UserRole = 'platform_admin' | 'tenant_admin' | 'tenant_user' | 'tenant_viewer'
 

@@ -1,15 +1,18 @@
-import { BaseAIProvider } from './base.provider.js'
-import type { IStreamResponse } from '../ai.interfaces.js'
 import { config } from '../../../config/index.js'
+import type { IStreamResponse } from '../ai.interfaces.js'
+import { BaseAIProvider } from './base.provider.js'
 
 export class AnthropicProvider extends BaseAIProvider {
   name = 'anthropic'
   private apiKey: string
+  private voyageApiKey: string
   private baseUrl = 'https://api.anthropic.com/v1'
+  private voyageUrl = 'https://api.voyageai.com/v1'
 
   constructor() {
     super()
-    this.apiKey = config.anthropicApiKey
+    this.apiKey = config.ai.anthropic.apiKey || ''
+    this.voyageApiKey = config.ai.voyage.apiKey || ''
   }
 
   async generateResponse(
@@ -22,19 +25,19 @@ export class AnthropicProvider extends BaseAIProvider {
     }
   ): Promise<string | AsyncGenerator<IStreamResponse>> {
     const response = await fetch(`${this.baseUrl}/messages`, {
-      method: 'POST',
+      body: JSON.stringify({
+        max_tokens: options?.maxTokens || 2000,
+        messages: this.formatMessages(messages),
+        model: options?.model || 'claude-3-opus-20240229',
+        stream: options?.stream || false,
+        temperature: options?.temperature || 0.7,
+      }),
       headers: {
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
         'x-api-key': this.apiKey,
-        'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({
-        model: options?.model || 'claude-3-opus-20240229',
-        messages: this.formatMessages(messages),
-        temperature: options?.temperature || 0.7,
-        max_tokens: options?.maxTokens || 2000,
-        stream: options?.stream || false,
-      }),
+      method: 'POST',
     })
 
     if (!response.ok) {
@@ -50,16 +53,37 @@ export class AnthropicProvider extends BaseAIProvider {
   }
 
   async embedText(text: string): Promise<number[]> {
-    // Anthropic doesn't have a native embedding API
-    // In production, you might want to use a different provider for embeddings
-    throw new Error('Anthropic does not support text embeddings. Use OpenAI or another provider.')
+    // Use Voyage AI for embeddings as recommended by Anthropic
+    if (!this.voyageApiKey) {
+      throw new Error('Voyage API key not configured. Set VOYAGE_API_KEY environment variable.')
+    }
+
+    const response = await fetch(`${this.voyageUrl}/embeddings`, {
+      body: JSON.stringify({
+        input: text,
+        model: 'voyage-large-2', // 1536 dimensions, best for general use
+      }),
+      headers: {
+        Authorization: `Bearer ${this.voyageApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Voyage API error: ${response.statusText} - ${error}`)
+    }
+
+    const data = await response.json()
+    return data.data[0].embedding
   }
 
   protected formatMessages(messages: Array<{ role: string; content: string }>): any {
     // Anthropic requires a specific format
     return messages.map(msg => ({
-      role: msg.role === 'system' ? 'assistant' : msg.role,
       content: msg.content,
+      role: msg.role === 'system' ? 'assistant' : msg.role,
     }))
   }
 
@@ -87,23 +111,24 @@ export class AnthropicProvider extends BaseAIProvider {
 
             if (parsed.type === 'content_block_delta') {
               yield {
-                text: parsed.delta.text,
                 isComplete: false,
+                text: parsed.delta.text,
               }
             } else if (parsed.type === 'message_stop') {
               yield {
-                text: '',
                 isComplete: true,
+                text: '',
                 usage: {
-                  promptTokens: parsed.usage?.input_tokens || 0,
                   completionTokens: parsed.usage?.output_tokens || 0,
+                  promptTokens: parsed.usage?.input_tokens || 0,
                   totalTokens:
                     (parsed.usage?.input_tokens || 0) + (parsed.usage?.output_tokens || 0),
                 },
               }
             }
-          } catch (e) {
-            // Skip invalid JSON
+          } catch {
+            // Skip invalid JSON chunks during streaming
+            // In production, you might want to log this to a monitoring service
           }
         }
       }

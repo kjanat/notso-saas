@@ -1,4 +1,4 @@
-import { createHash, randomBytes, createCipheriv, createDecipheriv, pbkdf2Sync } from 'crypto'
+import { createCipheriv, createDecipheriv, createHash, pbkdf2Sync, randomBytes } from 'crypto'
 
 export function generateId(prefix?: string): string {
   const id = randomBytes(16).toString('hex')
@@ -9,7 +9,7 @@ export function generateApiKey(): string {
   return randomBytes(32).toString('base64url')
 }
 
-export function generateSecret(length: number = 32): string {
+export function generateSecret(length = 32): string {
   return randomBytes(length).toString('hex')
 }
 

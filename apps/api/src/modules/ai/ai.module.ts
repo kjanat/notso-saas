@@ -1,7 +1,8 @@
-import { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync } from 'fastify'
 import { container } from '../../shared/di/container.js'
-import { AIService } from './ai.service.js'
+
 import type { IAIService } from './ai.interfaces.js'
+import { AIService } from './ai.service.js'
 
 export const aiModule: FastifyPluginAsync = async fastify => {
   // Register AI service
@@ -20,55 +21,55 @@ export const aiModule: FastifyPluginAsync = async fastify => {
   })
 
   fastify.post('/generate', {
-    schema: {
-      body: {
-        type: 'object',
-        required: ['provider', 'messages'],
-        properties: {
-          provider: { enum: ['openai', 'anthropic', 'vertex'] },
-          messages: {
-            type: 'array',
-            items: {
-              type: 'object',
-              required: ['role', 'content'],
-              properties: {
-                role: { type: 'string' },
-                content: { type: 'string' },
-              },
-            },
-          },
-          options: {
-            type: 'object',
-            properties: {
-              temperature: { type: 'number' },
-              maxTokens: { type: 'number' },
-              stream: { type: 'boolean' },
-              model: { type: 'string' },
-            },
-          },
-        },
-      },
-    },
     handler: async (request: any) => {
       const { provider, messages, options } = request.body
       return aiService.generateResponse(provider, messages, options)
     },
+    schema: {
+      body: {
+        properties: {
+          messages: {
+            items: {
+              properties: {
+                content: { type: 'string' },
+                role: { type: 'string' },
+              },
+              required: ['role', 'content'],
+              type: 'object',
+            },
+            type: 'array',
+          },
+          options: {
+            properties: {
+              maxTokens: { type: 'number' },
+              model: { type: 'string' },
+              stream: { type: 'boolean' },
+              temperature: { type: 'number' },
+            },
+            type: 'object',
+          },
+          provider: { enum: ['openai', 'anthropic', 'vertex'] },
+        },
+        required: ['provider', 'messages'],
+        type: 'object',
+      },
+    },
   })
 
   fastify.post('/embed', {
+    handler: async (request: any) => {
+      const { provider, text } = request.body
+      return aiService.embedText(provider, text)
+    },
     schema: {
       body: {
-        type: 'object',
-        required: ['provider', 'text'],
         properties: {
           provider: { enum: ['openai', 'anthropic', 'vertex'] },
           text: { type: 'string' },
         },
+        required: ['provider', 'text'],
+        type: 'object',
       },
-    },
-    handler: async (request: any) => {
-      const { provider, text } = request.body
-      return aiService.embedText(provider, text)
     },
   })
 }

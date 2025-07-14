@@ -3,9 +3,9 @@
  */
 
 import type {
-  TenantId,
   ChatbotId,
   ConversationId,
+  TenantId,
   UserId /* , Timestamps - available if needed */,
 } from './base'
 

@@ -1,57 +1,11 @@
 {
-  "name": "saas-chatbot-platform",
-  "version": "0.0.1",
-  "private": true,
-  "description": "Multi-tenant AI-powered customer service chatbot platform",
-  "keywords": [
-    "saas",
-    "chatbot",
-    "ai",
-    "multi-tenant",
-    "customer-service"
-  ],
-  "homepage": "https://github.com/notso/saas-chatbot-platform",
+  "author": "kjanat",
   "bugs": {
-    "url": "https://github.com/notso/saas-chatbot-platform/issues"
+    "url": "https://github.com/kjanat/notso-saas/issues"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/notso/saas-chatbot-platform.git"
-  },
-  "license": "PROPRIETARY",
-  "author": "NotSo Team",
-  "type": "module",
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
-  "scripts": {
-    "dev": "turbo run dev",
-    "dev:api": "turbo run dev --filter=@saas/api",
-    "dev:web": "turbo run dev --filter=@saas/customer-portal",
-    "dev:admin": "turbo run dev --filter=@saas/platform-admin",
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "test:e2e": "turbo run test:e2e",
-    "lint": "turbo run lint",
-    "type-check": "turbo run type-check",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
-    "clean": "turbo run clean && rm -rf node_modules",
-    "db:generate": "turbo run db:generate",
-    "db:push": "turbo run db:push",
-    "db:migrate": "turbo run db:migrate",
-    "db:seed": "turbo run db:seed",
-    "docker:up": "./scripts/dev-setup.sh",
-    "docker:down": "docker-compose down",
-    "docker:reset": "docker-compose down -v && ./scripts/dev-setup.sh",
-    "dev:simple": "./scripts/dev.sh",
-    "docker:simple": "docker-compose -f docker-compose.dev.yml up -d",
-    "docker:simple:down": "docker-compose -f docker-compose.dev.yml down",
-    "docker:simple:logs": "docker-compose -f docker-compose.dev.yml logs -f",
-    "prepare": "husky"
-  },
+  "description": "Multi-tenant AI-powered customer service chatbot platform",
   "devDependencies": {
+    "@biomejs/biome": "2.1.1",
     "@eslint/js": "^9.31.0",
     "@types/node": "^24.0.13",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
@@ -68,9 +22,47 @@
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   },
-  "packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
   "engines": {
     "node": ">=22.0.0",
     "pnpm": ">=10.0.0"
-  }
+  },
+  "homepage": "https://github.com/kjanat/notso-saas",
+  "keywords": ["saas", "chatbot", "ai", "multi-tenant", "customer-service"],
+  "license": "PROPRIETARY",
+  "name": "saas-chatbot-platform",
+  "packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kjanat/notso-saas.git"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "turbo run db:migrate",
+    "db:push": "turbo run db:push",
+    "db:seed": "turbo run db:seed",
+    "dev": "turbo run dev",
+    "dev:admin": "turbo run dev --filter=@saas/platform-admin",
+    "dev:api": "turbo run dev --filter=@saas/api",
+    "dev:simple": "./scripts/dev.sh",
+    "dev:web": "turbo run dev --filter=@saas/customer-portal",
+    "docker:down": "docker-compose down",
+    "docker:reset": "docker-compose down -v && ./scripts/dev-setup.sh",
+    "docker:simple": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:simple:down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:simple:logs": "docker-compose -f docker-compose.dev.yml logs -f",
+    "docker:up": "./scripts/dev-setup.sh",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "lint": "turbo run lint",
+    "prepare": "husky",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "type-check": "turbo run type-check"
+  },
+  "type": "module",
+  "version": "0.0.1",
+  "workspaces": ["packages/*", "apps/*"]
 }

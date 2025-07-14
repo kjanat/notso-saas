@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync } from 'fastify'
 import { AuthController } from './auth.controller.js'
 import { AuthService } from './auth.service.js'
 
@@ -8,33 +8,33 @@ export const authModule: FastifyPluginAsync = async fastify => {
 
   // Public routes
   fastify.post('/login', {
+    handler: authController.login.bind(authController),
     schema: {
       body: {
-        type: 'object',
-        required: ['email', 'password'],
         properties: {
-          email: { type: 'string', format: 'email' },
-          password: { type: 'string', minLength: 8 },
+          email: { format: 'email', type: 'string' },
+          password: { minLength: 8, type: 'string' },
         },
+        required: ['email', 'password'],
+        type: 'object',
       },
     },
-    handler: authController.login.bind(authController),
   })
 
   fastify.post('/register', {
+    handler: authController.register.bind(authController),
     schema: {
       body: {
-        type: 'object',
-        required: ['email', 'password', 'tenantId'],
         properties: {
-          email: { type: 'string', format: 'email' },
-          password: { type: 'string', minLength: 8 },
-          tenantId: { type: 'string' },
+          email: { format: 'email', type: 'string' },
           name: { type: 'string' },
+          password: { minLength: 8, type: 'string' },
+          tenantId: { type: 'string' },
         },
+        required: ['email', 'password', 'tenantId'],
+        type: 'object',
       },
     },
-    handler: authController.register.bind(authController),
   })
 
   // Protected routes

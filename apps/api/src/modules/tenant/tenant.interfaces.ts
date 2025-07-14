@@ -1,6 +1,6 @@
+import type { Tenant } from '@saas/domain'
 import type { IBaseRepository, IBaseService } from '../../shared/interfaces/base.interfaces.js'
 import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
-import type { Tenant } from '@saas/domain'
 
 export interface ITenantRepository
   extends IBaseRepository<Tenant, CreateTenantDto, UpdateTenantDto> {

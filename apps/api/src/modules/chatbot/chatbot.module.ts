@@ -1,4 +1,4 @@
-import { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync } from 'fastify'
 
 export const chatbotModule: FastifyPluginAsync = async fastify => {
   // TODO: Implement chatbot routes

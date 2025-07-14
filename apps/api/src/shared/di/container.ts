@@ -1,18 +1,12 @@
 import 'reflect-metadata'
-import { container } from 'tsyringe'
 import type { DependencyContainer } from 'tsyringe'
-
-// Import interfaces
-import type { ICacheService, IQueueService, ILogger } from '../interfaces/base.interfaces.js'
-
-// Import implementations
-import { CacheService } from '../cache/index.js'
-import { QueueService } from '../queue/index.js'
-import { logger } from '../utils/logger.js'
-
-// AI Factory
+import { container } from 'tsyringe'
 import { AIProviderFactory } from '../../modules/ai/ai.factory.js'
 import type { IAIProviderFactory } from '../../modules/ai/ai.interfaces.js'
+import { CacheService } from '../cache/index.js'
+import type { ICacheService, ILogger, IQueueService } from '../interfaces/base.interfaces.js'
+import { QueueService } from '../queue/index.js'
+import { logger } from '../utils/logger.js'
 
 export function setupContainer(): DependencyContainer {
   // Register shared services

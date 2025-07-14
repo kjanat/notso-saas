@@ -1,33 +1,32 @@
-import { ValidationError, generateDeploymentKey } from '@saas/utils'
-
 import type {
+  AvatarConfiguration,
   Chatbot,
   // ChatbotId, // Kept for future use
   PersonalityConfiguration,
-  AvatarConfiguration,
   WidgetConfiguration,
 } from '@saas/types'
+import { generateDeploymentKey, ValidationError } from '@saas/utils'
 
 export class ChatbotDomain {
   private static readonly DEFAULT_PERSONALITIES: Record<string, Partial<PersonalityConfiguration>> =
     {
-      professional: {
-        tone: 'professional',
-        temperature: 0.7,
-        systemPrompt:
-          'You are a professional customer service representative. Be helpful, concise, and maintain a professional tone.',
-      },
       friendly: {
-        tone: 'friendly',
-        temperature: 0.8,
         systemPrompt:
           'You are a friendly and helpful assistant. Be warm, engaging, and create a positive experience for users.',
+        temperature: 0.8,
+        tone: 'friendly',
+      },
+      professional: {
+        systemPrompt:
+          'You are a professional customer service representative. Be helpful, concise, and maintain a professional tone.',
+        temperature: 0.7,
+        tone: 'professional',
       },
       technical: {
-        tone: 'formal',
-        temperature: 0.6,
         systemPrompt:
           'You are a technical support specialist. Provide accurate, detailed technical information while remaining clear and helpful.',
+        temperature: 0.6,
+        tone: 'formal',
       },
     }
 
@@ -41,11 +40,11 @@ export class ChatbotDomain {
     }
 
     if (chatbot.personalityConfig) {
-      this.validatePersonalityConfig(chatbot.personalityConfig)
+      ChatbotDomain.validatePersonalityConfig(chatbot.personalityConfig)
     }
 
     if (chatbot.widgetConfig) {
-      this.validateWidgetConfig(chatbot.widgetConfig)
+      ChatbotDomain.validateWidgetConfig(chatbot.widgetConfig)
     }
   }
 
@@ -91,41 +90,41 @@ export class ChatbotDomain {
   static getDefaultPersonality(
     type: keyof typeof ChatbotDomain.DEFAULT_PERSONALITIES
   ): PersonalityConfiguration {
-    const defaults = this.DEFAULT_PERSONALITIES[type]
+    const defaults = ChatbotDomain.DEFAULT_PERSONALITIES[type]
     return {
-      name: type,
-      role: 'Customer Service Representative',
-      personality: type,
-      tone: defaults.tone || 'professional',
-      language: 'en',
-      systemPrompt: defaults.systemPrompt || '',
-      temperature: defaults.temperature || 0.7,
-      maxTokens: 1024,
-      welcomeMessage: 'Hello! How can I help you today?',
       fallbackResponses: [
         "I'm sorry, I didn't quite understand that. Could you please rephrase?",
         "I'm not sure about that. Let me connect you with a human agent who can help better.",
         "That's an interesting question. Could you provide more details?",
       ],
+      language: 'en',
+      maxTokens: 1024,
+      name: type,
+      personality: type,
+      role: 'Customer Service Representative',
+      systemPrompt: defaults.systemPrompt || '',
+      temperature: defaults.temperature || 0.7,
+      tone: defaults.tone || 'professional',
+      welcomeMessage: 'Hello! How can I help you today?',
     }
   }
 
   static getDefaultWidgetConfig(): WidgetConfiguration {
     return {
-      theme: {
-        primaryColor: '#0066cc',
-        textColor: '#333333',
-        backgroundColor: '#ffffff',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-      },
-      position: 'bottom-right',
-      size: 'medium',
+      allowedFileTypes: [],
+      allowFileUploads: false,
       autoOpen: false,
       autoOpenDelay: 5000,
+      position: 'bottom-right',
       showAvatar: true,
       showTypingIndicator: true,
-      allowFileUploads: false,
-      allowedFileTypes: [],
+      size: 'medium',
+      theme: {
+        backgroundColor: '#ffffff',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        primaryColor: '#0066cc',
+        textColor: '#333333',
+      },
     }
   }
 
@@ -133,24 +132,24 @@ export class ChatbotDomain {
     return {
       animations: [
         {
+          duration: 3000,
           name: 'idle',
           trigger: 'idle',
-          duration: 3000,
         },
         {
+          duration: 2000,
           name: 'greeting',
           trigger: 'greeting',
-          duration: 2000,
         },
         {
+          duration: 1500,
           name: 'thinking',
           trigger: 'thinking',
-          duration: 1500,
         },
         {
+          duration: 2000,
           name: 'speaking',
           trigger: 'speaking',
-          duration: 2000,
         },
       ],
       customization: {},

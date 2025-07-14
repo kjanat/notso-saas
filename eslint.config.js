@@ -1,11 +1,11 @@
 import js from '@eslint/js'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
+import prettierConfig from 'eslint-config-prettier'
+import importPlugin from 'eslint-plugin-import'
+import jsxA11yPlugin from 'eslint-plugin-jsx-a11y'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
-import jsxA11yPlugin from 'eslint-plugin-jsx-a11y'
-import importPlugin from 'eslint-plugin-import'
-import prettierConfig from 'eslint-config-prettier'
 
 export default [
   // Base JavaScript configuration
@@ -39,11 +39,11 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        ecmaVersion: 2024,
-        sourceType: 'module',
         ecmaFeatures: {
           jsx: true,
         },
+        ecmaVersion: 2024,
+        sourceType: 'module',
       },
     },
     plugins: {
@@ -75,21 +75,21 @@ export default [
       },
     },
     plugins: {
+      'jsx-a11y': jsxA11yPlugin,
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
-      'jsx-a11y': jsxA11yPlugin,
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
     },
     rules: {
       ...reactPlugin.configs.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
       ...jsxA11yPlugin.configs.recommended.rules,
-      'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
     },
   },
 
@@ -103,6 +103,10 @@ export default [
       'import/order': [
         'error',
         {
+          alphabetize: {
+            caseInsensitive: true,
+            order: 'asc',
+          },
           groups: [
             'builtin',
             'external',
@@ -114,10 +118,6 @@ export default [
             'type',
           ],
           'newlines-between': 'always',
-          alphabetize: {
-            order: 'asc',
-            caseInsensitive: true,
-          },
         },
       ],
     },
@@ -128,22 +128,36 @@ export default [
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     languageOptions: {
       ecmaVersion: 2024,
-      sourceType: 'module',
       globals: {
-        // Browser globals
-        window: 'readonly',
-        document: 'readonly',
-        navigator: 'readonly',
-        console: 'readonly',
-        // Node.js globals
-        process: 'readonly',
-        Buffer: 'readonly',
         __dirname: 'readonly',
         __filename: 'readonly',
+        Buffer: 'readonly',
+        clearImmediate: 'readonly',
+        clearInterval: 'readonly',
+        clearTimeout: 'readonly',
+        console: 'readonly',
+        document: 'readonly',
+        FormData: 'readonly',
+        fetch: 'readonly',
         global: 'readonly',
         // ES2024 globals
         globalThis: 'readonly',
+        Headers: 'readonly',
+        navigator: 'readonly',
+        // Node.js globals
+        process: 'readonly',
+        ReadableStream: 'readonly',
+        Request: 'readonly',
+        Response: 'readonly',
+        setImmediate: 'readonly',
+        setInterval: 'readonly',
+        setTimeout: 'readonly',
+        TextDecoder: 'readonly',
+        TextEncoder: 'readonly',
+        // Browser globals
+        window: 'readonly',
       },
+      sourceType: 'module',
     },
     rules: {
       'no-console': [

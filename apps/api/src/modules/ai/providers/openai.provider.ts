@@ -1,6 +1,6 @@
-import { BaseAIProvider } from './base.provider.js'
-import type { IStreamResponse } from '../ai.interfaces.js'
 import { config } from '../../../config/index.js'
+import type { IStreamResponse } from '../ai.interfaces.js'
+import { BaseAIProvider } from './base.provider.js'
 
 export class OpenAIProvider extends BaseAIProvider {
   name = 'openai'
@@ -22,18 +22,18 @@ export class OpenAIProvider extends BaseAIProvider {
     }
   ): Promise<string | AsyncGenerator<IStreamResponse>> {
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
       body: JSON.stringify({
-        model: options?.model || 'gpt-4',
-        messages: this.formatMessages(messages),
-        temperature: options?.temperature || 0.7,
         max_tokens: options?.maxTokens || 2000,
+        messages: this.formatMessages(messages),
+        model: options?.model || 'gpt-4',
         stream: options?.stream || false,
+        temperature: options?.temperature || 0.7,
       }),
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
     })
 
     if (!response.ok) {
@@ -50,15 +50,15 @@ export class OpenAIProvider extends BaseAIProvider {
 
   async embedText(text: string): Promise<number[]> {
     const response = await fetch(`${this.baseUrl}/embeddings`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
       body: JSON.stringify({
-        model: 'text-embedding-ada-002',
         input: text,
+        model: 'text-embedding-ada-002',
       }),
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
     })
 
     if (!response.ok) {
@@ -88,7 +88,7 @@ export class OpenAIProvider extends BaseAIProvider {
         if (line.startsWith('data: ')) {
           const data = line.slice(6)
           if (data === '[DONE]') {
-            yield { text: '', isComplete: true }
+            yield { isComplete: true, text: '' }
             return
           }
 
@@ -96,12 +96,13 @@ export class OpenAIProvider extends BaseAIProvider {
             const parsed = JSON.parse(data)
             const content = parsed.choices[0]?.delta?.content || ''
             yield {
-              text: content,
               isComplete: false,
+              text: content,
               usage: parsed.usage,
             }
-          } catch (e) {
-            // Skip invalid JSON
+          } catch {
+            // Skip invalid JSON chunks during streaming
+            // In production, you might want to log this to a monitoring service
           }
         }
       }

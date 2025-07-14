@@ -1,6 +1,6 @@
-import { injectable, inject } from 'tsyringe'
-import type { IAIService, IAIProviderFactory, IStreamResponse } from './ai.interfaces.js'
+import { inject, injectable } from 'tsyringe'
 import type { ILogger } from '../../shared/interfaces/base.interfaces.js'
+import type { IAIProviderFactory, IAIService, IStreamResponse } from './ai.interfaces.js'
 
 @injectable()
 export class AIService implements IAIService {
@@ -24,16 +24,16 @@ export class AIService implements IAIService {
       const response = await aiProvider.generateResponse(messages, options)
 
       this.logger.info('AI response generated', {
-        provider,
-        model: options?.model,
         messageCount: messages.length,
+        model: options?.model,
+        provider,
       })
 
       return response
     } catch (error) {
       this.logger.error('Failed to generate AI response', error as Error, {
-        provider,
         model: options?.model,
+        provider,
       })
       throw error
     }
@@ -45,9 +45,9 @@ export class AIService implements IAIService {
       const embedding = await aiProvider.embedText(text)
 
       this.logger.info('Text embedded', {
+        embeddingDimensions: embedding.length,
         provider,
         textLength: text.length,
-        embeddingDimensions: embedding.length,
       })
 
       return embedding

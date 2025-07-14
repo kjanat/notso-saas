@@ -1,71 +1,16 @@
-import { ValidationError, generateTenantDatabaseName } from '@saas/utils'
-
 import type {
-  Tenant,
   // TenantId, // Kept for future use
   SubscriptionPlan,
   SubscriptionTier,
+  Tenant,
   TenantCreationRequest,
   TenantUsage,
 } from '@saas/types'
+import { generateTenantDatabaseName, ValidationError } from '@saas/utils'
 
 export class TenantDomain {
   private static readonly SUBSCRIPTION_PLANS: Record<SubscriptionTier, SubscriptionPlan> = {
-    trial: {
-      tier: 'trial',
-      limits: {
-        chatbots: 1,
-        conversationsPerMonth: 100,
-        teamMembers: 2,
-        customAvatars: 0,
-        apiCallsPerMinute: 10,
-        storageGB: 1,
-      },
-      features: ['basic_chat', 'basic_analytics'],
-    },
-    starter: {
-      tier: 'starter',
-      limits: {
-        chatbots: 3,
-        conversationsPerMonth: 1000,
-        teamMembers: 5,
-        customAvatars: 1,
-        apiCallsPerMinute: 50,
-        storageGB: 10,
-      },
-      features: ['basic_chat', 'basic_analytics', 'custom_branding', 'api_access'],
-    },
-    professional: {
-      tier: 'professional',
-      limits: {
-        chatbots: 10,
-        conversationsPerMonth: 10000,
-        teamMembers: 20,
-        customAvatars: 5,
-        apiCallsPerMinute: 200,
-        storageGB: 50,
-      },
-      features: [
-        'basic_chat',
-        'basic_analytics',
-        'custom_branding',
-        'api_access',
-        'advanced_analytics',
-        '3d_avatars',
-        'sentiment_analysis',
-        'webhooks',
-      ],
-    },
     enterprise: {
-      tier: 'enterprise',
-      limits: {
-        chatbots: -1, // unlimited
-        conversationsPerMonth: -1,
-        teamMembers: -1,
-        customAvatars: -1,
-        apiCallsPerMinute: 1000,
-        storageGB: -1,
-      },
       features: [
         'basic_chat',
         'basic_analytics',
@@ -79,11 +24,65 @@ export class TenantDomain {
         'sla_support',
         'dedicated_resources',
       ],
+      limits: {
+        apiCallsPerMinute: 1000,
+        chatbots: -1, // unlimited
+        conversationsPerMonth: -1,
+        customAvatars: -1,
+        storageGB: -1,
+        teamMembers: -1,
+      },
+      tier: 'enterprise',
+    },
+    professional: {
+      features: [
+        'basic_chat',
+        'basic_analytics',
+        'custom_branding',
+        'api_access',
+        'advanced_analytics',
+        '3d_avatars',
+        'sentiment_analysis',
+        'webhooks',
+      ],
+      limits: {
+        apiCallsPerMinute: 200,
+        chatbots: 10,
+        conversationsPerMonth: 10000,
+        customAvatars: 5,
+        storageGB: 50,
+        teamMembers: 20,
+      },
+      tier: 'professional',
+    },
+    starter: {
+      features: ['basic_chat', 'basic_analytics', 'custom_branding', 'api_access'],
+      limits: {
+        apiCallsPerMinute: 50,
+        chatbots: 3,
+        conversationsPerMonth: 1000,
+        customAvatars: 1,
+        storageGB: 10,
+        teamMembers: 5,
+      },
+      tier: 'starter',
+    },
+    trial: {
+      features: ['basic_chat', 'basic_analytics'],
+      limits: {
+        apiCallsPerMinute: 10,
+        chatbots: 1,
+        conversationsPerMonth: 100,
+        customAvatars: 0,
+        storageGB: 1,
+        teamMembers: 2,
+      },
+      tier: 'trial',
     },
   }
 
   static getSubscriptionPlan(tier: SubscriptionTier): SubscriptionPlan {
-    return this.SUBSCRIPTION_PLANS[tier]
+    return TenantDomain.SUBSCRIPTION_PLANS[tier]
   }
 
   static validateTenantCreation(request: TenantCreationRequest): void {
@@ -135,7 +134,7 @@ export class TenantDomain {
   }
 
   static canAccessFeature(tenant: Tenant, feature: string): boolean {
-    const plan = this.getSubscriptionPlan(tenant.subscriptionPlan)
+    const plan = TenantDomain.getSubscriptionPlan(tenant.subscriptionPlan)
     return plan.features.includes(feature)
   }
 
@@ -148,16 +147,16 @@ export class TenantDomain {
 
   static calculateUsageCost(usage: TenantUsage): number {
     const { aiApiCost, storageCost } = usage.costs
-    const baseCost = this.getBaseCost(usage.tenantId as any)
+    const baseCost = TenantDomain.getBaseCost(usage.tenantId as any)
     return baseCost + aiApiCost + storageCost
   }
 
   private static getBaseCost(tier: SubscriptionTier): number {
     const costs: Record<SubscriptionTier, number> = {
-      trial: 0,
-      starter: 29,
-      professional: 99,
       enterprise: 499,
+      professional: 99,
+      starter: 29,
+      trial: 0,
     }
     return costs[tier] || 0
   }

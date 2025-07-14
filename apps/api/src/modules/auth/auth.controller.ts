@@ -1,5 +1,5 @@
-import { FastifyRequest, FastifyReply } from 'fastify'
-import { AuthService } from './auth.service.js'
+import type { FastifyReply, FastifyRequest } from 'fastify'
+import type { AuthService } from './auth.service.js'
 
 interface LoginBody {
   email: string
@@ -23,12 +23,12 @@ export class AuthController {
     }
 
     return {
-      user: result.user,
       token: await reply.jwtSign({
-        id: result.user.id,
         email: result.user.email,
+        id: result.user.id,
         tenantId: result.user.tenantId,
       }),
+      user: result.user,
     }
   }
 
@@ -36,12 +36,12 @@ export class AuthController {
     const user = await this.authService.register(request.body)
 
     return {
-      user,
       token: await reply.jwtSign({
-        id: user.id,
         email: user.email,
+        id: user.id,
         tenantId: user.tenantId,
       }),
+      user,
     }
   }
 
@@ -57,7 +57,17 @@ export class AuthController {
   }
 
   async logout(request: FastifyRequest, reply: FastifyReply) {
-    // In a real app, you might want to blacklist the token
-    return { message: 'Logged out successfully' }
+    // Log the logout event
+    const userId = request.user?.id
+    if (userId) {
+      this.logger.info('User logged out', { userId })
+    }
+
+    // In production, you might want to:
+    // - Blacklist the token in Redis
+    // - Clear any server-side sessions
+    // - Emit logout event for analytics
+
+    reply.code(200).send({ message: 'Logged out successfully' })
   }
 }

@@ -1,4 +1,5 @@
-import Redis from 'ioredis'
+import { Redis } from 'ioredis'
+
 import { config } from '../../config/index.js'
 import { logger } from '../utils/logger.js'
 
@@ -6,9 +7,9 @@ let redis: Redis
 
 export async function setupCache() {
   redis = new Redis(config.redis.url, {
-    maxRetriesPerRequest: 3,
     enableReadyCheck: true,
     lazyConnect: false,
+    maxRetriesPerRequest: 3,
   })
 
   redis.on('connect', () => {

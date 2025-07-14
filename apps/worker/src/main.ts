@@ -1,6 +1,7 @@
+import { PrismaClient } from '@saas/database'
 import { Worker } from 'bullmq'
-import Redis from 'ioredis'
-import { PrismaClient } from '@prisma/client'
+import { Redis } from 'ioredis'
+
 import { logger } from './logger.js'
 import { aiProcessor } from './processors/ai.processor.js'
 import { tenantProcessor } from './processors/tenant.processor.js'
@@ -13,8 +14,8 @@ async function startWorkers() {
 
   // AI Processing Worker
   const aiWorker = new Worker('ai-processing', aiProcessor, {
-    connection: redis,
     concurrency: 5,
+    connection: redis,
   })
 
   aiWorker.on('completed', job => {
@@ -27,8 +28,8 @@ async function startWorkers() {
 
   // Tenant Provisioning Worker
   const tenantWorker = new Worker('tenant-provisioning', tenantProcessor, {
-    connection: redis,
     concurrency: 2,
+    connection: redis,
   })
 
   tenantWorker.on('completed', job => {

@@ -7,8 +7,8 @@ export class BaseError extends Error {
   constructor(
     message: string,
     code: string,
-    statusCode: number = 500,
-    isOperational: boolean = true,
+    statusCode = 500,
+    isOperational = true,
     context?: Record<string, any>
   ) {
     super(message)
@@ -28,13 +28,13 @@ export class ValidationError extends BaseError {
 }
 
 export class AuthenticationError extends BaseError {
-  constructor(message: string = 'Authentication failed', context?: Record<string, any>) {
+  constructor(message = 'Authentication failed', context?: Record<string, any>) {
     super(message, 'AUTHENTICATION_ERROR', 401, true, context)
   }
 }
 
 export class AuthorizationError extends BaseError {
-  constructor(message: string = 'Access denied', context?: Record<string, any>) {
+  constructor(message = 'Access denied', context?: Record<string, any>) {
     super(message, 'AUTHORIZATION_ERROR', 403, true, context)
   }
 }
@@ -44,7 +44,7 @@ export class NotFoundError extends BaseError {
     const message = identifier
       ? `${resource} with identifier '${identifier}' not found`
       : `${resource} not found`
-    super(message, 'NOT_FOUND', 404, true, { resource, identifier })
+    super(message, 'NOT_FOUND', 404, true, { identifier, resource })
   }
 }
 
@@ -55,12 +55,11 @@ export class ConflictError extends BaseError {
 }
 
 export class RateLimitError extends BaseError {
-  constructor(
-    message: string = 'Rate limit exceeded',
-    retryAfter?: number,
-    context?: Record<string, any>
-  ) {
-    super(message, 'RATE_LIMIT_EXCEEDED', 429, true, { ...context, retryAfter })
+  constructor(message = 'Rate limit exceeded', retryAfter?: number, context?: Record<string, any>) {
+    super(message, 'RATE_LIMIT_EXCEEDED', 429, true, {
+      ...context,
+      retryAfter,
+    })
   }
 }
 
@@ -69,8 +68,8 @@ export class ExternalServiceError extends BaseError {
     const message = `External service error: ${service}`
     super(message, 'EXTERNAL_SERVICE_ERROR', 502, false, {
       ...context,
-      service,
       originalError: originalError?.message,
+      service,
     })
   }
 }
@@ -110,8 +109,8 @@ export function getErrorMessage(error: unknown): string {
 
 export function serializeError(error: Error): Record<string, any> {
   const serialized: Record<string, any> = {
-    name: error.name,
     message: error.message,
+    name: error.name,
     stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
   }
 
@@ -127,7 +126,6 @@ export function serializeError(error: Error): Record<string, any> {
 export function createErrorResponse(error: Error) {
   if (error instanceof BaseError) {
     return {
-      success: false,
       error: {
         code: error.code,
         message: error.message,
@@ -136,15 +134,16 @@ export function createErrorResponse(error: Error) {
           stack: error.stack,
         }),
       },
+      success: false,
     }
   }
 
   return {
-    success: false,
     error: {
       code: 'INTERNAL_ERROR',
       message: process.env.NODE_ENV === 'production' ? 'An internal error occurred' : error.message,
     },
+    success: false,
   }
 }
 
