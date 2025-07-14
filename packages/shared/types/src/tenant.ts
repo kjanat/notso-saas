@@ -2,7 +2,7 @@
  * Tenant-related types and interfaces
  */
 
-import type { BaseEntity, TenantId, Timestamps } from './base'
+import type { BaseEntity, TenantId /* , Timestamps - available if needed */ } from './base'
 
 export type SubscriptionStatus = 'trial' | 'active' | 'cancelled' | 'suspended'
 export type SubscriptionTier = 'trial' | 'starter' | 'professional' | 'enterprise'

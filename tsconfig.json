@@ -22,6 +22,7 @@
     "preserveWatchOutput": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "types": [],
     "baseUrl": ".",
     "paths": {
       "@saas/shared/*": ["packages/shared/*/src"],

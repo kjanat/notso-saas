@@ -2,7 +2,12 @@
  * Analytics and reporting types
  */
 
-import type { TenantId, ChatbotId, ConversationId, UserId, Timestamps } from './base'
+import type {
+  TenantId,
+  ChatbotId,
+  ConversationId,
+  UserId /* , Timestamps - available if needed */,
+} from './base'
 
 export interface AnalyticsEvent {
   id: string
@@ -17,7 +22,7 @@ export interface AnalyticsEvent {
   metadata?: Record<string, any>
 }
 
-export type EventType = 
+export type EventType =
   | 'page_view'
   | 'chat_started'
   | 'chat_ended'
@@ -28,12 +33,7 @@ export type EventType =
   | 'api_called'
   | 'custom'
 
-export type EventCategory = 
-  | 'engagement'
-  | 'performance'
-  | 'error'
-  | 'conversion'
-  | 'technical'
+export type EventCategory = 'engagement' | 'performance' | 'error' | 'conversion' | 'technical'
 
 export type EventSource = 'widget' | 'api' | 'admin' | 'system'
 
@@ -135,7 +135,7 @@ export interface Report {
   nextScheduledAt?: Date
 }
 
-export type ReportType = 
+export type ReportType =
   | 'conversation_summary'
   | 'performance_metrics'
   | 'user_satisfaction'
@@ -164,14 +164,7 @@ export interface DateRange {
   end: Date
 }
 
-export type AnalyticsPeriod = 
-  | 'hour'
-  | 'day'
-  | 'week'
-  | 'month'
-  | 'quarter'
-  | 'year'
-  | 'custom'
+export type AnalyticsPeriod = 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year' | 'custom'
 
 export interface HeatmapData {
   dayOfWeek: number

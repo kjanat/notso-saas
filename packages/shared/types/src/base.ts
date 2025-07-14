@@ -12,8 +12,12 @@ export type ChatbotId = Brand<string, 'ChatbotId'>
 export type ConversationId = Brand<string, 'ConversationId'>
 export type MessageId = Brand<string, 'MessageId'>
 export type DeploymentKey = Brand<string, 'DeploymentKey'>
-export type ApiKey = Brand<string, 'ApiKey'>
+export type ApiKeyId = Brand<string, 'ApiKeyId'>
 export type JobId = Brand<string, 'JobId'>
+
+// Additional ID types (commented out to avoid duplicates, but kept for future reference)
+// export type ApiKey = Brand<string, 'ApiKey'> // Duplicate of ApiKeyId, consider consolidating
+// export type PaginationParams // Moved to common.ts
 
 // Base entity interface
 export interface BaseEntity {
@@ -30,26 +34,4 @@ export interface Timestamps {
 }
 
 // Result type for error handling
-export type Result<T, E = Error> = 
-  | { success: true; data: T }
-  | { success: false; error: E }
-
-// Pagination types
-export interface PaginationParams {
-  page: number
-  limit: number
-  sortBy?: string
-  sortOrder?: 'asc' | 'desc'
-}
-
-export interface PaginatedResult<T> {
-  data: T[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-    hasNextPage: boolean
-    hasPreviousPage: boolean
-  }
-}
+export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E }

@@ -2,6 +2,7 @@
   "name": "@saas/tenant-service",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "nodemon --exec tsx src/index.ts",
     "build": "tsc",
@@ -25,6 +26,7 @@
     "pino": "^9.7.0"
   },
   "devDependencies": {
+    "@saas/tsconfig": "workspace:*",
     "@types/node": "^24.0.13",
     "nodemon": "^3.1.10",
     "prisma": "^6.11.1",

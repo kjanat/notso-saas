@@ -1,12 +1,13 @@
-import type { 
-  Tenant, 
-  TenantId, 
-  SubscriptionPlan, 
+import { ValidationError, generateTenantDatabaseName } from '@saas/utils'
+
+import type {
+  Tenant,
+  // TenantId, // Kept for future use
+  SubscriptionPlan,
   SubscriptionTier,
   TenantCreationRequest,
-  TenantUsage 
+  TenantUsage,
 } from '@saas/types'
-import { ValidationError, generateTenantDatabaseName } from '@saas/utils'
 
 export class TenantDomain {
   private static readonly SUBSCRIPTION_PLANS: Record<SubscriptionTier, SubscriptionPlan> = {
@@ -18,9 +19,9 @@ export class TenantDomain {
         teamMembers: 2,
         customAvatars: 0,
         apiCallsPerMinute: 10,
-        storageGB: 1
+        storageGB: 1,
       },
-      features: ['basic_chat', 'basic_analytics']
+      features: ['basic_chat', 'basic_analytics'],
     },
     starter: {
       tier: 'starter',
@@ -30,9 +31,9 @@ export class TenantDomain {
         teamMembers: 5,
         customAvatars: 1,
         apiCallsPerMinute: 50,
-        storageGB: 10
+        storageGB: 10,
       },
-      features: ['basic_chat', 'basic_analytics', 'custom_branding', 'api_access']
+      features: ['basic_chat', 'basic_analytics', 'custom_branding', 'api_access'],
     },
     professional: {
       tier: 'professional',
@@ -42,18 +43,18 @@ export class TenantDomain {
         teamMembers: 20,
         customAvatars: 5,
         apiCallsPerMinute: 200,
-        storageGB: 50
+        storageGB: 50,
       },
       features: [
-        'basic_chat', 
-        'basic_analytics', 
-        'custom_branding', 
+        'basic_chat',
+        'basic_analytics',
+        'custom_branding',
         'api_access',
         'advanced_analytics',
         '3d_avatars',
         'sentiment_analysis',
-        'webhooks'
-      ]
+        'webhooks',
+      ],
     },
     enterprise: {
       tier: 'enterprise',
@@ -63,12 +64,12 @@ export class TenantDomain {
         teamMembers: -1,
         customAvatars: -1,
         apiCallsPerMinute: 1000,
-        storageGB: -1
+        storageGB: -1,
       },
       features: [
-        'basic_chat', 
-        'basic_analytics', 
-        'custom_branding', 
+        'basic_chat',
+        'basic_analytics',
+        'custom_branding',
         'api_access',
         'advanced_analytics',
         '3d_avatars',
@@ -76,9 +77,9 @@ export class TenantDomain {
         'webhooks',
         'custom_ai_models',
         'sla_support',
-        'dedicated_resources'
-      ]
-    }
+        'dedicated_resources',
+      ],
+    },
   }
 
   static getSubscriptionPlan(tier: SubscriptionTier): SubscriptionPlan {
@@ -109,24 +110,24 @@ export class TenantDomain {
     return date
   }
 
-  static isWithinLimits(
-    usage: Partial<TenantUsage['metrics']>,
-    plan: SubscriptionPlan
-  ): boolean {
+  static isWithinLimits(usage: Partial<TenantUsage['metrics']>, plan: SubscriptionPlan): boolean {
     const metrics = usage as TenantUsage['metrics']
-    
-    if (plan.limits.conversationsPerMonth !== -1 && 
-        metrics.activeChats > plan.limits.conversationsPerMonth) {
+
+    if (
+      plan.limits.conversationsPerMonth !== -1 &&
+      metrics.activeChats > plan.limits.conversationsPerMonth
+    ) {
       return false
     }
 
-    if (plan.limits.apiCallsPerMinute !== -1 && 
-        metrics.aiApiCalls > plan.limits.apiCallsPerMinute * 60) {
+    if (
+      plan.limits.apiCallsPerMinute !== -1 &&
+      metrics.aiApiCalls > plan.limits.apiCallsPerMinute * 60
+    ) {
       return false
     }
 
-    if (plan.limits.storageGB !== -1 && 
-        metrics.storageUsedGB > plan.limits.storageGB) {
+    if (plan.limits.storageGB !== -1 && metrics.storageUsedGB > plan.limits.storageGB) {
       return false
     }
 
@@ -156,7 +157,7 @@ export class TenantDomain {
       trial: 0,
       starter: 29,
       professional: 99,
-      enterprise: 499
+      enterprise: 499,
     }
     return costs[tier] || 0
   }

@@ -2,6 +2,7 @@
   "name": "@saas/conversation-service",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "nodemon --exec tsx src/index.ts",
     "build": "tsc",
@@ -22,6 +23,7 @@
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
+    "@saas/tsconfig": "workspace:*",
     "@types/node": "^24.0.13",
     "nodemon": "^3.1.10",
     "tsx": "^4.20.3",

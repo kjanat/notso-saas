@@ -1,30 +1,35 @@
-import type {
-  Chatbot,
-  ChatbotId,
-  PersonalityConfiguration,
-  AvatarConfiguration,
-  WidgetConfiguration
-} from '@saas/types'
 import { ValidationError, generateDeploymentKey } from '@saas/utils'
 
+import type {
+  Chatbot,
+  // ChatbotId, // Kept for future use
+  PersonalityConfiguration,
+  AvatarConfiguration,
+  WidgetConfiguration,
+} from '@saas/types'
+
 export class ChatbotDomain {
-  private static readonly DEFAULT_PERSONALITIES: Record<string, Partial<PersonalityConfiguration>> = {
-    professional: {
-      tone: 'professional',
-      temperature: 0.7,
-      systemPrompt: 'You are a professional customer service representative. Be helpful, concise, and maintain a professional tone.'
-    },
-    friendly: {
-      tone: 'friendly',
-      temperature: 0.8,
-      systemPrompt: 'You are a friendly and helpful assistant. Be warm, engaging, and create a positive experience for users.'
-    },
-    technical: {
-      tone: 'formal',
-      temperature: 0.6,
-      systemPrompt: 'You are a technical support specialist. Provide accurate, detailed technical information while remaining clear and helpful.'
+  private static readonly DEFAULT_PERSONALITIES: Record<string, Partial<PersonalityConfiguration>> =
+    {
+      professional: {
+        tone: 'professional',
+        temperature: 0.7,
+        systemPrompt:
+          'You are a professional customer service representative. Be helpful, concise, and maintain a professional tone.',
+      },
+      friendly: {
+        tone: 'friendly',
+        temperature: 0.8,
+        systemPrompt:
+          'You are a friendly and helpful assistant. Be warm, engaging, and create a positive experience for users.',
+      },
+      technical: {
+        tone: 'formal',
+        temperature: 0.6,
+        systemPrompt:
+          'You are a technical support specialist. Provide accurate, detailed technical information while remaining clear and helpful.',
+      },
     }
-  }
 
   static validateChatbotConfig(chatbot: Partial<Chatbot>): void {
     if (!chatbot.name || chatbot.name.length < 2) {
@@ -69,8 +74,13 @@ export class ChatbotDomain {
       throw new ValidationError('Invalid background color format')
     }
 
-    if (config.allowFileUploads && (!config.allowedFileTypes || config.allowedFileTypes.length === 0)) {
-      throw new ValidationError('Allowed file types must be specified when file uploads are enabled')
+    if (
+      config.allowFileUploads &&
+      (!config.allowedFileTypes || config.allowedFileTypes.length === 0)
+    ) {
+      throw new ValidationError(
+        'Allowed file types must be specified when file uploads are enabled'
+      )
     }
   }
 
@@ -78,7 +88,9 @@ export class ChatbotDomain {
     return generateDeploymentKey()
   }
 
-  static getDefaultPersonality(type: keyof typeof ChatbotDomain.DEFAULT_PERSONALITIES): PersonalityConfiguration {
+  static getDefaultPersonality(
+    type: keyof typeof ChatbotDomain.DEFAULT_PERSONALITIES
+  ): PersonalityConfiguration {
     const defaults = this.DEFAULT_PERSONALITIES[type]
     return {
       name: type,
@@ -93,8 +105,8 @@ export class ChatbotDomain {
       fallbackResponses: [
         "I'm sorry, I didn't quite understand that. Could you please rephrase?",
         "I'm not sure about that. Let me connect you with a human agent who can help better.",
-        "That's an interesting question. Could you provide more details?"
-      ]
+        "That's an interesting question. Could you provide more details?",
+      ],
     }
   }
 
@@ -104,7 +116,7 @@ export class ChatbotDomain {
         primaryColor: '#0066cc',
         textColor: '#333333',
         backgroundColor: '#ffffff',
-        fontFamily: 'system-ui, -apple-system, sans-serif'
+        fontFamily: 'system-ui, -apple-system, sans-serif',
       },
       position: 'bottom-right',
       size: 'medium',
@@ -113,7 +125,7 @@ export class ChatbotDomain {
       showAvatar: true,
       showTypingIndicator: true,
       allowFileUploads: false,
-      allowedFileTypes: []
+      allowedFileTypes: [],
     }
   }
 
@@ -123,25 +135,25 @@ export class ChatbotDomain {
         {
           name: 'idle',
           trigger: 'idle',
-          duration: 3000
+          duration: 3000,
         },
         {
           name: 'greeting',
           trigger: 'greeting',
-          duration: 2000
+          duration: 2000,
         },
         {
           name: 'thinking',
           trigger: 'thinking',
-          duration: 1500
+          duration: 1500,
         },
         {
           name: 'speaking',
           trigger: 'speaking',
-          duration: 2000
-        }
+          duration: 2000,
+        },
       ],
-      customization: {}
+      customization: {},
     }
   }
 
@@ -149,8 +161,8 @@ export class ChatbotDomain {
     const baseDelay = 500
     const perCharDelay = 10
     const maxDelay = 3000
-    
-    const delay = baseDelay + (messageLength * perCharDelay)
+
+    const delay = baseDelay + messageLength * perCharDelay
     return Math.min(delay, maxDelay)
   }
 
@@ -158,11 +170,11 @@ export class ChatbotDomain {
     if (sentimentScore && sentimentScore < -0.5) {
       return true
     }
-    
+
     if (messageCount && messageCount > 10) {
       return true
     }
-    
+
     return false
   }
 

@@ -13,13 +13,14 @@
     }
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@saas/tsconfig": "workspace:*",
+    "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   }
 }
