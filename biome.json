@@ -164,6 +164,16 @@
   },
   "overrides": [
     {
+      "assist": {
+        "actions": {
+          "source": {
+            "useSortedKeys": "off"
+          }
+        }
+      },
+      "includes": ["**/package.json"]
+    },
+    {
       "includes": ["**/*.ts", "**/*.tsx"],
       "javascript": { "globals": [] },
       "linter": {
