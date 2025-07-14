@@ -1,18 +1,19 @@
+version: '3.8'
+
 services:
-  # PostgreSQL for multi-tenant data
+  # PostgreSQL - All data storage
   postgres:
     image: postgres:17-alpine
     container_name: saas-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_MULTIPLE_DATABASES: platform_db,tenant_template_db
+      POSTGRES_DB: saas_platform
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-multi-db.sh:/docker-entrypoint-initdb.d/01-init-multi-db.sh
-      - ./docker/postgres/init-schema.sql:/docker-entrypoint-initdb.d/02-init-schema.sql
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
@@ -21,56 +22,34 @@ services:
     networks:
       - saas-network
 
-  # Redis for caching, sessions, and job queues
+  # Redis - Cache and job queues
   redis:
     image: redis:8-alpine
     container_name: saas-redis
-    command: redis-server --appendonly yes --requirepass redis_password
+    command: redis-server --appendonly yes
     ports:
       - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', '-a', 'redis_password', 'ping']
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
       - saas-network
 
-  # RabbitMQ for message queuing
-  rabbitmq:
-    image: rabbitmq:4.1-management-alpine
-    container_name: saas-rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin
-      RABBITMQ_DEFAULT_VHOST: /
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - saas-network
-
-  # MinIO for S3-compatible storage (3D models, avatars, exports)
+  # MinIO - S3-compatible storage (optional for development)
   minio:
     image: minio/minio:latest
     container_name: saas-minio
-    command: server /data --console-address ":9002"
+    command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_BROWSER_REDIRECT_URL: http://localhost:9002
     ports:
       - '9000:9000'
-      - '9002:9002'
+      - '9001:9001'
     volumes:
       - minio_data:/data
     healthcheck:
@@ -81,100 +60,75 @@ services:
     networks:
       - saas-network
 
-  # Elasticsearch for analytics and search
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.3
-    container_name: saas-elasticsearch
+  # API Service (Monolith)
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: saas-api
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/saas_platform
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-development-secret
+      PORT: 3000
     ports:
-      - '9200:9200'
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:9200/_cluster/health']
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - ./apps/api/src:/app/apps/api/src
+      - ./packages:/app/packages
     networks:
       - saas-network
 
-  # Kafka for event streaming
-  kafka:
-    image: confluentinc/cp-kafka:7.9.2
-    container_name: saas-kafka
+  # Worker Service (Background jobs)
+  worker:
+    build:
+      context: .
+      dockerfile: ./apps/worker/Dockerfile
+    container_name: saas-worker
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/saas_platform
+      REDIS_URL: redis://redis:6379
     depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    ports:
-      - '9092:9092'
-    networks:
-      - saas-network
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.9.2
-    container_name: saas-zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - '2181:2181'
-    networks:
-      - saas-network
-
-  # Traefik as API Gateway
-  traefik:
-    image: traefik:v3
-    container_name: saas-traefik
-    command:
-      - '--api.insecure=true'
-      - '--providers.docker=true'
-      - '--providers.docker.exposedbydefault=false'
-      - '--entrypoints.web.address=:80'
-      - '--entrypoints.websocket.address=:8080'
-    ports:
-      - '80:80'
-      - '8080:8080'
-      - '8888:8080'
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./docker/traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ./apps/worker/src:/app/apps/worker/src
+      - ./packages:/app/packages
     networks:
       - saas-network
 
-  # Development tools
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: saas-pgadmin
+  # WebSocket Service (Real-time)
+  websocket:
+    build:
+      context: .
+      dockerfile: ./apps/websocket/Dockerfile
+    container_name: saas-websocket
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      NODE_ENV: development
+      REDIS_URL: redis://redis:6379
+      WEBSOCKET_PORT: 3001
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3002
     ports:
-      - '5050:80'
+      - '3001:3001'
     depends_on:
-      - postgres
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/websocket/src:/app/apps/websocket/src
+      - ./packages:/app/packages
     networks:
       - saas-network
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: saas-redis-commander
-    environment:
-      REDIS_HOSTS: local:redis:6379:0:redis_password
-    ports:
-      - '8081:8081'
-    depends_on:
-      - redis
-    networks:
-      - saas-network
-
+  # Development tools (optional)
   mailhog:
     image: mailhog/mailhog:latest
     container_name: saas-mailhog
@@ -187,9 +141,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  rabbitmq_data:
   minio_data:
-  elasticsearch_data:
 
 networks:
   saas-network:

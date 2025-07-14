@@ -46,7 +46,7 @@ export interface Permission {
   scope?: 'own' | 'team' | 'all'
 }
 
-export type ResourceType = 
+export type ResourceType =
   | 'chatbot'
   | 'conversation'
   | 'user'
@@ -56,14 +56,7 @@ export type ResourceType =
   | 'settings'
   | 'api_key'
 
-export type ActionType = 
-  | 'create'
-  | 'read'
-  | 'update'
-  | 'delete'
-  | 'export'
-  | 'invite'
-  | 'manage'
+export type ActionType = 'create' | 'read' | 'update' | 'delete' | 'export' | 'invite' | 'manage'
 
 // Authentication types
 export interface AuthTokens {

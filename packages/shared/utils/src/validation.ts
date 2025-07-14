@@ -33,14 +33,14 @@ export function parseZodError(error: z.ZodError): ValidationError[] {
     field: issue.path.join('.'),
     message: issue.message,
     code: issue.code,
-    value: issue.path.reduce((obj, key) => obj?.[key], {} as any)
+    value: issue.path.reduce((obj, key) => obj?.[key], {} as any),
   }))
 }
 
 export function createValidationResult(errors: ValidationError[]): ValidationResult {
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   }
 }
 
@@ -85,7 +85,7 @@ export function validatePasswordStrength(password: string): {
     hasUppercase: /[A-Z]/.test(password),
     hasLowercase: /[a-z]/.test(password),
     hasNumber: /\d/.test(password),
-    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
   }
 
   const score = Object.values(requirements).filter(Boolean).length
@@ -94,6 +94,6 @@ export function validatePasswordStrength(password: string): {
   return {
     isValid: requirements.minLength && score >= 3,
     strength,
-    requirements
+    requirements,
   }
 }

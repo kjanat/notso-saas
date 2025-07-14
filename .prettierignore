@@ -13,3 +13,8 @@ yarn.lock
 .github
 .vscode
 .devcontainer
+data/
+uploads/
+*.db
+*.sqlite
+generated/

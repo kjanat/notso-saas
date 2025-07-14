@@ -6,25 +6,18 @@ export type Nullable<T> = T | null
 export type Optional<T> = T | undefined
 export type Maybe<T> = T | null | undefined
 
-export type DeepPartial<T> = T extends object
-  ? { [P in keyof T]?: DeepPartial<T[P]> }
-  : T
+export type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T
 
-export type DeepReadonly<T> = T extends object
-  ? { readonly [P in keyof T]: DeepReadonly<T[P]> }
-  : T
+export type DeepReadonly<T> = T extends object ? { readonly [P in keyof T]: DeepReadonly<T[P]> } : T
 
-export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> =
-  Pick<T, Exclude<keyof T, Keys>> &
+export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
     [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>
   }[Keys]
 
-export type RequireOnlyOne<T, Keys extends keyof T = keyof T> =
-  Pick<T, Exclude<keyof T, Keys>> &
+export type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
-    [K in Keys]-?: Required<Pick<T, K>> & 
-      Partial<Record<Exclude<Keys, K>, undefined>>
+    [K in Keys]-?: Required<Pick<T, K>> & Partial<Record<Exclude<Keys, K>, undefined>>
   }[Keys]
 
 // Pagination
@@ -189,7 +182,7 @@ export interface WebhookConfig {
 export type Environment = 'development' | 'staging' | 'production'
 
 // Locale
-export type Locale = 
+export type Locale =
   | 'en-US'
   | 'es-ES'
   | 'fr-FR'

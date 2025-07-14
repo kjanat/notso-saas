@@ -28,7 +28,7 @@ export interface AIJob {
   completedAt?: Date
 }
 
-export type AIJobType = 
+export type AIJobType =
   | 'chat_response'
   | 'sentiment_analysis'
   | 'intent_classification'
@@ -37,7 +37,7 @@ export type AIJobType =
   | 'batch_processing'
   | 'embedding_generation'
 
-export type AIJobStatus = 
+export type AIJobStatus =
   | 'pending'
   | 'processing'
   | 'completed'

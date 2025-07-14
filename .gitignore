@@ -19,6 +19,7 @@ out/
 .env.local
 .env.production
 .env.*.local
+.env.simple
 
 # IDE
 .vscode/*

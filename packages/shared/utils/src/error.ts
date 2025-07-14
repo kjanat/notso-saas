@@ -41,7 +41,7 @@ export class AuthorizationError extends BaseError {
 
 export class NotFoundError extends BaseError {
   constructor(resource: string, identifier?: string) {
-    const message = identifier 
+    const message = identifier
       ? `${resource} with identifier '${identifier}' not found`
       : `${resource} not found`
     super(message, 'NOT_FOUND', 404, true, { resource, identifier })
@@ -65,16 +65,12 @@ export class RateLimitError extends BaseError {
 }
 
 export class ExternalServiceError extends BaseError {
-  constructor(
-    service: string,
-    originalError?: Error,
-    context?: Record<string, any>
-  ) {
+  constructor(service: string, originalError?: Error, context?: Record<string, any>) {
     const message = `External service error: ${service}`
     super(message, 'EXTERNAL_SERVICE_ERROR', 502, false, {
       ...context,
       service,
-      originalError: originalError?.message
+      originalError: originalError?.message,
     })
   }
 }
@@ -84,7 +80,7 @@ export class DatabaseError extends BaseError {
     const message = `Database operation failed: ${operation}`
     super(message, 'DATABASE_ERROR', 500, false, {
       operation,
-      originalError: originalError?.message
+      originalError: originalError?.message,
     })
   }
 }
@@ -116,7 +112,7 @@ export function serializeError(error: Error): Record<string, any> {
   const serialized: Record<string, any> = {
     name: error.name,
     message: error.message,
-    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
   }
 
   if (error instanceof BaseError) {
@@ -135,11 +131,11 @@ export function createErrorResponse(error: Error) {
       error: {
         code: error.code,
         message: error.message,
-        ...(process.env.NODE_ENV === 'development' && { 
+        ...(process.env.NODE_ENV === 'development' && {
           context: error.context,
-          stack: error.stack 
-        })
-      }
+          stack: error.stack,
+        }),
+      },
     }
   }
 
@@ -147,10 +143,8 @@ export function createErrorResponse(error: Error) {
     success: false,
     error: {
       code: 'INTERNAL_ERROR',
-      message: process.env.NODE_ENV === 'production' 
-        ? 'An internal error occurred' 
-        : error.message
-    }
+      message: process.env.NODE_ENV === 'production' ? 'An internal error occurred' : error.message,
+    },
   }
 }
 
@@ -174,7 +168,7 @@ export class ErrorHandler {
       const handler = this.handlers.get(error.code)!
       handler(error)
     }
-    
+
     if (!isOperationalError(error)) {
       console.error('Unhandled error:', error)
       process.exit(1)

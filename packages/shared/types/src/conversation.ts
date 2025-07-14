@@ -95,7 +95,7 @@ export interface ConversationEvent {
   data: any
 }
 
-export type ConversationEventType = 
+export type ConversationEventType =
   | 'conversation.started'
   | 'conversation.ended'
   | 'message.sent'

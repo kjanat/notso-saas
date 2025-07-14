@@ -45,6 +45,10 @@
     "docker:up": "./scripts/dev-setup.sh",
     "docker:down": "docker-compose down",
     "docker:reset": "docker-compose down -v && ./scripts/dev-setup.sh",
+    "dev:simple": "./scripts/dev.sh",
+    "docker:simple": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:simple:down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:simple:logs": "docker-compose -f docker-compose.dev.yml logs -f",
     "prepare": "husky"
   },
   "devDependencies": {

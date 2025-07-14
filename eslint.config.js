@@ -10,7 +10,7 @@ import prettierConfig from 'eslint-config-prettier'
 export default [
   // Base JavaScript configuration
   js.configs.recommended,
-  
+
   // Global ignores
   {
     ignores: [
@@ -30,7 +30,7 @@ export default [
       '*.config.ts',
       '**/prisma/generated/**',
       '**/.prisma/**',
-    ]
+    ],
   },
 
   // TypeScript configuration
@@ -42,12 +42,12 @@ export default [
         ecmaVersion: 2024,
         sourceType: 'module',
         ecmaFeatures: {
-          jsx: true
-        }
-      }
+          jsx: true,
+        },
+      },
     },
     plugins: {
-      '@typescript-eslint': tsPlugin
+      '@typescript-eslint': tsPlugin,
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
@@ -58,10 +58,10 @@ export default [
         'error',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_'
-        }
-      ]
-    }
+          varsIgnorePattern: '^_',
+        },
+      ],
+    },
   },
 
   // React configuration
@@ -70,34 +70,34 @@ export default [
     languageOptions: {
       parserOptions: {
         ecmaFeatures: {
-          jsx: true
-        }
-      }
+          jsx: true,
+        },
+      },
     },
     plugins: {
-      'react': reactPlugin,
+      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
-      'jsx-a11y': jsxA11yPlugin
+      'jsx-a11y': jsxA11yPlugin,
     },
     settings: {
       react: {
-        version: 'detect'
-      }
+        version: 'detect',
+      },
     },
     rules: {
       ...reactPlugin.configs.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
       ...jsxA11yPlugin.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off'
-    }
+      'react/prop-types': 'off',
+    },
   },
 
   // Import plugin configuration
   {
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     plugins: {
-      'import': importPlugin
+      import: importPlugin,
     },
     rules: {
       'import/order': [
@@ -111,16 +111,16 @@ export default [
             'sibling',
             'index',
             'object',
-            'type'
+            'type',
           ],
           'newlines-between': 'always',
           alphabetize: {
             order: 'asc',
-            caseInsensitive: true
-          }
-        }
-      ]
-    }
+            caseInsensitive: true,
+          },
+        },
+      ],
+    },
   },
 
   // General rules for all files
@@ -143,26 +143,26 @@ export default [
         global: 'readonly',
         // ES2024 globals
         globalThis: 'readonly',
-      }
+      },
     },
     rules: {
       'no-console': [
         'warn',
         {
-          allow: ['warn', 'error']
-        }
-      ]
-    }
+          allow: ['warn', 'error'],
+        },
+      ],
+    },
   },
 
   // Node.js specific configuration
   {
     files: ['**/*.js'],
     rules: {
-      '@typescript-eslint/no-var-requires': 'off'
-    }
+      '@typescript-eslint/no-var-requires': 'off',
+    },
   },
 
   // Prettier configuration (must be last)
-  prettierConfig
+  prettierConfig,
 ]

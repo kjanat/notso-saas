@@ -9,7 +9,7 @@ async function main() {
   // Create platform admin user
   const adminSalt = generateSalt()
   const adminPassword = hashPassword('admin123', adminSalt)
-  
+
   const admin = await prisma.user.upsert({
     where: { email: 'admin@saas-platform.com' },
     update: {},
@@ -27,11 +27,11 @@ async function main() {
           inApp: true,
           conversationAlerts: true,
           systemAlerts: true,
-          marketingEmails: false
+          marketingEmails: false,
         },
-        theme: 'system'
-      }
-    }
+        theme: 'system',
+      },
+    },
   })
 
   console.log('✅ Created platform admin:', admin.email)
@@ -48,19 +48,19 @@ async function main() {
       subscriptionPlan: 'PROFESSIONAL',
       settings: {
         branding: {
-          primaryColor: '#0066cc'
+          primaryColor: '#0066cc',
         },
         security: {
-          allowedDomains: ['demo-company.com', 'localhost:3000']
+          allowedDomains: ['demo-company.com', 'localhost:3000'],
         },
         features: {
           enableLegacyImport: true,
           enable3DAvatars: true,
           enableAnalytics: true,
-          enableWebhooks: true
-        }
-      }
-    }
+          enableWebhooks: true,
+        },
+      },
+    },
   })
 
   console.log('✅ Created demo tenant:', demoTenant.name)
@@ -68,7 +68,7 @@ async function main() {
   // Create demo user for the tenant
   const demoUserSalt = generateSalt()
   const demoUserPassword = hashPassword('demo123', demoUserSalt)
-  
+
   const demoUser = await prisma.user.upsert({
     where: { email: 'demo@demo-company.com' },
     update: {},
@@ -86,11 +86,11 @@ async function main() {
           inApp: true,
           conversationAlerts: true,
           systemAlerts: true,
-          marketingEmails: true
+          marketingEmails: true,
         },
-        theme: 'light'
-      }
-    }
+        theme: 'light',
+      },
+    },
   })
 
   // Link demo user to demo tenant
@@ -98,8 +98,8 @@ async function main() {
     where: {
       tenantId_userId: {
         tenantId: demoTenant.id,
-        userId: demoUser.id
-      }
+        userId: demoUser.id,
+      },
     },
     update: {},
     create: {
@@ -113,9 +113,9 @@ async function main() {
         { resource: 'analytics', action: 'read', scope: 'all' },
         { resource: 'billing', action: 'manage', scope: 'all' },
         { resource: 'settings', action: 'manage', scope: 'all' },
-        { resource: 'api_key', action: 'manage', scope: 'all' }
-      ]
-    }
+        { resource: 'api_key', action: 'manage', scope: 'all' },
+      ],
+    },
   })
 
   console.log('✅ Created demo user and linked to tenant:', demoUser.email)
@@ -129,11 +129,11 @@ async function main() {
       permissions: [
         { resource: 'chatbot', action: 'read', scope: 'all' },
         { resource: 'conversation', action: 'create', scope: 'all' },
-        { resource: 'conversation', action: 'read', scope: 'all' }
+        { resource: 'conversation', action: 'read', scope: 'all' },
       ],
       createdBy: demoUser.id,
-      isActive: true
-    }
+      isActive: true,
+    },
   })
 
   console.log('✅ Created demo API key')
@@ -142,7 +142,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Seed error:', e)
     process.exit(1)
   })

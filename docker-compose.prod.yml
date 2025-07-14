@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Production configuration
+  postgres:
+    image: postgres:17-alpine
+    container_name: saas-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - saas-network
+
+  # Redis - Production configuration
+  redis:
+    image: redis:8-alpine
+    container_name: saas-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - saas-network
+
+  # API Service
+  api:
+    image: saas/api:latest
+    container_name: saas-api
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - saas-network
+
+  # Worker Service
+  worker:
+    image: saas/worker:latest
+    container_name: saas-worker
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - saas-network
+
+  # WebSocket Service
+  websocket:
+    image: saas/websocket:latest
+    container_name: saas-websocket
+    environment:
+      NODE_ENV: production
+      REDIS_URL: ${REDIS_URL}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    ports:
+      - '3001:3001'
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - saas-network
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: saas-nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+      - websocket
+    restart: unless-stopped
+    networks:
+      - saas-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  saas-network:
+    driver: bridge
