@@ -1,4 +1,3 @@
-import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import jwt from '@fastify/jwt'
@@ -6,6 +5,8 @@ import rateLimit from '@fastify/rate-limit'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import { AuthenticationError } from '@saas/utils'
+import Fastify, { FastifyRequest } from 'fastify'
+
 import type { JWTPayload } from '@saas/types'
 
 const PORT = process.env.PORT || 3000
@@ -76,15 +77,15 @@ async function setupPlugins() {
   })
 }
 
-fastify.decorate('authenticate', async function(request: any, reply: any) {
+fastify.decorate('authenticate', async function(request: FastifyRequest) {
   try {
     await request.jwtVerify()
-  } catch (err) {
+  } catch {
     throw new AuthenticationError('Invalid or expired token')
   }
 })
 
-fastify.get('/health', async (request, reply) => {
+fastify.get('/health', async (_request, _reply) => {
   return {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -92,7 +93,7 @@ fastify.get('/health', async (request, reply) => {
   }
 })
 
-fastify.get('/', async (request, reply) => {
+fastify.get('/', async (_request, _reply) => {
   return {
     name: 'SaaS Chatbot API Gateway',
     version: '1.0.0',
