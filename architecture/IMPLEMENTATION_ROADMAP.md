@@ -34,17 +34,20 @@ Focus: Security, authentication, and core services
 ### Priority Tasks
 
 1. **Authentication Service**
+
    - JWT implementation with refresh tokens
    - Multi-tenant user management
    - API key generation and validation
    - Session management with Redis
 
 2. **Authorization System**
+
    - Role-based access control (RBAC)
    - Tenant isolation middleware
    - Permission inheritance model
 
 3. **Security Infrastructure**
+
    - Rate limiting with Redis
    - API throttling per tenant
    - CORS configuration
@@ -69,18 +72,21 @@ Focus: REST APIs, WebSocket, and real-time features
 ### Priority Tasks
 
 1. **API Gateway Setup**
+
    - Traefik configuration
    - Request routing
    - API versioning strategy
    - Request/response logging
 
 2. **Core REST APIs**
+
    - Tenant management API
    - Chatbot CRUD API
    - User management API
    - Conversation API
 
 3. **WebSocket Infrastructure**
+
    - Socket.io cluster setup
    - Redis adapter configuration
    - Connection management
@@ -105,18 +111,21 @@ Focus: AI processing, job queues, and integrations
 ### Priority Tasks
 
 1. **Job Queue System**
+
    - Bull queue setup
    - Priority queue management
    - Dead letter queue handling
    - Job monitoring dashboard
 
 2. **AI Service Integration**
+
    - OpenAI API integration
    - Response caching layer
    - Cost tracking per request
    - Fallback provider support
 
 3. **CSV Import Pipeline**
+
    - File upload handling
    - Batch processing system
    - Progress tracking
@@ -141,18 +150,21 @@ Focus: User interfaces and production readiness
 ### Priority Tasks
 
 1. **Chat Widget**
+
    - Embeddable JavaScript SDK
    - Widget customization API
    - CDN deployment
    - A/B testing support
 
 2. **Admin Portals**
+
    - Platform admin dashboard
    - Customer portal
    - Analytics dashboards
    - User management UI
 
 3. **3D Avatar System**
+
    - Three.js integration
    - Avatar customization UI
    - Animation controls
@@ -248,8 +260,8 @@ class MockOpenAIProvider implements AIProvider {
     return {
       content: "This is a mock response",
       usage: { tokens: 100 },
-      cost: 0
-    }
+      cost: 0,
+    };
   }
 }
 ```

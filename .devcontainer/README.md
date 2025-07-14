@@ -109,17 +109,17 @@ k get pods            # List Kubernetes pods
 
 ## Service URLs
 
-| Service             | URL                    | Credentials               |
-| ------------------- | ---------------------- | ------------------------- |
-| API Gateway         | <http://localhost:3000>  | -                         |
-| Customer Portal     | <http://localhost:3001>  | -                         |
-| Platform Admin      | <http://localhost:3002>  | -                         |
+| Service             | URL                      | Credentials                 |
+| ------------------- | ------------------------ | --------------------------- |
+| API Gateway         | <http://localhost:3000>  | -                           |
+| Customer Portal     | <http://localhost:3001>  | -                           |
+| Platform Admin      | <http://localhost:3002>  | -                           |
 | pgAdmin             | <http://localhost:5050>  | <admin@example.com> / admin |
-| Redis Commander     | <http://localhost:8081>  | -                         |
-| RabbitMQ Management | <http://localhost:15672> | admin / admin             |
-| MinIO Console       | <http://localhost:9001>  | minioadmin / minioadmin   |
-| Elasticsearch       | <http://localhost:9200>  | -                         |
-| Mailhog             | <http://localhost:8025>  | -                         |
+| Redis Commander     | <http://localhost:8081>  | -                           |
+| RabbitMQ Management | <http://localhost:15672> | admin / admin               |
+| MinIO Console       | <http://localhost:9001>  | minioadmin / minioadmin     |
+| Elasticsearch       | <http://localhost:9200>  | -                           |
+| Mailhog             | <http://localhost:8025>  | -                           |
 
 ## Troubleshooting
 

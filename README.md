@@ -5,6 +5,7 @@ A multi-tenant SaaS platform for AI-powered customer service chatbots with 3D av
 ## 🚀 Quick Start
 
 ### Using DevContainer (Recommended)
+
 ```bash
 # Open in VS Code and reopen in container
 # Or use GitHub Codespaces
@@ -12,6 +13,7 @@ A multi-tenant SaaS platform for AI-powered customer service chatbots with 3D av
 ```
 
 ### Using Docker Compose
+
 ```bash
 # Start all services
 ./scripts/dev-setup.sh
@@ -22,6 +24,7 @@ pnpm dev
 ```
 
 ### Manual Setup
+
 See [detailed setup instructions](./docs/SETUP.md)
 
 ## 🏗️ Architecture
@@ -40,6 +43,7 @@ See [architecture documentation](./architecture/) for detailed design.
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **Node.js + TypeScript** - Core services
 - **PostgreSQL** - Multi-tenant data with complete isolation
 - **Redis** - Caching, sessions, real-time pub/sub
@@ -48,17 +52,20 @@ See [architecture documentation](./architecture/) for detailed design.
 - **MinIO** - S3-compatible object storage
 
 ### Frontend
+
 - **Next.js** - Customer and admin portals
 - **Three.js** - 3D avatar rendering
 - **Tailwind CSS** - Styling
 - **React Query** - Data fetching
 
 ### AI/ML
+
 - **OpenAI API** - GPT-4/GPT-3.5 for responses
 - **Python + FastAPI** - AI service
 - **Celery** - Distributed task processing
 
 ### Infrastructure
+
 - **Docker** - Containerization
 - **Kubernetes** - Orchestration
 - **Traefik** - API Gateway
@@ -66,8 +73,8 @@ See [architecture documentation](./architecture/) for detailed design.
 
 ## 📁 Project Structure
 
-```
-saas/
+```tree
+saas-chatbot/
 ├── packages/              # Shared packages (monorepo)
 │   ├── api/              # Main API service
 │   ├── auth-service/     # Authentication microservice
@@ -88,6 +95,7 @@ saas/
 ## 🔑 Key Features
 
 ### For Customers
+
 - **Embeddable Chat Widget** - Simple JavaScript snippet
 - **3D Avatars** - Customizable Three.js avatars
 - **Real-time Chat** - Sub-second response times
@@ -97,6 +105,7 @@ saas/
 - **Webhook Integration** - Real-time events
 
 ### For Platform Admins
+
 - **Multi-tenant Management** - Complete tenant isolation
 - **Usage Analytics** - Platform-wide insights
 - **Billing Integration** - Stripe subscription management
@@ -105,6 +114,7 @@ saas/
 - **3D Model Library** - Manage avatar assets
 
 ### Technical Features
+
 - **Horizontal Scaling** - Handle thousands of concurrent chats
 - **Cost Control** - OpenAI API budget limits per tenant
 - **High Availability** - Zero-downtime deployments
@@ -162,6 +172,7 @@ The platform includes comprehensive monitoring:
 - **Alerts** - PagerDuty integration
 
 Access monitoring dashboards:
+
 - Grafana: http://localhost:3000
 - Jaeger: http://localhost:16686
 - Kibana: http://localhost:5601
@@ -180,12 +191,14 @@ Access monitoring dashboards:
 ## 🚀 Deployment
 
 ### Development
+
 ```bash
 docker-compose up -d
 pnpm dev
 ```
 
 ### Production
+
 ```bash
 # Build containers
 docker build -t saas/api:latest ./packages/api
@@ -203,6 +216,7 @@ See [deployment guide](./docs/DEPLOYMENT.md) for detailed instructions.
 ## 📈 Performance
 
 Target metrics:
+
 - **Response Time** < 100ms (p95)
 - **WebSocket Latency** < 50ms
 - **AI Response** < 2s (including generation)
@@ -234,23 +248,22 @@ This project is proprietary software. All rights reserved.
 ## 🎯 Roadmap
 
 ### Phase 1 (Current)
+
 - ✅ Core chat functionality
 - ✅ Multi-tenant architecture
 - ✅ Basic 3D avatars
 - ✅ OpenAI integration
 
 ### Phase 2
+
 - 🔄 Voice chat support
 - 🔄 Advanced analytics
 - 🔄 Mobile SDKs
 - 🔄 More AI providers
 
 ### Phase 3
+
 - 📋 Multi-language support
 - 📋 Custom AI training
 - 📋 Advanced avatar animations
 - 📋 Marketplace for avatars
-
----
-
-Built with ❤️ for the future of customer service

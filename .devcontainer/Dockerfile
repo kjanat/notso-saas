@@ -1,11 +1,27 @@
-FROM mcr.microsoft.com/devcontainers/typescript-node:1-22-bullseye
+FROM mcr.microsoft.com/devcontainers/typescript-node:latest
 
-# Install additional OS packages
+# Install golang
+RUN wget https://go.dev/dl/go1.24.5.linux-amd64.tar.gz \
+    && mkdir -p /usr/local/go \
+    && chown vscode:vscode /usr/local/go \
+    && chmod 755 /usr/local/go \
+    && tar -C /usr/local/go -xzf go1.24.5.linux-amd64.tar.gz \
+    && rm go1.24.5.linux-amd64.tar.gz \
+    && echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile \
+    && echo 'export GOPATH=$HOME/go' >> /etc/profile
+
+# Install database and messaging clients
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
     postgresql-client \
     redis-tools \
     kafkacat \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install CLI utilities and editors
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends \
     jq \
     httpie \
     tree \
@@ -14,11 +30,18 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     fzf \
     ripgrep \
     bat \
-    exa \
+    lsd \
     htop \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install build tools and linters
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends \
     make \
     build-essential \
     python3-pip \
+    python3-venv \
     shellcheck \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -46,7 +69,8 @@ RUN npm install -g \
     clinic@latest \
     autocannon@latest \
     madge@latest \
-    dependency-cruiser@latest
+    dependency-cruiser@latest \
+    @anthropic-ai/claude-code
 
 # Install Python packages for AI service development
 RUN pip3 install --no-cache-dir \
@@ -65,20 +89,16 @@ RUN pip3 install --no-cache-dir \
     ipython
 
 # Install useful CLI tools
-RUN curl -fsSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq \
-    && chmod +x /usr/local/bin/yq
-
-RUN curl -fsSL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq \
-    && chmod +x /usr/local/bin/jq
+RUN go install github.com/mikefarah/yq/v4@latest
 
 # Install k9s for Kubernetes management
-RUN curl -fsSL https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz | tar -xz -C /usr/local/bin
+RUN go install github.com/derailed/k9s@latest
 
 # Install lazydocker
-RUN curl -fsSL https://github.com/jesseduffield/lazydocker/releases/latest/download/lazydocker_0.23.1_Linux_x86_64.tar.gz | tar -xz -C /usr/local/bin
+RUN go install github.com/jesseduffield/lazydocker@latest
 
 # Install dive for Docker image analysis
-RUN curl -fsSL https://github.com/wagoodman/dive/releases/latest/download/dive_0.11.0_linux_amd64.tar.gz | tar -xz -C /usr/local/bin
+RUN go install github.com/wagoodman/dive@latest
 
 # Configure pnpm
 ENV PNPM_HOME="/home/vscode/.pnpm"
@@ -96,7 +116,7 @@ RUN git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.
 # Configure shell
 RUN echo 'export PNPM_HOME="/home/vscode/.pnpm"' >> ~/.zshrc \
     && echo 'export PATH="$PNPM_HOME:$PATH"' >> ~/.zshrc \
-    && echo 'alias ll="exa -la"' >> ~/.zshrc \
+    && echo 'alias ll="lsd -la"' >> ~/.zshrc \
     && echo 'alias cat="bat"' >> ~/.zshrc \
     && echo 'alias find="fd"' >> ~/.zshrc \
     && echo 'alias grep="rg"' >> ~/.zshrc \
@@ -115,6 +135,7 @@ RUN mkdir -p /home/vscode/.vscode-server/extensions \
 USER root
 
 # Set up Git config
+# Mark /workspace as a safe Git directory to avoid "detected dubious ownership" errors when using Git in dev containers.
 RUN git config --global --add safe.directory /workspace
 
 # Final setup

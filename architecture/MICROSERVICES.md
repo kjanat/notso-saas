@@ -277,7 +277,7 @@ class ServiceClient {
   constructor(
     private serviceName: string,
     private baseUrl: string,
-    private circuitBreaker: CircuitBreaker
+    private circuitBreaker: CircuitBreaker,
   ) {}
 
   async request<T>(options: RequestOptions): Promise<T> {
@@ -285,20 +285,20 @@ class ServiceClient {
       const response = await fetch(`${this.baseUrl}${options.path}`, {
         method: options.method,
         headers: {
-          'X-Tenant-ID': options.tenantId,
-          'X-Request-ID': options.requestId,
-          'Authorization': options.token,
-          'Content-Type': 'application/json'
+          "X-Tenant-ID": options.tenantId,
+          "X-Request-ID": options.requestId,
+          Authorization: options.token,
+          "Content-Type": "application/json",
         },
-        body: options.body ? JSON.stringify(options.body) : undefined
-      })
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
 
       if (!response.ok) {
-        throw new ServiceError(this.serviceName, response.status)
+        throw new ServiceError(this.serviceName, response.status);
       }
 
-      return response.json()
-    })
+      return response.json();
+    });
   }
 }
 ```
@@ -309,48 +309,50 @@ class ServiceClient {
 // RabbitMQ Message Publisher
 class MessagePublisher {
   async publishEvent(event: DomainEvent): Promise<void> {
-    const channel = await this.connection.createChannel()
-    const exchange = `${event.aggregateType}.events`
+    const channel = await this.connection.createChannel();
+    const exchange = `${event.aggregateType}.events`;
 
-    await channel.assertExchange(exchange, 'topic', { durable: true })
+    await channel.assertExchange(exchange, "topic", { durable: true });
 
     channel.publish(
       exchange,
       event.eventType,
-      Buffer.from(JSON.stringify({
-        ...event,
-        metadata: {
-          ...event.metadata,
-          publishedAt: new Date().toISOString()
-        }
-      })),
+      Buffer.from(
+        JSON.stringify({
+          ...event,
+          metadata: {
+            ...event.metadata,
+            publishedAt: new Date().toISOString(),
+          },
+        }),
+      ),
       {
         persistent: true,
         headers: {
-          'x-tenant-id': event.metadata.tenantId
-        }
-      }
-    )
+          "x-tenant-id": event.metadata.tenantId,
+        },
+      },
+    );
   }
 }
 
 // Event Consumer
 class EventConsumer {
   async consume(queue: string, handler: EventHandler): Promise<void> {
-    const channel = await this.connection.createChannel()
-    await channel.assertQueue(queue, { durable: true })
+    const channel = await this.connection.createChannel();
+    await channel.assertQueue(queue, { durable: true });
 
     channel.consume(queue, async (msg) => {
-      if (!msg) return
+      if (!msg) return;
 
       try {
-        const event = JSON.parse(msg.content.toString())
-        await handler.handle(event)
-        channel.ack(msg)
+        const event = JSON.parse(msg.content.toString());
+        await handler.handle(event);
+        channel.ack(msg);
       } catch (error) {
-        channel.nack(msg, false, true) // Requeue on error
+        channel.nack(msg, false, true); // Requeue on error
       }
-    })
+    });
   }
 }
 ```
@@ -399,37 +401,37 @@ spec:
         app: conversation-service
     spec:
       containers:
-      - name: conversation-service
-        image: saas/conversation-service:latest
-        ports:
-        - containerPort: 3004
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: REDIS_URL
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: url
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health/live
-            port: 3004
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: 3004
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: conversation-service
+          image: saas/conversation-service:latest
+          ports:
+            - containerPort: 3004
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: url
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 3004
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3004
+            initialDelaySeconds: 5
+            periodSeconds: 5
 ```
 
 ## Observability Stack

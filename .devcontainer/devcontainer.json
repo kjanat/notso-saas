@@ -61,7 +61,7 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true
+          "source.fixAll.eslint": "always"
         },
         "typescript.tsdk": "node_modules/typescript/lib",
         "typescript.enablePromptUseWorkspaceTsdk": true,
@@ -109,8 +109,7 @@
         "git.autofetch": true,
         "git.confirmSync": false,
         "git.enableSmartCommit": true,
-        "npm.packageManager": "pnpm",
-        "eslint.packageManager": "pnpm"
+        "npm.packageManager": "pnpm"
       },
 
       // Extensions to install
