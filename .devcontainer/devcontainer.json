@@ -6,46 +6,31 @@
 
   // Features to add to the dev container
   "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
       "configureZshAsDefaultShell": true,
       "installOhMyZsh": true,
       "upgradePackages": true,
-      "username": "vscode",
-      "userUid": "1000",
-      "userGid": "1000"
-    },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22",
-      "nodeGypDependencies": true
+      "username": "notso-user",
+      "userUid": "1001",
+      "userGid": "1001"
     },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.13",
-      "installTools": true
+      "installTools": true,
+      "installJupyterlab": false,
+      "optimize": false
     },
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest",
-      "ppa": true
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.24.5"
     },
-    "ghcr.io/devcontainers/features/git-lfs:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "moby": true,
-      "dockerDashComposeVersion": "v2"
-    },
-    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-      "version": "latest",
-      "helm": "latest",
-      "minikube": "latest"
-    },
-    "ghcr.io/devcontainers/features/aws-cli:1": {
-      "version": "latest"
-    }
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/git-lfs:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+    "ghcr.io/devcontainers/features/aws-cli:1": {}
   },
 
   // Configure VS Code settings
@@ -191,16 +176,16 @@
     "3001": { "label": "Customer Portal", "onAutoForward": "notify" },
     "3002": { "label": "Platform Admin", "onAutoForward": "notify" },
     "3008": { "label": "WebSocket Service", "onAutoForward": "notify" },
+    "5050": { "label": "pgAdmin", "onAutoForward": "notify" },
     "5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
     "6379": { "label": "Redis", "onAutoForward": "silent" },
+    "8025": { "label": "MailHog", "onAutoForward": "notify" },
+    "8081": { "label": "Redis Commander", "onAutoForward": "notify" },
+    "8888": { "label": "Traefik Dashboard", "onAutoForward": "notify" },
     "9000": { "label": "MinIO S3", "onAutoForward": "silent" },
     "9001": { "label": "MinIO Console", "onAutoForward": "notify" },
     "9200": { "label": "Elasticsearch", "onAutoForward": "silent" },
-    "15672": { "label": "RabbitMQ Management", "onAutoForward": "notify" },
-    "5050": { "label": "pgAdmin", "onAutoForward": "notify" },
-    "8081": { "label": "Redis Commander", "onAutoForward": "notify" },
-    "8025": { "label": "MailHog", "onAutoForward": "notify" },
-    "8888": { "label": "Traefik Dashboard", "onAutoForward": "notify" }
+    "15672": { "label": "RabbitMQ Management", "onAutoForward": "notify" }
   },
 
   // Startup commands
@@ -217,10 +202,10 @@
 
   // Mounts
   "mounts": [
-    "source=${localWorkspaceFolder}/.devcontainer/bash_history,target=/home/vscode/.bash_history,type=bind,consistency=cached",
-    "source=${localWorkspaceFolder}/.devcontainer/zsh_history,target=/home/vscode/.zsh_history,type=bind,consistency=cached"
+    "source=${localWorkspaceFolder}/.devcontainer/bash_history,target=/home/notso-user/.bash_history,type=bind,consistency=cached",
+    "source=${localWorkspaceFolder}/.devcontainer/zsh_history,target=/home/notso-user/.zsh_history,type=bind,consistency=cached"
   ],
 
   // Run as non-root user
-  "remoteUser": "vscode"
+  "remoteUser": "notso-user"
 }

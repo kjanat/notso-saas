@@ -178,7 +178,7 @@ Add them to `.env.local` (created automatically) or modify `.devcontainer/docker
 ## Security Notes
 
 - Default passwords are for development only
-- The container runs as non-root user (vscode)
+- The container runs as non-root user (notso-user)
 - Secrets in `.env.local` are gitignored
 - Network isolation between services
 

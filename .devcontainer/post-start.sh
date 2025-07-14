@@ -47,8 +47,14 @@ export MC_HOST_minio=http://minioadmin:minioadmin@minio:9000
 
 # Install mc (MinIO client) if not present
 if ! command -v mc &> /dev/null; then
-    curl -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
-    chmod +x /usr/local/bin/mc
+    # Create local bin directory if it doesn't exist
+    mkdir -p ~/.local/bin
+    curl -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o ~/.local/bin/mc
+    chmod +x ~/.local/bin/mc
+    # Add to PATH if not already there
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
 fi
 
 # Create buckets

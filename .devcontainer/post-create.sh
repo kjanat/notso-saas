@@ -3,6 +3,91 @@ set -e
 
 echo "🚀 Running post-create setup..."
 
+# Verify Go installation
+echo "🔍 Verifying Go installation..."
+if command -v go &>/dev/null; then
+    echo "✅ Go version: $(go version)"
+    echo "✅ GOPATH: $GOPATH"
+    echo "✅ Go tools available"
+else
+    echo "❌ Go not found in PATH"
+    export PATH="/usr/local/go/bin:$PATH"
+    if command -v go &>/dev/null; then
+        echo "✅ Go found after PATH update: $(go version)"
+    else
+        echo "❌ Go installation failed"
+    fi
+fi
+
+# Install Go CLI tools
+echo "🔧 Installing Go CLI tools..."
+if command -v go &>/dev/null; then
+    echo "📦 Installing yq..."
+    go install github.com/mikefarah/yq/v4@latest
+
+    echo "📦 Installing k9s..."
+    go install github.com/derailed/k9s@latest
+
+    echo "📦 Installing lazydocker..."
+    go install github.com/jesseduffield/lazydocker@latest
+
+    echo "📦 Installing dive..."
+    go install github.com/wagoodman/dive@latest
+
+    echo "✅ Go CLI tools installed successfully"
+else
+    echo "⚠️ Go not found, skipping CLI tools installation"
+fi
+
+# Fix ownership of user directories and prepare VS Code server directory
+echo "🔧 Fixing directory ownership..."
+sudo chown -R notso-user:notso-user "$HOME" /home/notso-user
+sudo mkdir -p /home/notso-user/.vscode-server
+sudo chown -R notso-user:notso-user /home/notso-user/.vscode-server
+
+# Setup ZSH plugins and configuration
+echo "🐚 Setting up ZSH plugins and configuration..."
+mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
+
+# Install oh-my-zsh plugins
+if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ]; then
+    echo "📥 Installing zsh-autosuggestions..."
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+fi
+
+if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then
+    echo "📥 Installing zsh-syntax-highlighting..."
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+fi
+
+if [ ! -d "$HOME/.oh-my-zsh/custom/plugins/zsh-completions" ]; then
+    echo "📥 Installing zsh-completions..."
+    git clone https://github.com/zsh-users/zsh-completions "$HOME/.oh-my-zsh/custom/plugins/zsh-completions"
+fi
+
+# Configure ZSH environment and aliases
+echo "⚙️ Configuring ZSH environment..."
+cat >>"$HOME/.zshrc" <<'EOF'
+
+# Custom environment variables
+export PNPM_HOME="/home/notso-user/.pnpm"
+export PATH="$PNPM_HOME:/usr/local/go/bin:$GOPATH/bin:$PATH"
+
+# Custom aliases
+alias ll="lsd -la"
+alias cat="bat"
+alias find="fd"
+alias grep="rg"
+alias dc="docker-compose"
+alias k="kubectl"
+alias kx="kubectx"
+alias kn="kubens"
+alias tf="terraform"
+
+# ZSH plugins configuration
+plugins=(git docker docker-compose kubectl helm npm zsh-autosuggestions zsh-syntax-highlighting zsh-completions)
+EOF
+
 # Create necessary directories
 echo "📁 Creating project directories..."
 mkdir -p .devcontainer/bash_history
@@ -35,7 +120,7 @@ fi
 # Create .env.local if it doesn't exist
 if [ ! -f ".env.local" ]; then
     echo "📝 Creating .env.local file..."
-    cat > .env.local << 'EOF'
+    cat >.env.local <<'EOF'
 # Database
 DATABASE_URL="postgresql://postgres:postgres@postgres:5432/platform_db"
 TENANT_DATABASE_HOST="postgres"
@@ -96,7 +181,7 @@ fi
 # Create VS Code workspace settings
 echo "⚙️  Creating VS Code workspace settings..."
 mkdir -p .vscode
-cat > .vscode/settings.json << 'EOF'
+cat >.vscode/settings.json <<'EOF'
 {
   "files.exclude": {
     "**/.git": true,
@@ -135,7 +220,7 @@ cat > .vscode/settings.json << 'EOF'
 EOF
 
 # Create launch configuration for debugging
-cat > .vscode/launch.json << 'EOF'
+cat >.vscode/launch.json <<'EOF'
 {
   "version": "0.2.0",
   "configurations": [
@@ -192,7 +277,7 @@ cat > .vscode/launch.json << 'EOF'
 EOF
 
 # Create tasks configuration
-cat > .vscode/tasks.json << 'EOF'
+cat >.vscode/tasks.json <<'EOF'
 {
   "version": "2.0.0",
   "tasks": [
