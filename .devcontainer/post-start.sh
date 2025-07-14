@@ -3,6 +3,13 @@ set -e
 
 echo "🚀 Running post-start setup..."
 
+# Clean up Git configuration to remove Windows paths
+echo "🔧 Cleaning Git configuration..."
+git config --global --unset-all safe.directory || true
+git config --global --add safe.directory /workspace
+git config --global --add safe.directory '*' 
+echo "✅ Git configuration cleaned"
+
 # Wait for services to be ready
 echo "⏳ Waiting for services to be ready..."
 
@@ -141,7 +148,7 @@ echo "  pgAdmin:         http://localhost:5050 (admin@example.com / admin)"
 echo "  Redis:           redis://:redis_password@redis:6379"
 echo "  Redis Commander: http://localhost:8081"
 echo "  RabbitMQ:        http://localhost:15672 (admin / admin)"
-echo "  MinIO Console:   http://localhost:9001 (minioadmin / minioadmin)"
+echo "  MinIO Console:   http://localhost:9002 (minioadmin / minioadmin)"
 echo "  Elasticsearch:   http://localhost:9200"
 echo "  Mailhog:         http://localhost:8025"
 echo ""

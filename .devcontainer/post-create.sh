@@ -3,6 +3,19 @@ set -e
 
 echo "🚀 Running post-create setup..."
 
+# Fix file ownership for workspace
+echo "🔧 Fixing workspace ownership..."
+sudo chown -R notso-user:notso-user /workspace
+echo "✅ Workspace ownership fixed"
+
+# Fix Git configuration
+echo "🔧 Configuring Git..."
+git config --global --add safe.directory /workspace
+git config --global --unset-all safe.directory || true
+git config --global --add safe.directory /workspace
+git config --global --add safe.directory '*'
+echo "✅ Git configuration fixed"
+
 # Verify Go installation
 echo "🔍 Verifying Go installation..."
 if command -v go &>/dev/null; then
