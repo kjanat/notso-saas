@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "mcp-server-docker": {
+      "args": ["docker-mcp"],
+      "command": "uvx",
+      "env": {},
+      "type": "stdio"
+    },
+    "prisma-local": {
+      "args": ["dlx", "prisma", "mcp"],
+      "command": "pnpm",
+      "env": {},
+      "type": "stdio"
+    }
+  }
+}

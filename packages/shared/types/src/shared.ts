@@ -4,7 +4,7 @@
 
 // Common metadata type that can be extended for specific use cases
 export interface BaseMetadata {
-  [key: string]: string | number | boolean | Date | null | undefined
+  [key: string]: string | number | boolean | Date | null | undefined | string[]
 }
 
 // More specific metadata types for different contexts

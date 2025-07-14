@@ -30,15 +30,10 @@ export function validatePhoneNumber(phone: string): boolean {
 
 export function parseZodError(error: z.ZodError): ValidationError[] {
   return error.issues.map(issue => ({
-    code: issue.code,
+    code: issue.code as string,
     field: issue.path.join('.'),
     message: issue.message,
-    value: issue.path.reduce<unknown>((obj, key) => {
-      if (obj && typeof obj === 'object' && key in obj) {
-        return (obj as Record<string, unknown>)[key]
-      }
-      return undefined
-    }, error.formErrors.formErrors),
+    value: undefined,
   }))
 }
 
