@@ -1,6 +1,6 @@
-# SaaS Chatbot Platform
+# Multi-Tenant 3D Avatar AI Chatbot Platform
 
-A multi-tenant SaaS platform for AI-powered customer service chatbots with 3D avatars, real-time chat, sentiment analysis, and comprehensive analytics.
+A production-ready SaaS platform enabling businesses to deploy multiple AI-powered 3D avatar chatbots, each with unique personalities, knowledge bases, and interactive behaviors. Built with TypeScript, Three.js, and microservices architecture.
 
 ## 🚀 Quick Start
 
@@ -31,12 +31,14 @@ See [detailed setup instructions](./docs/SETUP.md)
 
 The platform uses a **Domain-Driven Design** approach with clear bounded contexts:
 
-- **Tenant Management** - Multi-tenancy, subscriptions, billing
-- **Chatbot Configuration** - Bot instances, avatars, personalities
-- **Conversation Engine** - Real-time chat, message routing
-- **AI Processing** - NLP, sentiment analysis, response generation
-- **Analytics** - Metrics, reporting, insights
-- **Platform Administration** - System-wide controls, security
+- **Tenant Management** - Multi-tenancy with multiple chatbots per tenant
+- **Chatbot Configuration** - Individual 3D avatars, personalities, knowledge bases
+- **Avatar System** - Three.js integration, ~20 animations, interactive behaviors
+- **Conversation Engine** - Real-time chat with streaming AI responses
+- **AI Processing** - Multi-provider support (OpenAI, Anthropic, Vertex)
+- **Knowledge Base** - Vector embeddings, RAG, semantic search
+- **Analytics** - Per-chatbot metrics, conversation tracking, cost analysis
+- **Embed System** - Unique script generation for each chatbot
 
 See [architecture documentation](./architecture/) for detailed design.
 
@@ -53,10 +55,11 @@ See [architecture documentation](./architecture/) for detailed design.
 
 ### Frontend
 
-- **Next.js** - Customer and admin portals
-- **Three.js** - 3D avatar rendering
-- **Tailwind CSS** - Styling
-- **React Query** - Data fetching
+- **Three.js** - 3D avatar rendering with Blender model support
+- **React** - Embeddable chat widget
+- **Socket.io-client** - Real-time WebSocket communication
+- **Emotion** - CSS-in-JS for widget styling
+- **Next.js** - Admin dashboard (planned)
 
 ### AI/ML
 
@@ -74,35 +77,40 @@ See [architecture documentation](./architecture/) for detailed design.
 ## 📁 Project Structure
 
 ```tree
-saas-chatbot/
-├── packages/              # Shared packages (monorepo)
-│   ├── api/              # Main API service
-│   ├── auth-service/     # Authentication microservice
-│   ├── ai-service/       # AI processing service
-│   ├── websocket/        # Real-time service
-│   ├── shared/           # Shared types and utils
-│   └── database/         # Schemas and migrations
-├── apps/                 # Applications
-│   ├── customer-portal/  # Customer dashboard
-│   ├── platform-admin/   # Admin dashboard
-│   └── chat-widget/      # Embeddable widget
-├── docker/               # Docker configurations
-├── kubernetes/           # K8s manifests
-├── architecture/         # Architecture docs
-└── scripts/              # Utility scripts
+saas/
+├── apps/                      # Microservices
+│   ├── api-gateway/          # Main entry point, routing
+│   ├── tenant-service/       # Tenant & subscription management
+│   ├── chatbot-service/      # Chatbot configurations
+│   ├── ai-service/           # AI provider integrations
+│   ├── conversation-service/ # Real-time chat, WebSocket
+│   ├── avatar-service/       # 3D model management [NEW]
+│   └── knowledge-service/    # Knowledge base, RAG [NEW]
+├── packages/shared/          # Shared packages
+│   ├── types/               # TypeScript definitions
+│   ├── domain/              # Domain models, business logic
+│   ├── utils/               # Utilities, helpers
+│   ├── database/            # Prisma schema
+│   └── tsconfig/            # Shared TS configs
+├── apps/frontend/           # Frontend apps [PLANNED]
+│   ├── admin-dashboard/     # Tenant management UI
+│   └── chat-widget/         # Embeddable 3D chat
+├── architecture/            # Architecture docs
+└── scripts/                 # Utility scripts
 ```
 
 ## 🔑 Key Features
 
 ### For Customers
 
-- **Embeddable Chat Widget** - Simple JavaScript snippet
-- **3D Avatars** - Customizable Three.js avatars
-- **Real-time Chat** - Sub-second response times
-- **Sentiment Analysis** - Understand customer emotions
-- **Conversation Analytics** - Detailed insights
-- **Team Management** - Role-based permissions
-- **Webhook Integration** - Real-time events
+- **Multiple Chatbots Per Tenant** - Deploy different avatars for different purposes
+- **3D Interactive Avatars** - Blender models with ~20 animations
+- **Unique Embed Scripts** - One script per chatbot for easy deployment
+- **Context-Aware Behaviors** - Avatars react to page navigation, user actions
+- **Sentiment-Based Animations** - Emotional responses to conversation tone
+- **Knowledge Base Per Chatbot** - Separate training data for each avatar
+- **Real-time Streaming** - Stream AI responses with synchronized animations
+- **Interactive Behaviors** - Click, drag, hover interactions with avatars
 
 ### For Platform Admins
 
@@ -247,23 +255,30 @@ This project is proprietary software. All rights reserved.
 
 ## 🎯 Roadmap
 
-### Phase 1 (Current)
+### Phase 1: MVP (16-20 weeks)
 
-- ✅ Core chat functionality
-- ✅ Multi-tenant architecture
-- ✅ Basic 3D avatars
-- ✅ OpenAI integration
+- 🔄 Single 3D avatar with basic animations
+- 🔄 Core chat functionality with AI
+- 🔄 Basic Three.js integration
+- 🔄 Simple embed script
 
-### Phase 2
+### Phase 2: Multi-Chatbot (24-28 weeks)
 
-- 🔄 Voice chat support
-- 🔄 Advanced analytics
-- 🔄 Mobile SDKs
-- 🔄 More AI providers
+- 📋 Multiple chatbots per tenant
+- 📋 Full animation library (~20 animations)
+- 📋 Knowledge base system
+- 📋 Embed script generator
 
-### Phase 3
+### Phase 3: Advanced Features (32-36 weeks)
 
-- 📋 Multi-language support
-- 📋 Custom AI training
-- 📋 Advanced avatar animations
-- 📋 Marketplace for avatars
+- 📋 Sentiment analysis integration
+- 📋 Interactive behaviors (click, drag)
+- 📋 Context-aware responses
+- 📋 Avatar marketplace
+
+### Phase 4: Production (40-44 weeks)
+
+- 📋 Performance optimization
+- 📋 Mobile fallbacks
+- 📋 Analytics dashboard
+- 📋 Cost tracking per chatbot

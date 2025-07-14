@@ -1,0 +1,11 @@
+{
+  "name": "gltf-tools",
+  "version": "1.0.0",
+  "description": "Tools for optimizing GLTF models",
+  "private": true,
+  "dependencies": {
+    "@gltf-transform/cli": "^4.2.0",
+    "@gltf-transform/extensions": "^4.2.0",
+    "sharp": "^0.34.3"
+  }
+}

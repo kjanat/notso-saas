@@ -1,232 +1,290 @@
-# Implementation Roadmap
+# Implementation Roadmap - 3D Avatar Multi-Chatbot Platform
 
-## Phase 1: Foundation (Week 1)
+## Overview
 
-Focus: Core infrastructure and development environment
+Building a multi-tenant SaaS platform where each tenant can deploy multiple AI-powered chatbots, each with unique 3D avatars (~20 animations), personalities, and knowledge bases. Total estimated timeline: 40-44 weeks for solo developer.
 
-### Completed ✅
+## Phase 1: Foundation & Infrastructure (Weeks 1-4)
 
-- [x] Docker development environment configuration
-- [x] Domain model and bounded contexts
-- [x] Core aggregates and entities design
-- [x] Multi-tenancy data strategy
-- [x] Database schema design
+Focus: Core infrastructure, multi-tenancy, and development environment
 
-### Next Steps
+### Week 1-2: Project Setup ✅
 
-- [ ] Set up monorepo structure with pnpm workspaces
-- [ ] Initialize TypeScript projects for each service
-- [ ] Implement database migration tooling (Prisma/TypeORM)
-- [ ] Create shared libraries (types, utils, domain models)
-- [ ] Set up basic CI/CD pipeline
+- [x] Monorepo structure with pnpm workspaces
+- [x] TypeScript configuration
+- [x] ESLint v9 and Prettier setup
+- [x] Domain model with 3D avatar contexts
+- [x] Multi-tenant database strategy
+- [x] Docker development environment
+
+### Week 3-4: Core Services
+
+- [ ] Authentication service (JWT + refresh tokens)
+- [ ] Multi-tenant middleware
+- [ ] Tenant provisioning system
+- [ ] Basic API gateway setup
+- [ ] Database migrations (Prisma)
 
 ### Deliverables
 
 - Working development environment
-- Database migrations ready
-- Basic project structure
-- Shared TypeScript types
+- Multi-tenant authentication
+- Tenant provisioning API
+- Database schema with chatbot support
 
-## Phase 2: Core Infrastructure (Week 2)
+## Phase 2: Multi-Chatbot Architecture (Weeks 5-8)
 
-Focus: Security, authentication, and core services
+Focus: Multiple chatbots per tenant with embed script generation
 
 ### Priority Tasks
 
-1. **Authentication Service**
+1. **Chatbot Service**
+   - CRUD operations for multiple chatbots
+   - Unique embed ID generation
+   - Personality configuration
+   - Placement rules engine
 
-   - JWT implementation with refresh tokens
-   - Multi-tenant user management
-   - API key generation and validation
-   - Session management with Redis
+2. **Embed Script System**
+   - Dynamic script generation per chatbot
+   - CDN deployment for embed.js
+   - Configuration injection
+   - Version management
 
-2. **Authorization System**
+3. **Knowledge Base Service**
+   - Per-chatbot knowledge bases
+   - Document upload and processing
+   - Vector embeddings (pgvector)
+   - RAG implementation
 
-   - Role-based access control (RBAC)
-   - Tenant isolation middleware
-   - Permission inheritance model
-
-3. **Security Infrastructure**
-
-   - Rate limiting with Redis
-   - API throttling per tenant
-   - CORS configuration
-   - Input validation and sanitization
-
-4. **Error Handling**
-   - Global error handler
-   - Custom error types
-   - Error tracking integration
+4. **Tenant Quotas**
+   - Chatbot limits per plan
+   - Usage tracking
+   - Quota enforcement
+   - Upgrade flows
 
 ### Deliverables
 
-- Auth service with JWT
-- Tenant isolation working
-- Rate limiting implemented
-- Error handling framework
+- Multiple chatbots per tenant
+- Unique embed scripts working
+- Knowledge base CRUD
+- Quota management system
 
-## Phase 3: API & Communication (Week 3)
+## Phase 3: 3D Avatar System (Weeks 9-16)
 
-Focus: REST APIs, WebSocket, and real-time features
-
-### Priority Tasks
-
-1. **API Gateway Setup**
-
-   - Traefik configuration
-   - Request routing
-   - API versioning strategy
-   - Request/response logging
-
-2. **Core REST APIs**
-
-   - Tenant management API
-   - Chatbot CRUD API
-   - User management API
-   - Conversation API
-
-3. **WebSocket Infrastructure**
-
-   - Socket.io cluster setup
-   - Redis adapter configuration
-   - Connection management
-   - Message routing
-
-4. **Event System**
-   - Webhook infrastructure
-   - Event delivery with retry
-   - Event subscription management
-
-### Deliverables
-
-- Working API gateway
-- Core REST endpoints
-- Real-time chat functioning
-- Webhook system ready
-
-## Phase 4: AI Integration (Week 4)
-
-Focus: AI processing, job queues, and integrations
+Focus: Three.js integration, Blender model support, animation system
 
 ### Priority Tasks
 
-1. **Job Queue System**
-
-   - Bull queue setup
-   - Priority queue management
-   - Dead letter queue handling
-   - Job monitoring dashboard
-
-2. **AI Service Integration**
-
-   - OpenAI API integration
-   - Response caching layer
-   - Cost tracking per request
-   - Fallback provider support
-
-3. **CSV Import Pipeline**
-
-   - File upload handling
-   - Batch processing system
-   - Progress tracking
-   - Error reporting
-
-4. **Analytics Pipeline**
-   - Event streaming setup
-   - Metrics aggregation
-   - Real-time dashboard data
-
-### Deliverables
-
-- AI processing working
-- CSV import functional
-- Cost tracking active
-- Basic analytics flowing
-
-## Phase 5: Frontend & Deployment (Week 5)
-
-Focus: User interfaces and production readiness
-
-### Priority Tasks
-
-1. **Chat Widget**
-
-   - Embeddable JavaScript SDK
-   - Widget customization API
-   - CDN deployment
-   - A/B testing support
-
-2. **Admin Portals**
-
-   - Platform admin dashboard
-   - Customer portal
-   - Analytics dashboards
-   - User management UI
-
-3. **3D Avatar System**
-
-   - Three.js integration
-   - Avatar customization UI
-   - Animation controls
+1. **Avatar Service**
+   - Three.js scene setup
+   - GLB model loader
+   - Animation controller
    - Performance optimization
 
-4. **Production Deployment**
-   - Kubernetes manifests
-   - Helm charts
-   - Monitoring setup
-   - Backup automation
+2. **Animation System**
+   - ~20 animation mappings
+   - Sentiment-based selection
+   - Smooth transitions
+   - Idle behavior loops
+
+3. **Interactive Behaviors**
+   - Click/tap interactions
+   - Drag to reposition
+   - Hover effects
+   - Gesture responses
+
+4. **Avatar Management**
+   - Model upload system
+   - Animation extraction
+   - Preview generation
+   - CDN optimization
 
 ### Deliverables
 
-- Chat widget live
-- Admin portals functional
-- 3D avatars working
-- Production-ready deployment
+- 3D avatar rendering in widget
+- Full animation library working
+- Interactive behaviors implemented
+- Avatar upload and management
 
-## Quick Wins (Can be done anytime)
+## Phase 4: AI & Real-time Integration (Weeks 17-24)
 
-### Development Experience
+Focus: AI processing with streaming, WebSocket communication, sentiment analysis
 
-```bash
-# Create these npm scripts in package.json
-"scripts": {
-  "dev": "concurrently \"pnpm run dev:*\"",
-  "dev:api": "nodemon -w packages/api -e ts,js npm run start:api",
-  "dev:web": "next dev -p 3001",
-  "dev:admin": "next dev -p 3002",
-  "docker:up": "./scripts/dev-setup.sh",
-  "docker:down": "docker-compose down",
-  "docker:reset": "docker-compose down -v && ./scripts/dev-setup.sh",
-  "db:migrate": "prisma migrate dev",
-  "db:seed": "ts-node scripts/seed.ts",
-  "test": "jest",
-  "test:e2e": "playwright test",
-  "lint": "eslint . --ext .ts,.tsx",
-  "type-check": "tsc --noEmit"
-}
-```
+### Priority Tasks
 
-### Project Structure
+1. **AI Processing Pipeline**
+   - Multi-provider support (OpenAI, Anthropic, Vertex)
+   - Streaming response handling
+   - Context window management
+   - Cost tracking per chatbot
+
+2. **WebSocket Infrastructure**
+   - Socket.io with clustering
+   - Real-time message streaming
+   - Avatar state synchronization
+   - Presence management
+
+3. **Sentiment & Animation**
+   - Real-time sentiment analysis
+   - Animation selection logic
+   - Emotion-based responses
+   - Context-aware behaviors
+
+4. **Knowledge Base RAG**
+   - Semantic search implementation
+   - Context injection
+   - Source attribution
+   - Accuracy improvements
+
+### Deliverables
+
+- Streaming AI responses
+- Synchronized avatar animations
+- Knowledge base integration
+- Per-chatbot cost tracking
+
+## Phase 5: Widget & Admin Development (Weeks 25-32)
+
+Focus: Embeddable 3D chat widget and admin interfaces
+
+### Priority Tasks
+
+1. **3D Chat Widget**
+   - React + Three.js component
+   - Embed script loader
+   - Widget positioning system
+   - Mobile responsiveness
+
+2. **Widget Features**
+   - Chat interface with 3D avatar
+   - Message history
+   - Typing indicators
+   - Connection status
+
+3. **Admin Dashboard**
+   - Chatbot management UI
+   - Avatar assignment
+   - Knowledge base upload
+   - Analytics viewing
+
+4. **Customization UI**
+   - Avatar selection
+   - Animation mapping
+   - Personality editor
+   - Placement rules builder
+
+### Deliverables
+
+- Embeddable 3D chat widget
+- Multi-chatbot admin panel
+- Knowledge base management
+- Analytics dashboards
+
+## Phase 7: Polish & Launch (Weeks 41-44)
+
+Focus: Final polish, documentation, and launch preparation
+
+### Priority Tasks
+
+1. **Documentation**
+   - API documentation
+   - Integration guides
+   - Video tutorials
+   - Best practices
+
+2. **Launch Features**
+   - Onboarding flow
+   - Demo chatbots
+   - Template library
+   - Migration tools
+
+3. **Marketing Site**
+   - Landing pages
+   - Live demos
+   - Pricing calculator
+   - Sign-up flow
+
+4. **Support System**
+   - Help center
+   - Support ticketing
+   - Status page
+   - Community forum
+
+### Deliverables
+
+- Complete documentation
+- Smooth onboarding
+- Marketing site live
+- Support system ready
+
+## Technical Architecture
+
+### Service Architecture
 
 ```
 saas/
-├── packages/
-│   ├── api/                 # Main API service
-│   ├── auth-service/        # Authentication microservice
-│   ├── ai-service/          # AI processing service
-│   ├── websocket-service/   # Real-time service
-│   ├── shared/              # Shared types and utils
-│   ├── database/            # Database schemas and migrations
-│   └── sdk/                 # JavaScript SDK
 ├── apps/
-│   ├── customer-portal/     # Next.js customer app
-│   ├── platform-admin/      # Next.js admin app
-│   └── chat-widget/         # Embeddable widget
-├── docker/
-├── kubernetes/
-├── scripts/
-└── docs/
+│   ├── api-gateway/         # Kong/Traefik gateway
+│   ├── tenant-service/      # Tenant & subscription management
+│   ├── chatbot-service/     # Chatbot configurations
+│   ├── avatar-service/      # 3D model management
+│   ├── ai-service/          # AI processing pipeline
+│   ├── conversation-service/# Real-time chat
+│   ├── knowledge-service/   # RAG and embeddings
+│   └── analytics-service/   # Metrics and reporting
+├── packages/
+│   ├── shared/
+│   │   ├── types/          # TypeScript definitions
+│   │   ├── domain/         # Domain models
+│   │   └── utils/          # Shared utilities
+│   ├── database/           # Prisma schemas
+│   └── sdk/               # Embed SDK
+├── frontend/
+│   ├── admin-dashboard/    # Next.js admin
+│   ├── chat-widget/        # React + Three.js
+│   └── marketing-site/     # Landing pages
+└── infrastructure/
+    ├── docker/
+    ├── kubernetes/
+    └── terraform/
 ```
+
+## Phase 6: Production & Optimization (Weeks 33-40)
+
+Focus: Performance, scalability, and production deployment
+
+### Priority Tasks
+
+1. **Performance Optimization**
+   - 3D model compression
+   - Animation optimization
+   - Lazy loading strategies
+   - Mobile fallbacks
+
+2. **Scalability**
+   - Horizontal scaling
+   - Load balancing
+   - CDN optimization
+   - Database sharding
+
+3. **Production Infrastructure**
+   - Kubernetes deployment
+   - Auto-scaling policies
+   - Monitoring (Prometheus/Grafana)
+   - Backup automation
+
+4. **Security Hardening**
+   - Penetration testing
+   - OWASP compliance
+   - DDoS protection
+   - Data encryption
+
+### Deliverables
+
+- Production-ready platform
+- < 2s initial load time
+- 99.9% uptime SLA ready
+- Security audit passed
 
 ### Environment Setup
 
@@ -242,73 +300,130 @@ pnpm add -D dotenv-cli
 pnpm dotenv -e .env.staging -- pnpm start
 ```
 
-## Risk Mitigation Strategies
+## Critical Technical Decisions
 
-### 1. Start with Monolith
-
-- Build everything in one codebase initially
-- Extract microservices only when needed
-- Use feature flags to control rollout
-
-### 2. Mock External Services
+### 1. Three.js Integration Strategy
 
 ```typescript
-// Create mock providers for development
-class MockOpenAIProvider implements AIProvider {
-  async generateResponse(prompt: string): Promise<AIResponse> {
-    // Return canned responses for development
-    return {
-      content: "This is a mock response",
-      usage: { tokens: 100 },
-      cost: 0,
-    };
+// Modular avatar system
+class Avatar3DManager {
+  private scene: THREE.Scene
+  private mixer: THREE.AnimationMixer
+  private animations: Map<string, THREE.AnimationAction>
+
+  async loadModel(url: string): Promise<void> {
+    const loader = new GLTFLoader()
+    const gltf = await loader.loadAsync(url)
+
+    // Extract and map animations
+    gltf.animations.forEach(clip => {
+      const action = this.mixer.clipAction(clip)
+      this.animations.set(clip.name, action)
+    })
+  }
+
+  playAnimation(name: string, options?: AnimationOptions): void {
+    const action = this.animations.get(name)
+    if (action) {
+      // Smooth transition between animations
+      action.reset().fadeIn(0.25).play()
+    }
   }
 }
 ```
 
-### 3. Progressive Enhancement
+### 2. Embed Script Architecture
 
-- Start with basic chat, add 3D avatars later
-- Begin with simple analytics, enhance over time
-- Launch with core features, iterate based on feedback
+```javascript
+// Embed script pattern
+;(function () {
+  const script = document.currentScript
+  const embedId = script.getAttribute('data-embed-id')
 
-### 4. Cost Controls from Day 1
+  // Lazy load dependencies
+  Promise.all([
+    loadScript('https://cdn.example.com/three.min.js'),
+    loadScript('https://cdn.example.com/socket.io.min.js'),
+    loadScript(`https://api.example.com/embed/${embedId}/config.js`),
+  ]).then(() => {
+    // Initialize widget
+    window.ChatbotWidget.init(embedId)
+  })
+})()
+```
 
-- Implement spending limits per tenant
-- Add circuit breakers for external APIs
-- Monitor and alert on unusual usage
+### 3. Knowledge Base RAG Implementation
 
-## Success Metrics
+```typescript
+class KnowledgeBaseService {
+  async enhancePrompt(chatbotId: string, query: string): Promise<EnhancedPrompt> {
+    // 1. Generate embedding for query
+    const queryEmbedding = await this.generateEmbedding(query)
 
-### Week 1 Success
+    // 2. Search vector DB
+    const relevantDocs = await this.vectorDB.search({
+      chatbotId,
+      embedding: queryEmbedding,
+      limit: 5,
+      threshold: 0.7,
+    })
 
-- [ ] Can spin up full dev environment with one command
-- [ ] Database migrations run successfully
-- [ ] Can create a tenant programmatically
+    // 3. Build context
+    const context = this.formatContext(relevantDocs)
 
-### Week 2 Success
+    // 4. Return enhanced prompt
+    return {
+      systemPrompt: `You have access to the following information:\n${context}`,
+      userQuery: query,
+      sources: relevantDocs.map(d => d.metadata),
+    }
+  }
+}
+```
 
-- [ ] Can authenticate and get JWT token
-- [ ] Tenant isolation verified with tests
-- [ ] Rate limiting prevents abuse
+## Key Milestones & Success Metrics
 
-### Week 3 Success
+### Milestone 1: Multi-Tenant Foundation (Week 4)
 
-- [ ] Can send/receive chat messages in real-time
-- [ ] REST APIs return correct data
-- [ ] Webhooks deliver events successfully
+- [ ] Create and provision tenants
+- [ ] JWT authentication working
+- [ ] Database isolation verified
+- [ ] Basic API endpoints functional
 
-### Week 4 Success
+### Milestone 2: Multi-Chatbot System (Week 8)
 
-- [ ] AI responses generated and cached
-- [ ] CSV import processes 1000 records
-- [ ] Cost tracking accurate to $0.01
+- [ ] Create multiple chatbots per tenant
+- [ ] Unique embed scripts generated
+- [ ] Knowledge base upload working
+- [ ] Quota enforcement active
 
-### Week 5 Success
+### Milestone 3: 3D Avatar MVP (Week 16)
 
-- [ ] Widget embeds on test site
-- [ ] Admin can view all tenants
-- [ ] System handles 100 concurrent chats
+- [ ] Blender model rendering in browser
+- [ ] 5+ animations working smoothly
+- [ ] Basic interactions (click, drag)
+- [ ] < 3s load time
+
+### Milestone 4: AI Integration (Week 24)
+
+- [ ] Streaming responses working
+- [ ] Sentiment-based animations
+- [ ] Knowledge base RAG active
+- [ ] Cost tracking accurate
+
+### Milestone 5: Production Widget (Week 32)
+
+- [ ] Embed script < 50KB
+- [ ] Mobile responsive
+- [ ] Cross-browser compatible
+- [ ] Analytics tracking working
+
+### Milestone 6: Launch Ready (Week 44)
+
+- [ ] Handle 10,000 concurrent conversations
+- [ ] 99.9% uptime achieved
+- [ ] < 100ms API response time (p95)
+- [ ] Complete documentation
 
 ## Critical Path Items
 
@@ -322,24 +437,45 @@ These MUST be done in order:
 
 Everything else can be parallelized or deferred.
 
-## Budget Considerations
+## Resource Requirements
 
-### Development Costs
+### Development Phase
 
-- OpenAI API: ~$500/month for development
-- Infrastructure: ~$200/month for dev/staging
-- Monitoring tools: ~$100/month
+- **Time**: 44 weeks (solo developer)
+- **Infrastructure**: ~$500/month
+- **AI Costs**: ~$300/month
+- **CDN/Storage**: ~$100/month
+- **Total**: ~$900/month
 
-### Production Estimates (100 tenants)
+### Production Estimates (100 tenants, 500 chatbots)
 
-- OpenAI API: $2,000-5,000/month
-- Infrastructure: $1,000-2,000/month
-- CDN: $200-500/month
-- Backups: $100-200/month
+- **AI API Costs**: $3,000-6,000/month
+- **Infrastructure**: $2,000-3,000/month
+- **CDN (3D models)**: $500-1,000/month
+- **Vector DB**: $300-500/month
+- **Monitoring**: $200-300/month
+- **Total**: ~$6,000-11,000/month
 
-### Cost Optimization
+### Cost Optimization Strategies
 
-- Cache aggressively (80% cache hit target)
-- Use GPT-3.5 for most queries
-- Implement spending caps per tenant
-- Monitor and optimize token usage
+1. **Aggressive Caching**: 80%+ cache hit rate for common queries
+2. **Model Optimization**: Compress 3D models, use LODs
+3. **Smart Routing**: Use cheaper models for simple queries
+4. **Quota Management**: Hard limits per tenant/chatbot
+5. **CDN Strategy**: Edge caching for avatars and scripts
+
+## Risk Factors & Mitigation
+
+### Technical Risks
+
+1. **3D Performance on Mobile**: Progressive enhancement, 2D fallback
+2. **WebGL Compatibility**: Feature detection, graceful degradation
+3. **Real-time Scaling**: Horizontal scaling, Redis clustering
+4. **AI Provider Outages**: Multi-provider fallback system
+
+### Business Risks
+
+1. **Complexity Overwhelm**: MVP with single avatar first
+2. **Cost Overruns**: Strict per-tenant limits from day 1
+3. **Security Breaches**: Regular audits, bug bounty program
+4. **Slow Adoption**: Free tier, easy onboarding, templates

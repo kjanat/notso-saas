@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+**/node_modules/
 .pnpm-store/
 .yarn/
 
@@ -151,3 +152,8 @@ openapi.json
 .eslintcache
 .stylelintcache
 *.tsbuildinfo
+
+CLAUDE.md
+convo.md
+models/*
+!models/**/sources.txt
