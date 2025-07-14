@@ -5,14 +5,17 @@ This folder contains the configuration for a fully-featured development containe
 ## Features
 
 ### 🛠️ Pre-installed Development Tools
-- **Node.js 20** with pnpm, TypeScript, and essential build tools
-- **Python 3.11** with FastAPI, Celery, and AI/ML libraries
+
+- **Node.js 22** with pnpm, TypeScript, and essential build tools
+- **Python 3.13** with FastAPI, Celery, and AI/ML libraries
 - **Database clients** for PostgreSQL, Redis, and MongoDB
 - **DevOps tools** including Docker, Kubernetes (kubectl, Helm, k9s), and Terraform
 - **Code quality tools** like ESLint, Prettier, Black, and pre-commit hooks
 
 ### 📦 Integrated Services
+
 All backend services run within the container network:
+
 - PostgreSQL 16 (Multi-tenant database)
 - Redis 7 (Caching & queues)
 - RabbitMQ (Message broker)
@@ -22,7 +25,9 @@ All backend services run within the container network:
 - Mailhog (Email testing)
 
 ### 🚀 VS Code Extensions
+
 Automatically installs 40+ extensions including:
+
 - Language support (TypeScript, Python, YAML)
 - Framework tools (React, Next.js, Prisma)
 - Testing (Jest, Playwright)
@@ -33,6 +38,7 @@ Automatically installs 40+ extensions including:
 ## Quick Start
 
 ### Option 1: Using VS Code
+
 1. Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 2. Open the project folder in VS Code
 3. Click the popup "Reopen in Container" or use Command Palette → "Dev Containers: Reopen in Container"
@@ -40,11 +46,13 @@ Automatically installs 40+ extensions including:
 5. The post-create script will automatically set up the environment
 
 ### Option 2: Using GitHub Codespaces
+
 1. Click "Code" → "Codespaces" → "Create codespace on main"
 2. Wait for the environment to initialize
 3. All services and tools will be pre-configured
 
 ### Option 3: Using CLI
+
 ```bash
 # Install Dev Container CLI
 npm install -g @devcontainers/cli
@@ -60,6 +68,7 @@ devcontainer exec --workspace-folder . pnpm dev
 ## Post-Setup
 
 After the container starts, the following will be automatically configured:
+
 - ✅ All npm dependencies installed
 - ✅ Database migrations applied
 - ✅ MinIO buckets created
@@ -100,21 +109,22 @@ k get pods            # List Kubernetes pods
 
 ## Service URLs
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| API Gateway | http://localhost:3000 | - |
-| Customer Portal | http://localhost:3001 | - |
-| Platform Admin | http://localhost:3002 | - |
-| pgAdmin | http://localhost:5050 | admin@example.com / admin |
-| Redis Commander | http://localhost:8081 | - |
-| RabbitMQ Management | http://localhost:15672 | admin / admin |
-| MinIO Console | http://localhost:9001 | minioadmin / minioadmin |
-| Elasticsearch | http://localhost:9200 | - |
-| Mailhog | http://localhost:8025 | - |
+| Service             | URL                    | Credentials               |
+| ------------------- | ---------------------- | ------------------------- |
+| API Gateway         | <http://localhost:3000>  | -                         |
+| Customer Portal     | <http://localhost:3001>  | -                         |
+| Platform Admin      | <http://localhost:3002>  | -                         |
+| pgAdmin             | <http://localhost:5050>  | <admin@example.com> / admin |
+| Redis Commander     | <http://localhost:8081>  | -                         |
+| RabbitMQ Management | <http://localhost:15672> | admin / admin             |
+| MinIO Console       | <http://localhost:9001>  | minioadmin / minioadmin   |
+| Elasticsearch       | <http://localhost:9200>  | -                         |
+| Mailhog             | <http://localhost:8025>  | -                         |
 
 ## Troubleshooting
 
 ### Container won't start
+
 ```bash
 # Clean up and rebuild
 docker-compose -f .devcontainer/docker-compose.yml down -v
@@ -123,6 +133,7 @@ docker system prune -af
 ```
 
 ### Services not accessible
+
 ```bash
 # Check service health
 docker-compose -f .devcontainer/docker-compose.yml ps
@@ -130,25 +141,31 @@ docker-compose -f .devcontainer/docker-compose.yml logs [service-name]
 ```
 
 ### Permission issues
+
 ```bash
 # Fix ownership
 sudo chown -R $(id -u):$(id -g) .
 ```
 
 ### Port conflicts
+
 If you have services running locally that conflict with container ports, either:
+
 1. Stop the local services
 2. Or modify the port mappings in `.devcontainer/docker-compose.yml`
 
 ## Customization
 
 ### Adding new tools
+
 Edit `.devcontainer/Dockerfile` to add system packages or global npm packages.
 
 ### VS Code settings
+
 Modify `.devcontainer/devcontainer.json` to add extensions or change settings.
 
 ### Environment variables
+
 Add them to `.env.local` (created automatically) or modify `.devcontainer/docker-compose.yml`.
 
 ## Performance Tips
@@ -168,6 +185,7 @@ Add them to `.env.local` (created automatically) or modify `.devcontainer/docker
 ## Contributing
 
 When adding new services or tools:
+
 1. Update `.devcontainer/docker-compose.yml` for new services
 2. Add initialization to `.devcontainer/post-start.sh`
 3. Document the service in this README

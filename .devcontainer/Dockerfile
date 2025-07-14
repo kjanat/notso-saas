@@ -1,25 +1,25 @@
-FROM mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye
+FROM mcr.microsoft.com/devcontainers/typescript-node:1-22-bullseye
 
 # Install additional OS packages
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
-        postgresql-client \
-        redis-tools \
-        kafkacat \
-        jq \
-        httpie \
-        tree \
-        tmux \
-        neovim \
-        fzf \
-        ripgrep \
-        bat \
-        exa \
-        htop \
-        make \
-        build-essential \
-        python3-pip \
-        shellcheck \
+    postgresql-client \
+    redis-tools \
+    kafkacat \
+    jq \
+    httpie \
+    tree \
+    tmux \
+    neovim \
+    fzf \
+    ripgrep \
+    bat \
+    exa \
+    htop \
+    make \
+    build-essential \
+    python3-pip \
+    shellcheck \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
