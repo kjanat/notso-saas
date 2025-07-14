@@ -1,0 +1,11 @@
+{
+  "name": "@saas/tsconfig",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared TypeScript configurations",
+  "files": [
+    "base.json",
+    "node.json",
+    "nextjs.json"
+  ]
+}

@@ -1,0 +1,14 @@
+node_modules
+dist
+build
+.next
+.turbo
+coverage
+*.log
+.env*
+.git
+.github
+.vscode
+.devcontainer
+*.config.js
+*.config.ts

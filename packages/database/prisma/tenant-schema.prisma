@@ -1,0 +1,175 @@
+// Tenant-specific Database Schema (Per-tenant database)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/tenant-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("TENANT_DATABASE_URL")
+}
+
+// Chatbot configuration
+model Chatbot {
+  id               String         @id @default(cuid())
+  name             String
+  slug             String         @unique
+  deploymentKey    String         @unique
+  isActive         Boolean        @default(true)
+  avatarConfig     Json           @default("{}")
+  personalityConfig Json          @default("{}")
+  widgetConfig     Json           @default("{}")
+  metadata         Json           @default("{}")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  knowledgeBase    KnowledgeBase[]
+  conversations    Conversation[]
+  deployments      ChatbotDeployment[]
+  
+  @@index([slug])
+  @@index([deploymentKey])
+}
+
+model KnowledgeBase {
+  id          String   @id @default(cuid())
+  chatbotId   String
+  type        String   // faq, document, website, api
+  title       String
+  content     String   @db.Text
+  url         String?
+  metadata    Json?
+  embedding   Float[]? // For vector search
+  lastUpdated DateTime @default(now())
+  createdAt   DateTime @default(now())
+  
+  chatbot     Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  
+  @@index([chatbotId])
+  @@index([type])
+}
+
+model ChatbotDeployment {
+  id             String   @id @default(cuid())
+  chatbotId      String
+  deploymentKey  String
+  allowedDomains String[]
+  rateLimit      Json?
+  analytics      Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  chatbot        Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  
+  @@unique([chatbotId, deploymentKey])
+  @@index([deploymentKey])
+}
+
+// Conversation management
+model Conversation {
+  id              String             @id @default(cuid())
+  chatbotId       String
+  visitorId       String
+  visitorMetadata Json
+  startedAt       DateTime           @default(now())
+  endedAt         DateTime?
+  status          ConversationStatus @default(ACTIVE)
+  sentimentScore  Float?
+  tags            String[]
+  metadata        Json               @default("{}")
+  summary         String?            @db.Text
+  
+  chatbot         Chatbot            @relation(fields: [chatbotId], references: [id])
+  messages        Message[]
+  metrics         ConversationMetrics?
+  
+  @@index([chatbotId])
+  @@index([visitorId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model Message {
+  id                  String   @id @default(cuid())
+  conversationId      String
+  sender              String   // visitor, bot, agent
+  senderId            String
+  content             String   @db.Text
+  type                String   // text, image, file, system, card, quick-reply
+  sentimentScore      Float?
+  intentClassification Json?
+  attachments         Json[]
+  metadata            Json     @default("{}")
+  createdAt           DateTime @default(now())
+  
+  conversation        Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@index([conversationId])
+  @@index([sender])
+  @@index([createdAt])
+}
+
+model ConversationMetrics {
+  id                  String   @id @default(cuid())
+  conversationId      String   @unique
+  duration            Int      // in seconds
+  messageCount        Int
+  visitorMessageCount Int
+  botMessageCount     Int
+  averageResponseTime Int      // in milliseconds
+  sentimentTrend      Json     // Array of {timestamp, score}
+  resolutionStatus    String?  // resolved, unresolved, escalated
+  customerSatisfaction Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  conversation        Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+// AI Processing
+model AIJob {
+  id          String   @id @default(cuid())
+  conversationId String?
+  messageId   String?
+  type        String   // chat_response, sentiment_analysis, intent_classification, etc.
+  status      String   // pending, processing, completed, failed, cancelled
+  priority    Int      @default(5)
+  payload     Json
+  result      Json?
+  error       Json?
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// Analytics
+model AnalyticsEvent {
+  id           String   @id @default(cuid())
+  eventType    String
+  eventCategory String
+  eventData    Json
+  source       String   // widget, api, admin, system
+  sessionId    String?
+  visitorId    String?
+  timestamp    DateTime @default(now())
+  metadata     Json?
+  
+  @@index([eventType])
+  @@index([eventCategory])
+  @@index([timestamp])
+  @@index([sessionId])
+}
+
+// Enums
+enum ConversationStatus {
+  ACTIVE
+  ENDED
+  ABANDONED
+  TRANSFERRED
+}

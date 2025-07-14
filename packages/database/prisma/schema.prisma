@@ -1,0 +1,202 @@
+// Platform Database Schema (Shared across all tenants)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Tenant management
+model Tenant {
+  id                 String             @id @default(cuid())
+  slug               String             @unique
+  name               String
+  databaseName       String             @unique
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  subscriptionPlan   SubscriptionTier   @default(TRIAL)
+  trialEndsAt        DateTime?
+  metadata           Json               @default("{}")
+  settings           Json               @default("{}")
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  
+  users              TenantUser[]
+  apiKeys            ApiKey[]
+  usageMetrics       TenantUsage[]
+  webhooks           Webhook[]
+  
+  @@index([slug])
+  @@index([subscriptionStatus])
+}
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  passwordHash   String
+  name           String
+  avatarUrl      String?
+  isActive       Boolean      @default(true)
+  emailVerified  Boolean      @default(false)
+  lastLoginAt    DateTime?
+  preferences    Json         @default("{}")
+  metadata       Json         @default("{}")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  
+  tenants        TenantUser[]
+  sessions       Session[]
+  apiKeys        ApiKey[]
+  auditLogs      AuditLog[]
+  
+  @@index([email])
+}
+
+model TenantUser {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String
+  role       UserRole @default(TENANT_USER)
+  permissions Json     @default("[]")
+  joinedAt   DateTime @default(now())
+  invitedBy  String?
+  
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, userId])
+  @@index([tenantId])
+  @@index([userId])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  ipAddress  String?
+  userAgent  String?
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([token])
+  @@index([userId])
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  tenantId    String
+  name        String
+  keyHash     String    @unique
+  permissions Json      @default("[]")
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdBy   String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  creator     User      @relation(fields: [createdBy], references: [id])
+  
+  @@index([keyHash])
+  @@index([tenantId])
+}
+
+model TenantUsage {
+  id        String   @id @default(cuid())
+  tenantId  String
+  period    DateTime
+  metrics   Json
+  costs     Json
+  createdAt DateTime @default(now())
+  
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, period])
+  @@index([tenantId])
+  @@index([period])
+}
+
+model Webhook {
+  id           String   @id @default(cuid())
+  tenantId     String
+  url          String
+  events       String[]
+  secret       String
+  isActive     Boolean  @default(true)
+  headers      Json?
+  retryPolicy  Json?
+  lastTriggered DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deliveries   WebhookDelivery[]
+  
+  @@index([tenantId])
+}
+
+model WebhookDelivery {
+  id          String   @id @default(cuid())
+  webhookId   String
+  event       String
+  payload     Json
+  response    Json?
+  statusCode  Int?
+  attempts    Int      @default(1)
+  success     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  deliveredAt DateTime?
+  
+  webhook     Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  
+  @@index([webhookId])
+  @@index([event])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String?
+  userId     String?
+  action     String
+  resource   String
+  resourceId String
+  changes    Json?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  timestamp  DateTime @default(now())
+  
+  user       User?    @relation(fields: [userId], references: [id])
+  
+  @@index([tenantId])
+  @@index([userId])
+  @@index([resource])
+  @@index([timestamp])
+}
+
+// Enums
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  CANCELLED
+  SUSPENDED
+}
+
+enum SubscriptionTier {
+  TRIAL
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum UserRole {
+  PLATFORM_ADMIN
+  TENANT_ADMIN
+  TENANT_USER
+  TENANT_VIEWER
+}

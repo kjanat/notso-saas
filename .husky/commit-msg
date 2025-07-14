@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Simple commit message validation
+commit_regex='^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,100}'
+
+if ! grep -qE "$commit_regex" "$1"; then
+    echo "Invalid commit message format!"
+    echo "Format: <type>(<scope>): <subject>"
+    echo "Example: feat(auth): add login functionality"
+    echo ""
+    echo "Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
+    exit 1
+fi
+
+# Check for forbidden content
+if grep -iE "(claude|anthropic\.com)" "$1"; then
+    echo "❌ Commit message cannot contain 'Claude' or 'anthropic.com'"
+    echo "Please remove these references from your commit message."
+    exit 1
+fi

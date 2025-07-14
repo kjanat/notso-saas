@@ -1,0 +1,32 @@
+{
+  "name": "@saas/ai-service",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon --exec tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.56.0",
+    "@google-cloud/vertexai": "^1.10.0",
+    "@saas/domain": "workspace:*",
+    "@saas/types": "workspace:*",
+    "@saas/utils": "workspace:*",
+    "bullmq": "^5.56.4",
+    "fastify": "^5.4.0",
+    "ioredis": "^5.6.1",
+    "openai": "^5.9.0",
+    "pino": "^9.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
