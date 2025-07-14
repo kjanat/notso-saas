@@ -6,7 +6,7 @@ import type {
   ILogger,
   IQueueService,
 } from '../../shared/interfaces/base.interfaces.js'
-import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
+import type { CreateTenantDto, TenantFilters, UpdateTenantDto } from './tenant.dto.js'
 import type { ITenantRepository, ITenantService } from './tenant.interfaces.js'
 
 @injectable()
@@ -44,10 +44,21 @@ export class TenantService implements ITenantService {
   async findById(id: string): Promise<Tenant> {
     // Try cache first
     const cacheKey = `tenant:${id}`
-    const cached = await this.cache.get<Tenant>(cacheKey)
+    const cached = await this.cache.get<{
+      id: string
+      name: string
+      slug: string
+      apiKey: string
+      isActive: boolean
+      subscriptionPlan: string
+      maxChatbots: number
+      currentChatbots: number
+      createdAt?: Date
+      updatedAt?: Date
+    }>(cacheKey)
     if (cached) {
       // Reconstitute domain model from cached data
-      return Tenant.reconstitute(cached.id, cached as any)
+      return Tenant.reconstitute(cached.id, cached)
     }
 
     // Fetch from database
@@ -83,7 +94,7 @@ export class TenantService implements ITenantService {
     return tenant
   }
 
-  async findAll(filters?: Record<string, any>): Promise<{ data: Tenant[]; total: number }> {
+  async findAll(filters?: TenantFilters): Promise<{ data: Tenant[]; total: number }> {
     const [data, total] = await Promise.all([
       this.repository.findAll(filters),
       this.repository.count(filters),
@@ -146,7 +157,7 @@ export class TenantService implements ITenantService {
     const newApiKey = tenant.regenerateApiKey()
 
     // Persist changes
-    await this.repository.update(id, { apiKey: newApiKey })
+    await this.repository.update(id, {})
 
     // Process domain events
     for (const event of tenant.domainEvents) {

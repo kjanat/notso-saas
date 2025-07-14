@@ -40,6 +40,11 @@ const configSchema = z.object({
     }),
     type: z.enum(['local', 's3']).default('local'),
   }),
+  vertex: z.object({
+    apiKey: z.string().optional(),
+    location: z.string().default('us-central1'),
+    projectId: z.string().optional(),
+  }),
 })
 
 export const config = configSchema.parse({
@@ -81,6 +86,11 @@ export const config = configSchema.parse({
       region: process.env.S3_REGION,
     },
     type: process.env.STORAGE_TYPE as 'local' | 's3',
+  },
+  vertex: {
+    apiKey: process.env.GOOGLE_VERTEX_API_KEY,
+    location: process.env.GOOGLE_VERTEX_LOCATION,
+    projectId: process.env.GOOGLE_VERTEX_PROJECT_ID,
   },
 })
 

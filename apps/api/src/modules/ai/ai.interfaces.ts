@@ -8,6 +8,8 @@ export interface IStreamResponse {
   }
 }
 
+export type FormattedMessage = Array<{ role: string; content: string }>
+
 export interface IAIProvider {
   name: string
   generateResponse(

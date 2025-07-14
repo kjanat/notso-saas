@@ -3,6 +3,7 @@
  */
 
 import type { BaseEntity, ChatbotId, DeploymentKey, TenantId } from './base'
+import type { EntityMetadata } from './shared'
 
 export interface Chatbot extends BaseEntity {
   id: ChatbotId
@@ -15,7 +16,7 @@ export interface Chatbot extends BaseEntity {
   personalityConfig: PersonalityConfiguration
   knowledgeBase: KnowledgeBaseItem[]
   widgetConfig: WidgetConfiguration
-  metadata: Record<string, any>
+  metadata: EntityMetadata
 }
 
 export interface AvatarConfiguration {
@@ -63,7 +64,7 @@ export interface KnowledgeBaseItem {
   title: string
   content: string
   url?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, string | number | boolean>
   lastUpdated: Date
 }
 

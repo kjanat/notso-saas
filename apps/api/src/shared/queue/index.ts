@@ -1,3 +1,4 @@
+import type { Job, JobsOptions, Processor } from 'bullmq'
 import { Queue, Worker } from 'bullmq'
 import { Redis } from 'ioredis'
 
@@ -47,7 +48,7 @@ export function getQueue(name: string): Queue {
 }
 
 export class QueueService {
-  async addJob<T>(queueName: string, jobName: string, data: T, options?: any) {
+  async addJob<T>(queueName: string, jobName: string, data: T, options?: JobsOptions) {
     const queue = getQueue(queueName)
     const job = await queue.add(jobName, data, options)
     logger.debug(`Job ${jobName} added to queue ${queueName}`, {
@@ -56,7 +57,7 @@ export class QueueService {
     return job
   }
 
-  registerWorker<T>(queueName: string, processor: (job: any) => Promise<T>) {
+  registerWorker<T>(queueName: string, processor: Processor<T>) {
     const connection = new Redis(config.redis.url, {
       enableOfflineQueue: false,
       maxRetriesPerRequest: null,

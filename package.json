@@ -3,6 +3,9 @@
   "bugs": {
     "url": "https://github.com/kjanat/notso-saas/issues"
   },
+  "dependencies": {
+    "nanoid": "^5.1.5"
+  },
   "description": "Multi-tenant AI-powered customer service chatbot platform",
   "devDependencies": {
     "@biomejs/biome": "2.1.1",

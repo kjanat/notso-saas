@@ -1,16 +1,24 @@
-export interface IBaseRepository<T, CreateDTO = any, UpdateDTO = any> {
+export interface IBaseRepository<
+  T,
+  CreateDTO = Record<string, unknown>,
+  UpdateDTO = Partial<CreateDTO>,
+> {
   create(data: CreateDTO): Promise<T>
   findById(id: string): Promise<T | null>
-  findAll(filters?: Record<string, any>): Promise<T[]>
-  count(filters?: Record<string, any>): Promise<number>
+  findAll(filters?: Record<string, unknown>): Promise<T[]>
+  count(filters?: Record<string, unknown>): Promise<number>
   update(id: string, data: UpdateDTO): Promise<T>
   delete(id: string): Promise<void>
 }
 
-export interface IBaseService<T, CreateDTO = any, UpdateDTO = any> {
+export interface IBaseService<
+  T,
+  CreateDTO = Record<string, unknown>,
+  UpdateDTO = Partial<CreateDTO>,
+> {
   create(data: CreateDTO): Promise<T>
   findById(id: string): Promise<T>
-  findAll(filters?: Record<string, any>): Promise<T[]>
+  findAll(filters?: Record<string, unknown>): Promise<T[]>
   update(id: string, data: UpdateDTO): Promise<T>
   delete(id: string): Promise<void>
 }
@@ -19,17 +27,17 @@ export interface ICacheService {
   get<T>(key: string): Promise<T | null>
   set<T>(key: string, value: T, ttl?: number): Promise<void>
   delete(key: string): Promise<void>
-  clear(): Promise<void>
+  exists(key: string): Promise<boolean>
 }
 
 export interface IQueueService {
-  addJob<T>(queue: string, name: string, data: T): Promise<void>
-  process<T, R>(queue: string, name: string, handler: (data: T) => Promise<R>): void
+  addJob<T>(queue: string, name: string, data: T, options?: unknown): Promise<unknown>
+  registerWorker<T>(queue: string, processor: (job: unknown) => Promise<T>): void
 }
 
 export interface ILogger {
-  info(message: string, meta?: any): void
-  error(message: string, error?: Error, meta?: any): void
-  warn(message: string, meta?: any): void
-  debug(message: string, meta?: any): void
+  info(message: string, meta?: Record<string, unknown>): void
+  error(message: string, error?: Error | unknown, meta?: Record<string, unknown>): void
+  warn(message: string, meta?: Record<string, unknown>): void
+  debug(message: string, meta?: Record<string, unknown>): void
 }

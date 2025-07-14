@@ -2,6 +2,7 @@ import { injectable } from 'tsyringe'
 import type { IAIProvider, IAIProviderFactory } from './ai.interfaces.js'
 import { AnthropicProvider } from './providers/anthropic.provider.js'
 import { OpenAIProvider } from './providers/openai.provider.js'
+import { VertexAIProvider } from './providers/vertex.provider.js'
 
 @injectable()
 export class AIProviderFactory implements IAIProviderFactory {
@@ -11,6 +12,7 @@ export class AIProviderFactory implements IAIProviderFactory {
     // Initialize providers
     this.registerProvider('openai', new OpenAIProvider())
     this.registerProvider('anthropic', new AnthropicProvider())
+    this.registerProvider('vertex', new VertexAIProvider())
   }
 
   create(provider: 'openai' | 'anthropic' | 'vertex'): IAIProvider {

@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
+import { logger } from '../../shared/utils/logger.js'
 import type { AuthService } from './auth.service.js'
 
 interface LoginBody {
@@ -60,7 +61,7 @@ export class AuthController {
     // Log the logout event
     const userId = request.user?.id
     if (userId) {
-      this.logger.info('User logged out', { userId })
+      logger.info('User logged out', { userId })
     }
 
     // In production, you might want to:

@@ -8,18 +8,19 @@ import type {
   TenantId,
   UserId /* , Timestamps - available if needed */,
 } from './base'
+import type { DynamicValue, EventMetadata } from './shared'
 
 export interface AnalyticsEvent {
   id: string
   tenantId: TenantId
   eventType: EventType
   eventCategory: EventCategory
-  eventData: Record<string, any>
+  eventData: Record<string, DynamicValue>
   source: EventSource
   sessionId?: string
   userId?: UserId
   timestamp: Date
-  metadata?: Record<string, any>
+  metadata?: EventMetadata
 }
 
 export type EventType =
@@ -156,7 +157,7 @@ export interface ReportFilters {
   chatbotIds?: ChatbotId[]
   conversationStatus?: string[]
   sentimentRange?: [number, number]
-  customFilters?: Record<string, any>
+  customFilters?: Record<string, string | number | boolean | string[]>
 }
 
 export interface DateRange {
@@ -221,5 +222,5 @@ export interface AlertCondition {
 
 export interface AlertAction {
   type: 'email' | 'webhook' | 'sms' | 'slack'
-  config: Record<string, any>
+  config: Record<string, string | number | boolean | string[]>
 }

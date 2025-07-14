@@ -3,6 +3,7 @@
  */
 
 import type { BaseEntity, ChatbotId, ConversationId, MessageId, TenantId, UserId } from './base'
+import type { DynamicValue, EntityMetadata } from './shared'
 
 export interface Conversation extends BaseEntity {
   id: ConversationId
@@ -15,7 +16,7 @@ export interface Conversation extends BaseEntity {
   status: ConversationStatus
   sentimentScore?: number
   tags: string[]
-  metadata: Record<string, any>
+  metadata: EntityMetadata
   summary?: string
 }
 
@@ -34,7 +35,7 @@ export interface VisitorMetadata {
   currentPage?: string
   sessionId?: string
   userId?: UserId // If visitor is authenticated
-  customAttributes?: Record<string, any>
+  customAttributes?: Record<string, DynamicValue>
 }
 
 export interface Message extends BaseEntity {
@@ -47,7 +48,7 @@ export interface Message extends BaseEntity {
   sentimentScore?: number
   intentClassification?: IntentClassification
   attachments?: MessageAttachment[]
-  metadata: Record<string, any>
+  metadata: EntityMetadata
 }
 
 export type MessageSender = 'visitor' | 'bot' | 'agent'
@@ -92,7 +93,7 @@ export interface ConversationEvent {
   type: ConversationEventType
   conversationId: ConversationId
   timestamp: Date
-  data: any
+  data: DynamicValue
 }
 
 export type ConversationEventType =

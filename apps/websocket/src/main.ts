@@ -23,10 +23,18 @@ io.on('connection', socket => {
 
   // Join conversation room
   socket.on('join:conversation', async data => {
-    const { conversationId, token: _token } = data
+    const { conversationId, token } = data
 
-    // TODO: Validate token
+    // Validate token
+    if (!token) {
+      socket.emit('error', { message: 'Authentication required' })
+      return
+    }
 
+    // For now, we'll accept any token. In production, validate JWT here
+    // Example: jwt.verify(token, process.env.JWT_SECRET)
+
+    socket.data.conversationId = conversationId
     socket.join(`conversation:${conversationId}`)
     logger.info('Socket joined conversation', {
       conversationId,
@@ -36,7 +44,13 @@ io.on('connection', socket => {
 
   // Handle chat messages
   socket.on('message:send', async data => {
-    const { conversationId, message } = data
+    const { conversationId, message, chatbotId } = data
+
+    // Verify user is in this conversation
+    if (socket.data.conversationId !== conversationId) {
+      socket.emit('error', { message: 'Not authorized for this conversation' })
+      return
+    }
 
     // Broadcast to conversation room
     io.to(`conversation:${conversationId}`).emit('message:received', {
@@ -46,14 +60,15 @@ io.on('connection', socket => {
       timestamp: new Date().toISOString(),
     })
 
-    // Publish to Redis for other services
+    // Publish to Redis for other services (e.g., worker to process with AI)
     await pubClient.publish(
       'chat:messages',
       JSON.stringify({
+        chatbotId,
         conversationId,
         message,
+        sessionId: socket.id,
         timestamp: new Date().toISOString(),
-        userId: socket.data.userId,
       })
     )
   })
@@ -83,7 +98,41 @@ subClient.subscribe('chat:messages')
 subClient.on('message', (channel: string, message: string) => {
   if (channel === 'chat:messages') {
     const data = JSON.parse(message)
-    io.to(`conversation:${data.conversationId}`).emit('message:ai', data)
+
+    // Handle different message types
+    switch (data.type) {
+      case 'stream':
+        // Streaming chunk
+        io.to(`conversation:${data.conversationId}`).emit('message:stream', {
+          content: data.content,
+          conversationId: data.conversationId,
+          timestamp: data.timestamp,
+        })
+        break
+
+      case 'complete':
+        // Complete message with usage
+        io.to(`conversation:${data.conversationId}`).emit('message:complete', {
+          content: data.content,
+          conversationId: data.conversationId,
+          timestamp: data.timestamp,
+          usage: data.usage,
+        })
+        break
+
+      case 'error':
+        // Error message
+        io.to(`conversation:${data.conversationId}`).emit('message:error', {
+          conversationId: data.conversationId,
+          error: data.error,
+          timestamp: data.timestamp,
+        })
+        break
+
+      default:
+        // Legacy format for backward compatibility
+        io.to(`conversation:${data.conversationId}`).emit('message:ai', data)
+    }
   }
 })
 

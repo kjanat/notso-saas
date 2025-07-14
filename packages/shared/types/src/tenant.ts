@@ -3,6 +3,7 @@
  */
 
 import type { BaseEntity, TenantId /* , Timestamps - available if needed */ } from './base'
+import type { EntityMetadata } from './shared'
 
 export type SubscriptionStatus = 'trial' | 'active' | 'cancelled' | 'suspended'
 export type SubscriptionTier = 'trial' | 'starter' | 'professional' | 'enterprise'
@@ -28,7 +29,7 @@ export interface Tenant extends BaseEntity {
   subscriptionStatus: SubscriptionStatus
   subscriptionPlan: SubscriptionTier
   trialEndsAt?: Date
-  metadata: Record<string, any>
+  metadata: EntityMetadata
   settings: TenantSettings
 }
 

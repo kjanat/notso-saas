@@ -60,7 +60,13 @@ export interface AIJobPayload {
     systemPrompt?: string
     personality?: string
   }
-  options?: Record<string, any>
+  options?: {
+    language?: string
+    format?: 'text' | 'json' | 'markdown'
+    stream?: boolean
+    includeMetadata?: boolean
+    [key: string]: unknown
+  }
 }
 
 export interface AIJobResult {
@@ -69,7 +75,17 @@ export interface AIJobResult {
   intent?: IntentResult
   entities?: EntityExtraction[]
   embedding?: number[]
-  metadata?: Record<string, any>
+  metadata?: {
+    responseTime?: number
+    usageStats?: {
+      promptTokens: number
+      completionTokens: number
+      totalTokens: number
+    }
+    cacheHit?: boolean
+    model?: string
+    [key: string]: unknown
+  }
 }
 
 export interface AIJobError {

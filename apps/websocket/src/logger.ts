@@ -5,12 +5,12 @@ export const logger = pino({
   transport:
     process.env.NODE_ENV === 'development'
       ? {
-          target: 'pino-pretty',
           options: {
             colorize: true,
-            translateTime: 'HH:MM:ss Z',
             ignore: 'pid,hostname',
+            translateTime: 'HH:MM:ss Z',
           },
+          target: 'pino-pretty',
         }
       : undefined,
 })

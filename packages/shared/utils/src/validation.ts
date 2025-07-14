@@ -33,7 +33,12 @@ export function parseZodError(error: z.ZodError): ValidationError[] {
     code: issue.code,
     field: issue.path.join('.'),
     message: issue.message,
-    value: issue.path.reduce((obj, key) => obj?.[key], {} as any),
+    value: issue.path.reduce<unknown>((obj, key) => {
+      if (obj && typeof obj === 'object' && key in obj) {
+        return (obj as Record<string, unknown>)[key]
+      }
+      return undefined
+    }, error.formErrors.formErrors),
   }))
 }
 

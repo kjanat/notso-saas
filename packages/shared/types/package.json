@@ -1,26 +1,26 @@
 {
-  "name": "@saas/types",
-  "version": "0.0.1",
-  "private": true,
   "description": "Shared TypeScript types and interfaces",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
-    }
-  },
-  "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit"
-  },
   "devDependencies": {
     "@saas/tsconfig": "workspace:*",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
-  }
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "name": "@saas/types",
+  "private": true,
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "clean": "rm -rf dist",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts",
+  "version": "0.0.1"
 }

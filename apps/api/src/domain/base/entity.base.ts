@@ -25,13 +25,13 @@ export abstract class Entity<T> {
 }
 
 export abstract class AggregateRoot<T> extends Entity<T> {
-  private _domainEvents: DomainEvent[] = []
+  private _domainEvents: DomainEvent<unknown>[] = []
 
-  get domainEvents(): DomainEvent[] {
+  get domainEvents(): DomainEvent<unknown>[] {
     return this._domainEvents
   }
 
-  protected addDomainEvent(event: DomainEvent): void {
+  protected addDomainEvent(event: DomainEvent<unknown>): void {
     this._domainEvents.push(event)
   }
 
@@ -40,9 +40,9 @@ export abstract class AggregateRoot<T> extends Entity<T> {
   }
 }
 
-export interface DomainEvent {
+export interface DomainEvent<TPayload = Record<string, unknown>> {
   aggregateId: string
   eventName: string
   occurredOn: Date
-  payload: any
+  payload: TPayload
 }

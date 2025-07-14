@@ -145,9 +145,9 @@ export class TenantDomain {
     return new Date() > tenant.trialEndsAt
   }
 
-  static calculateUsageCost(usage: TenantUsage): number {
+  static calculateUsageCost(usage: TenantUsage, tier: SubscriptionTier): number {
     const { aiApiCost, storageCost } = usage.costs
-    const baseCost = TenantDomain.getBaseCost(usage.tenantId as any)
+    const baseCost = TenantDomain.getBaseCost(tier)
     return baseCost + aiApiCost + storageCost
   }
 

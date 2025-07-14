@@ -3,6 +3,7 @@
  */
 
 import type { BaseEntity, TenantId, UserId } from './base'
+import type { EntityMetadata } from './shared'
 
 export type UserRole = 'platform_admin' | 'tenant_admin' | 'tenant_user' | 'tenant_viewer'
 
@@ -15,7 +16,7 @@ export interface User extends BaseEntity {
   emailVerified: boolean
   lastLoginAt?: Date
   preferences: UserPreferences
-  metadata: Record<string, any>
+  metadata: EntityMetadata
 }
 
 export interface TenantUser {

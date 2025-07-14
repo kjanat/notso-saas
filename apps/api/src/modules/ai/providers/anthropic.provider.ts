@@ -1,5 +1,5 @@
 import { config } from '../../../config/index.js'
-import type { IStreamResponse } from '../ai.interfaces.js'
+import type { FormattedMessage, IStreamResponse } from '../ai.interfaces.js'
 import { BaseAIProvider } from './base.provider.js'
 
 export class AnthropicProvider extends BaseAIProvider {
@@ -79,7 +79,7 @@ export class AnthropicProvider extends BaseAIProvider {
     return data.data[0].embedding
   }
 
-  protected formatMessages(messages: Array<{ role: string; content: string }>): any {
+  protected formatMessages(messages: Array<{ role: string; content: string }>): FormattedMessage {
     // Anthropic requires a specific format
     return messages.map(msg => ({
       content: msg.content,

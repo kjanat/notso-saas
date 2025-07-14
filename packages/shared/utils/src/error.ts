@@ -1,15 +1,17 @@
+import type { ErrorContext, SerializedError } from './types'
+
 export class BaseError extends Error {
   public readonly code: string
   public readonly statusCode: number
   public readonly isOperational: boolean
-  public readonly context?: Record<string, any>
+  public readonly context?: ErrorContext
 
   constructor(
     message: string,
     code: string,
     statusCode = 500,
     isOperational = true,
-    context?: Record<string, any>
+    context?: ErrorContext
   ) {
     super(message)
     this.name = this.constructor.name
@@ -22,19 +24,19 @@ export class BaseError extends Error {
 }
 
 export class ValidationError extends BaseError {
-  constructor(message: string, context?: Record<string, any>) {
+  constructor(message: string, context?: ErrorContext) {
     super(message, 'VALIDATION_ERROR', 400, true, context)
   }
 }
 
 export class AuthenticationError extends BaseError {
-  constructor(message = 'Authentication failed', context?: Record<string, any>) {
+  constructor(message = 'Authentication failed', context?: ErrorContext) {
     super(message, 'AUTHENTICATION_ERROR', 401, true, context)
   }
 }
 
 export class AuthorizationError extends BaseError {
-  constructor(message = 'Access denied', context?: Record<string, any>) {
+  constructor(message = 'Access denied', context?: ErrorContext) {
     super(message, 'AUTHORIZATION_ERROR', 403, true, context)
   }
 }
@@ -49,13 +51,13 @@ export class NotFoundError extends BaseError {
 }
 
 export class ConflictError extends BaseError {
-  constructor(message: string, context?: Record<string, any>) {
+  constructor(message: string, context?: ErrorContext) {
     super(message, 'CONFLICT', 409, true, context)
   }
 }
 
 export class RateLimitError extends BaseError {
-  constructor(message = 'Rate limit exceeded', retryAfter?: number, context?: Record<string, any>) {
+  constructor(message = 'Rate limit exceeded', retryAfter?: number, context?: ErrorContext) {
     super(message, 'RATE_LIMIT_EXCEEDED', 429, true, {
       ...context,
       retryAfter,
@@ -64,7 +66,7 @@ export class RateLimitError extends BaseError {
 }
 
 export class ExternalServiceError extends BaseError {
-  constructor(service: string, originalError?: Error, context?: Record<string, any>) {
+  constructor(service: string, originalError?: Error, context?: ErrorContext) {
     const message = `External service error: ${service}`
     super(message, 'EXTERNAL_SERVICE_ERROR', 502, false, {
       ...context,
@@ -85,7 +87,7 @@ export class DatabaseError extends BaseError {
 }
 
 export class ConfigurationError extends BaseError {
-  constructor(message: string, context?: Record<string, any>) {
+  constructor(message: string, context?: ErrorContext) {
     super(message, 'CONFIGURATION_ERROR', 500, false, context)
   }
 }
@@ -107,8 +109,8 @@ export function getErrorMessage(error: unknown): string {
   return 'An unknown error occurred'
 }
 
-export function serializeError(error: Error): Record<string, any> {
-  const serialized: Record<string, any> = {
+export function serializeError(error: Error): SerializedError {
+  const serialized: SerializedError = {
     message: error.message,
     name: error.name,
     stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,

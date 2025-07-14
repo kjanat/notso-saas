@@ -1,4 +1,4 @@
-import type { IAIProvider, IStreamResponse } from '../ai.interfaces.js'
+import type { FormattedMessage, IAIProvider, IStreamResponse } from '../ai.interfaces.js'
 
 export abstract class BaseAIProvider implements IAIProvider {
   abstract name: string
@@ -20,7 +20,7 @@ export abstract class BaseAIProvider implements IAIProvider {
     return Math.ceil(text.length / 4)
   }
 
-  protected formatMessages(messages: Array<{ role: string; content: string }>): any {
+  protected formatMessages(messages: Array<{ role: string; content: string }>): FormattedMessage {
     return messages
   }
 }

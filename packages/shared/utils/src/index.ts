@@ -1,4 +1,5 @@
 export * from './crypto'
 export * from './date'
 export * from './error'
+export * from './types'
 export * from './validation'

@@ -2,6 +2,8 @@
  * Common utility types and enums
  */
 
+import type { DynamicConfig, DynamicValue, EntityMetadata, ResponseMetadata } from './shared'
+
 export type Nullable<T> = T | null
 export type Optional<T> = T | undefined
 export type Maybe<T> = T | null | undefined
@@ -45,17 +47,17 @@ export interface PaginatedResponse<T> {
 }
 
 // API Response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: ApiError
-  metadata?: Record<string, any>
+  metadata?: ResponseMetadata
 }
 
 export interface ApiError {
   code: string
   message: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   stack?: string
 }
 
@@ -64,7 +66,7 @@ export interface ValidationError {
   field: string
   message: string
   code: string
-  value?: any
+  value?: DynamicValue
 }
 
 export interface ValidationResult {
@@ -83,7 +85,7 @@ export interface FileUpload {
 }
 
 // Queue job types
-export interface QueueJob<T = any> {
+export interface QueueJob<T = unknown> {
   id: string
   queue: string
   type: string
@@ -98,7 +100,7 @@ export interface QueueJob<T = any> {
 }
 
 // Event emitter types
-export interface EventPayload<T = any> {
+export interface EventPayload<T = unknown> {
   event: string
   data: T
   timestamp: Date
@@ -106,7 +108,7 @@ export interface EventPayload<T = any> {
 }
 
 // Cache types
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   key: string
   value: T
   ttl?: number
@@ -119,7 +121,7 @@ export interface FeatureFlag {
   enabled: boolean
   rolloutPercentage?: number
   enabledForTenants?: string[]
-  metadata?: Record<string, any>
+  metadata?: DynamicConfig
 }
 
 // Health check
@@ -136,7 +138,7 @@ export interface HealthCheck {
   status: 'pass' | 'fail' | 'warn'
   message?: string
   duration?: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, string | number | boolean>
 }
 
 // Audit log
@@ -148,10 +150,10 @@ export interface AuditLog {
   resource: string
   resourceId: string
   changes?: {
-    before: Record<string, any>
-    after: Record<string, any>
+    before: Record<string, DynamicValue>
+    after: Record<string, DynamicValue>
   }
-  metadata?: Record<string, any>
+  metadata?: EntityMetadata
   ipAddress?: string
   userAgent?: string
   timestamp: Date
@@ -161,7 +163,7 @@ export interface AuditLog {
 export interface WebhookEvent {
   id: string
   type: string
-  data: Record<string, any>
+  data: Record<string, unknown>
   timestamp: Date
   signature?: string
 }

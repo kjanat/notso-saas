@@ -4,7 +4,7 @@ import { Tenant } from '../../domain/entities/tenant.entity.js'
 import { ApiKey } from '../../domain/value-objects/api-key.value-object.js'
 import { getDatabase } from '../../shared/database/index.js'
 
-import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
+import type { CreateTenantDto, TenantFilters, UpdateTenantDto } from './tenant.dto.js'
 import type { ITenantRepository } from './tenant.interfaces.js'
 
 @injectable()
@@ -107,13 +107,13 @@ export class TenantRepository implements ITenantRepository {
     })
   }
 
-  async count(filters?: Record<string, any>): Promise<number> {
+  async count(filters?: TenantFilters): Promise<number> {
     return this.db.tenant.count({
       where: filters,
     })
   }
 
-  async findAll(filters?: Record<string, any>): Promise<Tenant[]> {
+  async findAll(filters?: TenantFilters): Promise<Tenant[]> {
     const tenants = await this.db.tenant.findMany({
       orderBy: { createdAt: 'desc' },
       where: filters,

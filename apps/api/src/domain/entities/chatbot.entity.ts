@@ -169,6 +169,60 @@ export class Chatbot extends AggregateRoot<ChatbotProps> {
     return `/embed/${this.props.embedId.value}.js`
   }
 
+  get avatarModelUrl(): string | undefined {
+    return this.props.avatar?.modelUrl
+  }
+
+  get avatarScale(): number {
+    return this.props.avatar?.scale || 1
+  }
+
+  get avatarPosition(): { x: number; y: number; z: number } {
+    return this.props.avatar?.position || { x: 0, y: -0.5, z: 0 }
+  }
+
+  get animationMap(): Record<string, string> {
+    return this.props.avatar?.animationMap || {}
+  }
+
+  get systemPrompt(): string {
+    return this.props.personality?.systemPrompt || 'You are a helpful assistant.'
+  }
+
+  get welcomeMessage(): string | undefined {
+    return this.props.personality?.traits
+  }
+
+  get model(): string {
+    return this.props.aiModel
+  }
+
+  get temperature(): number {
+    return this.props.temperature
+  }
+
+  get maxTokens(): number | undefined {
+    return undefined // Not defined in the current model
+  }
+
+  get knowledgeBaseId(): string | undefined {
+    return this.props.knowledgeBaseId
+  }
+
+  get placement(): PlacementConfiguration {
+    return this.props.placement
+  }
+
+  get behaviors(): BehaviorConfiguration {
+    return this.props.behavior
+  }
+
+  get theme():
+    | { primaryColor?: string; secondaryColor?: string; fontFamily?: string; borderRadius?: string }
+    | undefined {
+    return undefined // Not defined in the current model
+  }
+
   updateAvatar(config: Partial<AvatarConfiguration>): void {
     this.props.avatar = { ...this.props.avatar, ...config }
     this.props.updatedAt = new Date()
