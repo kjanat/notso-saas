@@ -6,7 +6,8 @@ const prisma = new PrismaClient()
 async function main() {
   // Create platform admin user
   const adminSalt = generateSalt()
-  const adminPassword = hashPassword('admin123', adminSalt)
+  const adminPasswordPlain = process.env.ADMIN_PASSWORD || 'SecureAdm!n2025#Dev'
+  const adminPassword = hashPassword(adminPasswordPlain, adminSalt)
 
   await prisma.user.upsert({
     create: {
@@ -61,7 +62,8 @@ async function main() {
 
   // Create demo user for the tenant
   const demoUserSalt = generateSalt()
-  const demoUserPassword = hashPassword('demo123', demoUserSalt)
+  const demoPasswordPlain = process.env.DEMO_PASSWORD || 'DemoUser@2025!'
+  const demoUserPassword = hashPassword(demoPasswordPlain, demoUserSalt)
 
   const demoUser = await prisma.user.upsert({
     create: {

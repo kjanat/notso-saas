@@ -1,9 +1,12 @@
 import 'reflect-metadata'
+import { PrismaClient } from '@saas/database'
+import type { Redis } from 'ioredis'
 import type { DependencyContainer } from 'tsyringe'
 import { container } from 'tsyringe'
 import { AIProviderFactory } from '../../modules/ai/ai.factory.js'
 import type { IAIProviderFactory } from '../../modules/ai/ai.interfaces.js'
-import { CacheService } from '../cache/index.js'
+import { CacheService, getCache } from '../cache/index.js'
+import { getDatabase } from '../database/index.js'
 import type { IAuditService } from '../interfaces/audit.interfaces.js'
 import type { ICacheService, ILogger, IQueueService } from '../interfaces/base.interfaces.js'
 import { QueueService } from '../queue/index.js'
@@ -21,6 +24,12 @@ export function setupContainer(): DependencyContainer {
   container.registerSingleton<IAIProviderFactory>('IAIProviderFactory', AIProviderFactory)
 
   return container
+}
+
+export function registerInfrastructure(): void {
+  // These should be called after setupDatabase() and setupCache() in main.ts
+  container.registerInstance<PrismaClient>('PrismaClient', getDatabase())
+  container.registerInstance<Redis>('Redis', getCache())
 }
 
 export { container }

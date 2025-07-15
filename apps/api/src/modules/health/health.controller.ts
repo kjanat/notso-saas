@@ -1,17 +1,14 @@
 import { PrismaClient } from '@saas/database'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { Redis } from 'ioredis'
-import { injectable } from 'tsyringe'
+import { inject, injectable } from 'tsyringe'
 
 @injectable()
 export class HealthController {
-  private prisma: PrismaClient
-  private redis: Redis
-
-  constructor() {
-    this.prisma = new PrismaClient()
-    this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
-  }
+  constructor(
+    @inject('PrismaClient') private prisma: PrismaClient,
+    @inject('Redis') private redis: Redis
+  ) {}
 
   async check(_request: FastifyRequest, reply: FastifyReply) {
     const services: Record<string, string> = {}
@@ -37,7 +34,9 @@ export class HealthController {
 
     // Check if worker is running by checking Redis queue status
     try {
-      const aiQueueKey = 'bull:ai-processing:meta'
+      const queuePrefix = process.env.QUEUE_PREFIX || 'bull'
+      const queueName = process.env.AI_QUEUE_NAME || 'ai-processing'
+      const aiQueueKey = `${queuePrefix}:${queueName}:meta`
       const exists = await this.redis.exists(aiQueueKey)
       services.worker = exists ? 'running' : 'unknown'
     } catch {
