@@ -10,12 +10,18 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/saas_platform_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: test-secret-key
+      API_URL: http://localhost:3000
     services:
       postgres:
         image: postgres:17
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'postgres' }}
           POSTGRES_DB: saas_platform_test
         ports:
           - 5432:5432
@@ -58,10 +64,17 @@ jobs:
       - name: Generate Prisma Client
         run: pnpm db:generate
 
+      - name: Wait for database to be ready
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for database to be ready..."
+            sleep 2
+          done
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'postgres' }}
+
       - name: Push database schema
         run: pnpm db:push
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_platform_test
 
       - name: Run linting
         run: pnpm lint
@@ -72,20 +85,10 @@ jobs:
       - name: Run unit tests
         run: pnpm test:unit
         continue-on-error: true
-        env:
-          NODE_ENV: test
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_platform_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-secret-key
 
       - name: Run integration tests
         run: pnpm test:integration
         continue-on-error: true
-        env:
-          NODE_ENV: test
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_platform_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-secret-key
 
       - name: Install Playwright browsers
         run: pnpm --filter=@saas/e2e exec playwright install --with-deps chromium
@@ -94,12 +97,6 @@ jobs:
       - name: Run E2E tests
         run: pnpm test:e2e
         continue-on-error: true
-        env:
-          NODE_ENV: test
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_platform_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-secret-key
-          API_URL: http://localhost:3000
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
