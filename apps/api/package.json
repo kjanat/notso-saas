@@ -36,6 +36,7 @@
     "tsup": "^8.5.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
   "name": "@saas/api",
@@ -50,7 +51,7 @@
     "lint": "eslint src",
     "start": "node dist/main.js",
     "test": "vitest run",
-    "test:unit": "vitest run src/**/*.test.ts",
+    "test:unit": "vitest run src/**/*.test.ts --passWithNoTests",
     "test:integration": "vitest run tests/integration/**/*.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

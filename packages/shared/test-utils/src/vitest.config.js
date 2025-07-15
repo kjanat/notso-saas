@@ -1,18 +1,18 @@
-import path from 'path'
+import path from 'node:path'
+import tsconfigPaths from 'vite-tsconfig-paths'
 import { defineConfig } from 'vitest/config'
 
-export function createVitestConfig(
-  dirname: string,
-  options?: {
-    setupFiles?: string[]
-    alias?: Record<string, string>
-  }
-) {
+export function createVitestConfig(dirname, options) {
   return defineConfig({
+    plugins: [tsconfigPaths()],
     resolve: {
       alias: {
+        '.prisma/client': path.resolve(
+          dirname,
+          '../../packages/database/node_modules/.prisma/client'
+        ),
         '@': path.resolve(dirname, './src'),
-        '@saas/database': path.resolve(dirname, '../../packages/database/src'),
+        '@saas/database': path.resolve(dirname, '../../packages/database'),
         '@saas/shared': path.resolve(dirname, '../../packages/shared'),
         ...options?.alias,
       },
