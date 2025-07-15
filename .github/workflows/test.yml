@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
-      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/saas_platform_test
+      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/saas_platform_test
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: test-secret-key
     services:
@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
-      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/saas_platform_test
+      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/saas_platform_test
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: test-secret-key
     services:
@@ -191,7 +191,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
-      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/saas_platform_test
+      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/saas_platform_test
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: test-secret-key
       API_URL: http://localhost:3000
