@@ -7,15 +7,53 @@ on:
     branches: [master, develop]
 
 jobs:
-  test:
-    name: Test
+  setup:
+    name: Setup and Checks
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
+      - name: Run linting
+        run: pnpm lint
+
+      - name: Run type checking
+        run: pnpm type-check
+
+  unit-tests:
+    name: Unit Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/saas_platform_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: test-secret-key
     services:
       postgres:
         image: postgres:17
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'postgres' }}
           POSTGRES_DB: saas_platform_test
         ports:
           - 5432:5432
@@ -38,8 +76,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2  # For --filter=[origin/master]
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -58,65 +94,198 @@ jobs:
       - name: Generate Prisma Client
         run: pnpm db:generate
 
-      - name: Push database schema
-        run: pnpm db:push
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_platform_test
-
-      - name: Run linting
-        run: pnpm lint
-
-      - name: Run type checking
-        run: pnpm type-check
-
       - name: Run unit tests
         run: pnpm test:unit
-        continue-on-error: true
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-coverage
+          path: |
+            **/coverage/
+          retention-days: 7
+
+  integration-tests:
+    name: Integration Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/saas_platform_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: test-secret-key
+    services:
+      postgres:
+        image: postgres:17
         env:
-          NODE_ENV: test
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_platform_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-secret-key
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'postgres' }}
+          POSTGRES_DB: saas_platform_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
+      - name: Wait for database to be ready
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for database to be ready..."
+            sleep 2
+          done
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'postgres' }}
+
+      - name: Push database schema
+        run: pnpm db:push
 
       - name: Run integration tests
         run: pnpm test:integration
-        continue-on-error: true
-        env:
-          NODE_ENV: test
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_platform_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-secret-key
-
-      - name: Install Playwright browsers
-        run: pnpm --filter=@saas/e2e exec playwright install --with-deps chromium
-        continue-on-error: true
-
-      - name: Run E2E tests
-        run: pnpm test:e2e
-        continue-on-error: true
-        env:
-          NODE_ENV: test
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/saas_platform_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-secret-key
-          API_URL: http://localhost:3000
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
+          name: integration-test-results
           path: |
-            **/coverage/
             **/test-results/
+          retention-days: 7
+
+  e2e-tests:
+    name: E2E Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/saas_platform_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: test-secret-key
+      API_URL: http://localhost:3000
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'postgres' }}
+          POSTGRES_DB: saas_platform_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
+
+      - name: Wait for database to be ready
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for database to be ready..."
+            sleep 2
+          done
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD || 'postgres' }}
+
+      - name: Push database schema
+        run: pnpm db:push
+
+      - name: Install Playwright browsers
+        run: pnpm --filter=@saas/e2e exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: |
             **/playwright-report/
           retention-days: 7
 
+  upload-coverage:
+    name: Upload Coverage to Codecov
+    needs: [unit-tests, integration-tests, e2e-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-artifacts
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        if: always()
         with:
-          files: ./apps/*/coverage/coverage-final.json,./packages/*/coverage/coverage-final.json
+          files: ./test-artifacts/**/coverage/coverage-final.json
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
