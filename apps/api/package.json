@@ -45,7 +45,7 @@
     "db:push": "echo 'Run db:push from root'",
     "db:seed": "tsx src/scripts/seed.ts",
     "dev": "tsx watch src/main.ts",
-    "lint": "eslint .",
+    "lint": "eslint src",
     "start": "node dist/main.js",
     "test": "vitest run",
     "test:unit": "vitest run src/**/*.test.ts",

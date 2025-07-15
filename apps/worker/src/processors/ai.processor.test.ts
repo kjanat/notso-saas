@@ -1,9 +1,12 @@
 import type { Job } from 'bullmq'
+
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { aiProcessor } from './ai.processor'
 
 // Mock fetch globally
 global.fetch = vi.fn()
+const mockFetch = global.fetch as ReturnType<typeof vi.fn>
 
 describe('AI Processor', () => {
   beforeEach(() => {
@@ -21,7 +24,7 @@ describe('AI Processor', () => {
     } as Job
 
     // Mock chatbot config fetch
-    ;(global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       json: async () => ({
         maxTokens: 500,
         model: 'gpt-4',
@@ -33,7 +36,7 @@ describe('AI Processor', () => {
     })
 
     // Mock AI service response
-    ;(global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => ({
         content: 'I can help you with that!',
@@ -75,7 +78,7 @@ describe('AI Processor', () => {
     } as Job
 
     // Mock chatbot config
-    ;(global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       json: async () => ({ provider: 'openai' }),
       ok: true,
     })
@@ -96,7 +99,7 @@ describe('AI Processor', () => {
       },
     })
 
-    ;(global.fetch as any).mockResolvedValueOnce({
+    mockFetch.mockResolvedValueOnce({
       body: stream,
       headers: new Headers({ 'content-type': 'text/event-stream' }),
       ok: true,

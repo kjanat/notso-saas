@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import type { Job } from 'bullmq'
+
 import { logger } from '../logger.js'
 
 const prisma = new PrismaClient()

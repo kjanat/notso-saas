@@ -61,7 +61,7 @@ test.describe('Tenant Management E2E Flow', () => {
     expect(listResponse.ok()).toBeTruthy()
 
     const tenants = await listResponse.json()
-    const foundTenant = tenants.find((t: any) => t.id === tenantId)
+    const foundTenant = tenants.find((t: { id: string }) => t.id === tenantId)
     expect(foundTenant).toBeDefined()
     expect(foundTenant.subscriptionPlan).toBe('pro')
   })

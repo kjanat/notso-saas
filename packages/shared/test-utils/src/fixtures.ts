@@ -51,7 +51,10 @@ export function createChatbotFixture(
   }
 }
 
-export function createConversationFixture(chatbotId: string, overrides?: any) {
+export function createConversationFixture(
+  chatbotId: string,
+  overrides?: Partial<Record<string, unknown>>
+) {
   return {
     chatbotId,
     metadata: {},
@@ -61,7 +64,10 @@ export function createConversationFixture(chatbotId: string, overrides?: any) {
   }
 }
 
-export function createMessageFixture(conversationId: string, overrides?: any) {
+export function createMessageFixture(
+  conversationId: string,
+  overrides?: Partial<Record<string, unknown>>
+) {
   return {
     content: faker.lorem.sentence(),
     conversationId,

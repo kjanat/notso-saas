@@ -6,7 +6,7 @@ import { setupContainer } from '../../../apps/api/src/shared/di/container'
 interface TestAppOptions {
   logger?: boolean
   modules?: Array<{
-    module: any
+    module: FastifyPluginAsync
     prefix: string
   }>
 }

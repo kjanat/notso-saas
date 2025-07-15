@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsx watch src/main.ts",
-    "lint": "eslint .",
+    "lint": "eslint src",
     "start": "node dist/main.js",
     "test": "vitest",
     "type-check": "tsc --noEmit"

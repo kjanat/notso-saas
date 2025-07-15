@@ -60,7 +60,7 @@ export function createMockQueue(): IQueueService {
 }
 
 export function createMockRepository<T>(methods: string[]) {
-  const repo: any = {}
+  const repo: Record<string, ReturnType<typeof vi.fn>> = {}
 
   methods.forEach(method => {
     repo[method] = vi.fn()
