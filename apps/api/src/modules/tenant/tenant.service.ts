@@ -18,7 +18,7 @@ export class TenantService implements ITenantService {
     @inject('ILogger') private readonly logger: ILogger
   ) {}
 
-  async create(dto: CreateTenantDto): Promise<Tenant> {
+  async create(dto: CreateTenantDto, createdBy = 'system'): Promise<Tenant> {
     // Check if slug already exists
     const existing = await this.repository.findBySlug(dto.slug)
     if (existing) {
@@ -26,7 +26,7 @@ export class TenantService implements ITenantService {
     }
 
     // Create tenant using domain model
-    const tenant = await this.repository.create(dto)
+    const tenant = await this.repository.create(dto, createdBy)
 
     // Queue provisioning job
     await this.queue.addJob('tenant-provisioning', 'provision-database', {
@@ -58,7 +58,11 @@ export class TenantService implements ITenantService {
     }>(cacheKey)
     if (cached) {
       // Reconstitute domain model from cached data
-      return Tenant.reconstitute(cached.id, cached)
+      return Tenant.reconstitute(cached.id, {
+        ...cached,
+        createdAt: cached.createdAt ? new Date(cached.createdAt) : new Date(),
+        updatedAt: cached.updatedAt ? new Date(cached.updatedAt) : new Date(),
+      })
     }
 
     // Fetch from database
@@ -94,12 +98,8 @@ export class TenantService implements ITenantService {
     return tenant
   }
 
-  async findAll(filters?: TenantFilters): Promise<{ data: Tenant[]; total: number }> {
-    const [data, total] = await Promise.all([
-      this.repository.findAll(filters),
-      this.repository.count(filters),
-    ])
-    return { data, total }
+  async findAll(filters?: TenantFilters): Promise<Tenant[]> {
+    return this.repository.findAll(filters as Record<string, unknown>)
   }
 
   async update(id: string, dto: UpdateTenantDto): Promise<Tenant> {

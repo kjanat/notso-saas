@@ -5,6 +5,9 @@ export interface CreateChatbotDto {
   tenantId: string
   name: string
   purpose?: 'sales' | 'support' | 'onboarding' | 'general'
+  description?: string
+  welcomeMessage?: string
+  theme?: Record<string, any>
   avatar?: {
     modelUrl: string
     scale?: number
@@ -35,13 +38,13 @@ export interface CreateChatbotDto {
   knowledgeBaseId?: string
 }
 
-export interface UpdateChatbotDto extends Partial<CreateChatbotDto> {}
+export type UpdateChatbotDto = Partial<CreateChatbotDto>
 
 export interface IChatbotRepository
   extends IBaseRepository<Chatbot, CreateChatbotDto, UpdateChatbotDto> {
   findByEmbedId(embedId: string): Promise<Chatbot | null>
   findAllByTenant(tenantId: string): Promise<Chatbot[]>
-  generateEmbedId(): string
+  generateDeploymentKey(): string
 }
 
 export interface IChatbotService {

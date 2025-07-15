@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@saas/database'
 import type { Job } from 'bullmq'
 import { logger } from '../logger.js'
 
@@ -22,8 +22,7 @@ export async function tenantProcessor(job: Job) {
     // Update tenant status
     await prisma.tenant.update({
       data: {
-        provisionedAt: new Date(),
-        status: 'active',
+        subscriptionStatus: 'ACTIVE',
       },
       where: { id: tenantId },
     })

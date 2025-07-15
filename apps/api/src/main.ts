@@ -11,7 +11,7 @@ import { config } from './config/index.js'
 import { registerModules } from './modules/index.js'
 import { setupCache } from './shared/cache/index.js'
 import { setupDatabase } from './shared/database/index.js'
-import { setupContainer } from './shared/di/container.js'
+import { registerInfrastructure, setupContainer } from './shared/di/container.js'
 import { setupQueues } from './shared/queue/index.js'
 import { logger } from './shared/utils/logger.js'
 
@@ -23,6 +23,9 @@ async function bootstrap() {
   await setupDatabase()
   await setupCache()
   await setupQueues()
+
+  // Register infrastructure in DI container after initialization
+  registerInfrastructure()
 
   // Create Fastify instance
   const app = Fastify({

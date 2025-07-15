@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const createTenantSchema = z.object({
   email: z.string().email(),
   name: z.string().min(2).max(100),
+  plan: z.enum(['trial', 'starter', 'professional', 'enterprise']).optional(),
   slug: z
     .string()
     .regex(/^[a-z0-9-]+$/)
@@ -12,7 +13,8 @@ export const createTenantSchema = z.object({
 
 export const updateTenantSchema = z.object({
   name: z.string().min(2).max(100).optional(),
-  settings: z.record(z.unknown()).optional(),
+  plan: z.enum(['trial', 'starter', 'professional', 'enterprise']).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type CreateTenantDto = z.infer<typeof createTenantSchema>

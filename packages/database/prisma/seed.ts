@@ -4,13 +4,12 @@ import { PrismaClient } from '../node_modules/.prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('🌱 Starting database seed...')
-
   // Create platform admin user
   const adminSalt = generateSalt()
-  const adminPassword = hashPassword('admin123', adminSalt)
+  const adminPasswordPlain = process.env.ADMIN_PASSWORD || 'SecureAdm!n2025#Dev'
+  const adminPassword = hashPassword(adminPasswordPlain, adminSalt)
 
-  const admin = await prisma.user.upsert({
+  await prisma.user.upsert({
     create: {
       email: 'admin@saas-platform.com',
       emailVerified: true,
@@ -33,8 +32,6 @@ async function main() {
     update: {},
     where: { email: 'admin@saas-platform.com' },
   })
-
-  console.log('✅ Created platform admin:', admin.email)
 
   // Create demo tenant
   const demoTenant = await prisma.tenant.upsert({
@@ -63,11 +60,10 @@ async function main() {
     where: { slug: 'demo-company' },
   })
 
-  console.log('✅ Created demo tenant:', demoTenant.name)
-
   // Create demo user for the tenant
   const demoUserSalt = generateSalt()
-  const demoUserPassword = hashPassword('demo123', demoUserSalt)
+  const demoPasswordPlain = process.env.DEMO_PASSWORD || 'DemoUser@2025!'
+  const demoUserPassword = hashPassword(demoPasswordPlain, demoUserSalt)
 
   const demoUser = await prisma.user.upsert({
     create: {
@@ -118,8 +114,6 @@ async function main() {
     },
   })
 
-  console.log('✅ Created demo user and linked to tenant:', demoUser.email)
-
   // Create initial API key for demo tenant
   await prisma.apiKey.create({
     data: {
@@ -135,10 +129,6 @@ async function main() {
       tenantId: demoTenant.id,
     },
   })
-
-  console.log('✅ Created demo API key')
-
-  console.log('🎉 Database seed completed!')
 }
 
 main()

@@ -8,7 +8,9 @@ export class TenantController {
   constructor(@inject('ITenantService') private readonly tenantService: ITenantService) {}
 
   async create(request: FastifyRequest<{ Body: CreateTenantDto }>, reply: FastifyReply) {
-    const tenant = await this.tenantService.create(request.body)
+    // Get user ID from JWT token if available, otherwise use 'system'
+    const createdBy = request.user?.id || 'system'
+    const tenant = await this.tenantService.create(request.body, createdBy)
     return reply.status(201).send(tenant)
   }
 
@@ -25,14 +27,14 @@ export class TenantController {
     reply: FastifyReply
   ) {
     const { page = 1, limit = 10 } = request.query
-    const result = await this.tenantService.findAll({ limit, page })
+    const tenants = await this.tenantService.findAll()
 
-    // Set pagination headers
-    reply.header('X-Total-Count', result.total.toString())
+    // For now, return all tenants without pagination
+    reply.header('X-Total-Count', tenants.length.toString())
     reply.header('X-Page', page.toString())
     reply.header('X-Limit', limit.toString())
 
-    return result.data
+    return tenants
   }
 
   async update(

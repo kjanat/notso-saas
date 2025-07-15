@@ -1,7 +1,30 @@
 export interface IStreamResponse {
-  text: string
-  isComplete: boolean
+  text?: string
+  isComplete?: boolean
   usage?: {
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+  }
+  choices?: Array<{
+    delta: {
+      content?: string
+    }
+    finishReason?: string | null
+  }>
+}
+
+export interface IChatRequest {
+  messages: Array<{ role: string; content: string }>
+  temperature?: number
+  maxTokens?: number
+  model?: string
+}
+
+export interface IChatResponse {
+  content: string
+  finishReason: string
+  usage: {
     promptTokens: number
     completionTokens: number
     totalTokens: number

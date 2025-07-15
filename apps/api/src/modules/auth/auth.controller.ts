@@ -1,10 +1,12 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { logger } from '../../shared/utils/logger.js'
 import type { AuthService } from './auth.service.js'
+import type { LoginResponse, RegisterResponse, UserProfile } from './auth.types.js'
 
 interface LoginBody {
   email: string
   password: string
+  tenantId?: string // Optional tenant selection
 }
 
 interface RegisterBody extends LoginBody {
@@ -15,12 +17,27 @@ interface RegisterBody extends LoginBody {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  async login(request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) {
-    const { email, password } = request.body
-    const result = await this.authService.login(email, password)
+  async login(
+    request: FastifyRequest<{ Body: LoginBody }>,
+    reply: FastifyReply
+  ): Promise<
+    | { token: string; user: LoginResponse['user'] }
+    | { message: string; availableTenants?: Array<{ id: string; name: string; slug: string }> }
+    | { message: string }
+  > {
+    const { email, password, tenantId } = request.body
+    const result = await this.authService.login({ email, password, tenantId })
 
     if (!result) {
       return reply.status(401).send({ message: 'Invalid credentials' })
+    }
+
+    // Check if tenant selection is required
+    if (result.availableTenants) {
+      return {
+        availableTenants: result.availableTenants,
+        message: 'Multiple tenants available. Please select a tenant.',
+      }
     }
 
     return {
@@ -33,7 +50,10 @@ export class AuthController {
     }
   }
 
-  async register(request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) {
+  async register(
+    request: FastifyRequest<{ Body: RegisterBody }>,
+    reply: FastifyReply
+  ): Promise<{ token: string; user: RegisterResponse }> {
     const user = await this.authService.register(request.body)
 
     return {
@@ -46,7 +66,10 @@ export class AuthController {
     }
   }
 
-  async getProfile(request: FastifyRequest, reply: FastifyReply) {
+  async getProfile(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<UserProfile | { message: string }> {
     const userId = request.user.id
     const user = await this.authService.getUserById(userId)
 

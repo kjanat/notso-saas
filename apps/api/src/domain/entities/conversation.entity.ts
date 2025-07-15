@@ -52,7 +52,7 @@ export class Conversation extends BaseEntity {
     createdAt?: Date
     updatedAt?: Date
   }) {
-    super(data.id, data.createdAt, data.updatedAt)
+    super({ createdAt: data.createdAt, id: data.id, updatedAt: data.updatedAt })
     this.chatbotId = data.chatbotId
     this.sessionId = data.sessionId
     this.status = data.status || ConversationStatus.ACTIVE

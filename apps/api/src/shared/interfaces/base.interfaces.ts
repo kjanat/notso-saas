@@ -28,11 +28,15 @@ export interface ICacheService {
   set<T>(key: string, value: T, ttl?: number): Promise<void>
   delete(key: string): Promise<void>
   exists(key: string): Promise<boolean>
+  flush(): Promise<void>
 }
 
 export interface IQueueService {
-  addJob<T>(queue: string, name: string, data: T, options?: unknown): Promise<unknown>
-  registerWorker<T>(queue: string, processor: (job: unknown) => Promise<T>): void
+  addJob<T>(queue: string, name: string, data: T, options?: unknown): Promise<string>
+  removeJob(jobId: string): Promise<void>
+  getJob(jobId: string): Promise<Job | null>
+  getJobs(): Promise<Job[]>
+  registerWorker<T>(queue: string, processor: (job: Job) => Promise<T>): void
 }
 
 export interface ILogger {
@@ -41,3 +45,5 @@ export interface ILogger {
   warn(message: string, meta?: Record<string, unknown>): void
   debug(message: string, meta?: Record<string, unknown>): void
 }
+
+import type { Job } from 'bullmq'

@@ -1,6 +1,16 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { CreateChatbotDto, IChatbotService, UpdateChatbotDto } from './chatbot.interfaces.js'
 
+declare module 'fastify' {
+  interface FastifyRequest {
+    user: {
+      id: string
+      email: string
+      tenantId: string
+    }
+  }
+}
+
 interface ChatbotParams {
   id: string
 }
@@ -12,7 +22,13 @@ interface EmbedParams {
 export class ChatbotController {
   constructor(private readonly chatbotService: IChatbotService) {}
 
-  async create(request: FastifyRequest<{ Body: CreateChatbotDto }>, reply: FastifyReply) {
+  async create(
+    request: FastifyRequest & {
+      body: CreateChatbotDto
+      user: { id: string; email: string; tenantId: string }
+    },
+    reply: FastifyReply
+  ) {
     const chatbot = await this.chatbotService.create({
       ...request.body,
       tenantId: request.user.tenantId,
@@ -20,7 +36,13 @@ export class ChatbotController {
     return reply.code(201).send(chatbot)
   }
 
-  async findById(request: FastifyRequest<{ Params: ChatbotParams }>, reply: FastifyReply) {
+  async findById(
+    request: FastifyRequest & {
+      params: ChatbotParams
+      user: { id: string; email: string; tenantId: string }
+    },
+    reply: FastifyReply
+  ) {
     const chatbot = await this.chatbotService.findById(request.params.id)
 
     if (!chatbot) {
@@ -35,7 +57,7 @@ export class ChatbotController {
     return chatbot
   }
 
-  async findByEmbedId(request: FastifyRequest<{ Params: EmbedParams }>, reply: FastifyReply) {
+  async findByEmbedId(request: FastifyRequest & { params: EmbedParams }, reply: FastifyReply) {
     const chatbot = await this.chatbotService.findByEmbedId(request.params.embedId)
 
     if (!chatbot) {
@@ -57,13 +79,20 @@ export class ChatbotController {
     }
   }
 
-  async findAllByTenant(request: FastifyRequest, reply: FastifyReply) {
+  async findAllByTenant(
+    request: FastifyRequest & { user: { id: string; email: string; tenantId: string } },
+    _reply: FastifyReply
+  ) {
     const chatbots = await this.chatbotService.findAllByTenant(request.user.tenantId)
     return chatbots
   }
 
   async update(
-    request: FastifyRequest<{ Params: ChatbotParams; Body: UpdateChatbotDto }>,
+    request: FastifyRequest & {
+      params: ChatbotParams
+      body: UpdateChatbotDto
+      user: { id: string; email: string; tenantId: string }
+    },
     reply: FastifyReply
   ) {
     // Check if chatbot exists and user has access
@@ -80,7 +109,13 @@ export class ChatbotController {
     return chatbot
   }
 
-  async delete(request: FastifyRequest<{ Params: ChatbotParams }>, reply: FastifyReply) {
+  async delete(
+    request: FastifyRequest & {
+      params: ChatbotParams
+      user: { id: string; email: string; tenantId: string }
+    },
+    reply: FastifyReply
+  ) {
     // Check if chatbot exists and user has access
     const existing = await this.chatbotService.findById(request.params.id)
     if (!existing) {
@@ -95,7 +130,13 @@ export class ChatbotController {
     return reply.code(204).send()
   }
 
-  async getEmbedScript(request: FastifyRequest<{ Params: ChatbotParams }>, reply: FastifyReply) {
+  async getEmbedScript(
+    request: FastifyRequest & {
+      params: ChatbotParams
+      user: { id: string; email: string; tenantId: string }
+    },
+    reply: FastifyReply
+  ) {
     // Check if chatbot exists and user has access
     const chatbot = await this.chatbotService.findById(request.params.id)
     if (!chatbot) {

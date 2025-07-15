@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@saas/database'
 
 import { logger } from '../utils/logger.js'
 
@@ -18,7 +18,7 @@ export async function setupDatabase() {
   }
 }
 
-export function getDatabase() {
+export function getDatabase(): PrismaClient {
   if (!prisma) {
     throw new Error('Database not initialized. Call setupDatabase() first.')
   }

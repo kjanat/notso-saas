@@ -1,7 +1,6 @@
 import type { Job, JobsOptions, Processor } from 'bullmq'
 import { Queue, Worker } from 'bullmq'
 import { Redis } from 'ioredis'
-
 import { config } from '../../config/index.js'
 import { logger } from '../utils/logger.js'
 
@@ -48,13 +47,53 @@ export function getQueue(name: string): Queue {
 }
 
 export class QueueService {
-  async addJob<T>(queueName: string, jobName: string, data: T, options?: JobsOptions) {
+  async addJob<T>(
+    queueName: string,
+    jobName: string,
+    data: T,
+    options?: JobsOptions
+  ): Promise<string> {
     const queue = getQueue(queueName)
     const job = await queue.add(jobName, data, options)
     logger.debug(`Job ${jobName} added to queue ${queueName}`, {
       jobId: job.id,
     })
-    return job
+  if (!job.id) {
+    throw new Error(`Failed to create job ${jobName} in queue ${queueName}`)
+  }
+  return job.id
+  }
+
+  async removeJob(jobId: string): Promise<void> {
+    // Since we don't know which queue the job belongs to, we need to check all queues
+    for (const queue of queues.values()) {
+      const job = await queue.getJob(jobId)
+      if (job) {
+        await job.remove()
+        return
+      }
+    }
+    logger.warn(`Job ${jobId} not found in any queue`)
+  }
+
+  async getJob(jobId: string): Promise<Job | null> {
+    // Since we don't know which queue the job belongs to, we need to check all queues
+    for (const queue of queues.values()) {
+      const job = await queue.getJob(jobId)
+      if (job) {
+        return job
+      }
+    }
+    return null
+  }
+
+  async getJobs(): Promise<Job[]> {
+    const allJobs: Job[] = []
+    for (const queue of queues.values()) {
+      const jobs = await queue.getJobs()
+      allJobs.push(...jobs)
+    }
+    return allJobs
   }
 
   registerWorker<T>(queueName: string, processor: Processor<T>) {

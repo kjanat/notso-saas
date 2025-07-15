@@ -14,18 +14,7 @@ export const chatbotModule: FastifyPluginAsync = async fastify => {
   const chatbotController = new ChatbotController(chatbotService)
 
   // Public routes
-  fastify.get('/embed/:embedId', {
-    handler: chatbotController.findByEmbedId.bind(chatbotController),
-    schema: {
-      params: {
-        properties: {
-          embedId: { type: 'string' },
-        },
-        required: ['embedId'],
-        type: 'object',
-      },
-    },
-  })
+  fastify.get('/embed/:embedId', chatbotController.findByEmbedId.bind(chatbotController) as any)
 
   // Protected routes
   fastify.register(async protectedRoutes => {
@@ -39,105 +28,19 @@ export const chatbotModule: FastifyPluginAsync = async fastify => {
     })
 
     // CRUD routes
-    protectedRoutes.get('/', chatbotController.findAllByTenant.bind(chatbotController))
+    protectedRoutes.get('/', chatbotController.findAllByTenant.bind(chatbotController) as any)
 
-    protectedRoutes.post('/', {
-      handler: chatbotController.create.bind(chatbotController),
-      schema: {
-        body: {
-          properties: {
-            animationMap: { type: 'object' },
-            avatarModelUrl: { type: 'string' },
-            avatarPosition: { type: 'object' },
-            avatarScale: { type: 'number' },
-            behaviors: { type: 'object' },
-            description: { type: 'string' },
-            knowledgeBaseId: { type: 'string' },
-            maxTokens: { type: 'number' },
-            model: { type: 'string' },
-            name: { type: 'string' },
-            placement: { type: 'object' },
-            systemPrompt: { type: 'string' },
-            temperature: { type: 'number' },
-            theme: { type: 'object' },
-            welcomeMessage: { type: 'string' },
-          },
-          required: ['name'],
-          type: 'object',
-        },
-      },
-    })
+    protectedRoutes.post('/', chatbotController.create.bind(chatbotController) as any)
 
-    protectedRoutes.get('/:id', {
-      handler: chatbotController.findById.bind(chatbotController),
-      schema: {
-        params: {
-          properties: {
-            id: { type: 'string' },
-          },
-          required: ['id'],
-          type: 'object',
-        },
-      },
-    })
+    protectedRoutes.get('/:id', chatbotController.findById.bind(chatbotController) as any)
 
-    protectedRoutes.patch('/:id', {
-      handler: chatbotController.update.bind(chatbotController),
-      schema: {
-        body: {
-          properties: {
-            animationMap: { type: 'object' },
-            avatarModelUrl: { type: 'string' },
-            avatarPosition: { type: 'object' },
-            avatarScale: { type: 'number' },
-            behaviors: { type: 'object' },
-            description: { type: 'string' },
-            knowledgeBaseId: { type: 'string' },
-            maxTokens: { type: 'number' },
-            model: { type: 'string' },
-            name: { type: 'string' },
-            placement: { type: 'object' },
-            systemPrompt: { type: 'string' },
-            temperature: { type: 'number' },
-            theme: { type: 'object' },
-            welcomeMessage: { type: 'string' },
-          },
-          type: 'object',
-        },
-        params: {
-          properties: {
-            id: { type: 'string' },
-          },
-          required: ['id'],
-          type: 'object',
-        },
-      },
-    })
+    protectedRoutes.patch('/:id', chatbotController.update.bind(chatbotController) as any)
 
-    protectedRoutes.delete('/:id', {
-      handler: chatbotController.delete.bind(chatbotController),
-      schema: {
-        params: {
-          properties: {
-            id: { type: 'string' },
-          },
-          required: ['id'],
-          type: 'object',
-        },
-      },
-    })
+    protectedRoutes.delete('/:id', chatbotController.delete.bind(chatbotController) as any)
 
-    protectedRoutes.get('/:id/embed-script', {
-      handler: chatbotController.getEmbedScript.bind(chatbotController),
-      schema: {
-        params: {
-          properties: {
-            id: { type: 'string' },
-          },
-          required: ['id'],
-          type: 'object',
-        },
-      },
-    })
+    protectedRoutes.get(
+      '/:id/embed-script',
+      chatbotController.getEmbedScript.bind(chatbotController) as any
+    )
   })
 }

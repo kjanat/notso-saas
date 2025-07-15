@@ -65,4 +65,22 @@ export class CacheService {
     const result = await this.redis.exists(key)
     return result === 1
   }
+
+  async flush(force = false): Promise<void> {
+    // Safeguard against accidental production data loss
+    if (process.env.NODE_ENV === 'production' && !force) {
+      throw new Error(
+        'Cannot flush Redis database in production. Use force=true if you really want to do this.'
+      )
+    }
+
+    // Additional safety check for production
+    if (process.env.NODE_ENV === 'production' && force) {
+      logger.warn('Flushing Redis database in production environment', {
+        timestamp: new Date().toISOString(),
+      })
+    }
+
+    await this.redis.flushdb()
+  }
 }
