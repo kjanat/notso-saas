@@ -18,7 +18,7 @@ export class TenantService implements ITenantService {
     @inject('ILogger') private readonly logger: ILogger
   ) {}
 
-  async create(dto: CreateTenantDto): Promise<Tenant> {
+  async create(dto: CreateTenantDto, createdBy = 'system'): Promise<Tenant> {
     // Check if slug already exists
     const existing = await this.repository.findBySlug(dto.slug)
     if (existing) {
@@ -26,7 +26,7 @@ export class TenantService implements ITenantService {
     }
 
     // Create tenant using domain model
-    const tenant = await this.repository.create(dto)
+    const tenant = await this.repository.create(dto, createdBy)
 
     // Queue provisioning job
     await this.queue.addJob('tenant-provisioning', 'provision-database', {

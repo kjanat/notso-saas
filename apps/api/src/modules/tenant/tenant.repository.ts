@@ -1,4 +1,7 @@
+import { createHash } from 'node:crypto'
+import type { Prisma, SubscriptionTier } from '@saas/database'
 import { injectable } from 'tsyringe'
+import { v4 as uuidv4 } from 'uuid'
 
 import { Tenant } from '../../domain/entities/tenant.entity.js'
 import { ApiKey } from '../../domain/value-objects/api-key.value-object.js'
@@ -13,13 +16,17 @@ export class TenantRepository implements ITenantRepository {
     return getDatabase()
   }
 
-  async create(data: CreateTenantDto): Promise<Tenant> {
+  async create(
+    data: CreateTenantDto,
+    createdBy = 'system',
+    permissions: string[] = ['*']
+  ): Promise<Tenant> {
     const apiKey = ApiKey.generate().value
     const subscriptionPlan = data.plan || 'TRIAL'
     const maxChatbots = this.getMaxChatbotsForPlan(subscriptionPlan)
 
-    // Create tenant with generated ID
-    const tenantId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    // Create tenant with UUID v4
+    const tenantId = uuidv4()
 
     const dbTenant = await this.db.tenant.create({
       data: {
@@ -37,10 +44,10 @@ export class TenantRepository implements ITenantRepository {
     const hashedKey = await this.hashApiKey(apiKey)
     await this.db.apiKey.create({
       data: {
-        createdBy: 'system', // System-generated
+        createdBy,
         keyHash: hashedKey,
         name: 'Default API Key',
-        permissions: ['*'], // Full permissions for now
+        permissions,
         tenantId: dbTenant.id,
       },
     })
@@ -69,8 +76,8 @@ export class TenantRepository implements ITenantRepository {
   }
 
   private async hashApiKey(key: string): Promise<string> {
-    // Simple hash for now - in production use proper hashing
-    return Buffer.from(key).toString('base64')
+    // Use SHA-256 for secure one-way hashing
+    return createHash('sha256').update(key).digest('hex')
   }
 
   async findById(id: string): Promise<Tenant | null> {
@@ -87,8 +94,8 @@ export class TenantRepository implements ITenantRepository {
     if (!dbTenant) return null
 
     const currentChatbots = await this.getChatbotCount(id)
-    // Get the first API key for backward compatibility
-    const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
+    // Hide API key - never expose the actual key
+    const apiKey = 'hidden'
 
     return Tenant.reconstitute(dbTenant.id, {
       apiKey,
@@ -117,7 +124,8 @@ export class TenantRepository implements ITenantRepository {
     if (!dbTenant) return null
 
     const currentChatbots = await this.getChatbotCount(dbTenant.id)
-    const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
+    // Hide API key - never expose the actual key
+    const apiKey = 'hidden'
 
     return Tenant.reconstitute(dbTenant.id, {
       apiKey,
@@ -179,7 +187,8 @@ export class TenantRepository implements ITenantRepository {
     return Promise.all(
       tenants.map(async dbTenant => {
         const currentChatbots = await this.getChatbotCount(dbTenant.id)
-        const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
+        // Hide API key - never expose the actual key
+        const apiKey = 'hidden'
         return Tenant.reconstitute(dbTenant.id, {
           apiKey,
           createdAt: dbTenant.createdAt,
@@ -196,10 +205,10 @@ export class TenantRepository implements ITenantRepository {
   }
 
   async update(id: string, data: UpdateTenantDto): Promise<Tenant> {
-    const updateData: any = {}
+    const updateData: Prisma.TenantUpdateInput = {}
     if (data.name) updateData.name = data.name
     if (data.plan) {
-      updateData.subscriptionPlan = data.plan.toUpperCase()
+      updateData.subscriptionPlan = data.plan.toUpperCase() as SubscriptionTier
       updateData.maxChatbots = this.getMaxChatbotsForPlan(data.plan)
     }
 
@@ -215,7 +224,8 @@ export class TenantRepository implements ITenantRepository {
     })
 
     const currentChatbots = await this.getChatbotCount(id)
-    const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
+    // Hide API key - never expose the actual key
+    const apiKey = 'hidden'
 
     return Tenant.reconstitute(dbTenant.id, {
       apiKey,
@@ -234,7 +244,7 @@ export class TenantRepository implements ITenantRepository {
     const dbTenant = await this.db.tenant.update({
       data: {
         maxChatbots: this.getMaxChatbotsForPlan(plan),
-        subscriptionPlan: plan.toUpperCase() as any,
+        subscriptionPlan: plan.toUpperCase() as SubscriptionTier,
       },
       include: {
         apiKeys: {
@@ -246,7 +256,8 @@ export class TenantRepository implements ITenantRepository {
     })
 
     const currentChatbots = await this.getChatbotCount(id)
-    const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
+    // Hide API key - never expose the actual key
+    const apiKey = 'hidden'
 
     return Tenant.reconstitute(dbTenant.id, {
       apiKey,

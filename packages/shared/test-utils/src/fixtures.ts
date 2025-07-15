@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import type { Tenant, User } from '@saas/database'
+import type { ApiKey, Tenant, User } from '@saas/database'
 
 export function createTenantFixture(
   overrides?: Partial<Tenant>
@@ -41,10 +41,14 @@ export function createUserFixture(
 
 export function createApiKeyFixture(
   tenantId: string,
-  overrides?: Partial<Record<string, unknown>>
-) {
+  overrides?: Partial<ApiKey>
+): Omit<ApiKey, 'id' | 'createdAt' | 'updatedAt' | 'keyHash'> & { key: string } {
   return {
+    createdBy: 'system',
+    expiresAt: null,
+    isActive: true,
     key: `sk_${faker.string.alphanumeric(32)}`,
+    lastUsedAt: null,
     name: faker.lorem.words(2),
     permissions: [],
     tenantId,

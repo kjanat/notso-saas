@@ -2,13 +2,22 @@ import bcrypt from 'bcryptjs'
 
 import { getDatabase } from '../../shared/database/index.js'
 import { logger } from '../../shared/utils/logger.js'
+import type {
+  LoginOptions,
+  LoginResponse,
+  RegisterOptions,
+  RegisterResponse,
+  UserProfile,
+} from './auth.types.js'
 
 export class AuthService {
   private get db() {
     return getDatabase()
   }
 
-  async login(email: string, password: string): Promise<any> {
+  async login(options: LoginOptions): Promise<LoginResponse | null> {
+    const { email, password, tenantId } = options
+
     const user = await this.db.user.findUnique({
       include: {
         tenants: {
@@ -24,30 +33,48 @@ export class AuthService {
       return null
     }
 
-    // For now, assume the user logs into their first tenant
-    // In a real app, you'd let them select which tenant to log into
-    const tenantUser = user.tenants[0]
-    if (!tenantUser) {
+    // Handle tenant selection
+    let selectedTenant
+
+    if (tenantId) {
+      // User specified a tenant, verify they have access
+      selectedTenant = user.tenants.find(tu => tu.tenantId === tenantId)
+      if (!selectedTenant) {
+        throw new Error('User does not have access to the specified tenant')
+      }
+    } else if (user.tenants.length === 1) {
+      // User has only one tenant, auto-select it
+      selectedTenant = user.tenants[0]
+    } else if (user.tenants.length > 1) {
+      // User has multiple tenants but didn't specify one
+      // Return available tenants for selection
+      return {
+        availableTenants: user.tenants.map(tu => ({
+          id: tu.tenant.id,
+          name: tu.tenant.name,
+          slug: tu.tenant.slug,
+        })),
+        user: {
+          ...user,
+          tenantId: '', // No tenant selected yet
+        },
+      }
+    } else {
       throw new Error('User is not associated with any tenant')
     }
 
-    logger.info('User logged in', { tenantId: tenantUser.tenantId, userId: user.id })
+    logger.info('User logged in', { tenantId: selectedTenant.tenantId, userId: user.id })
 
-    // Return user with tenantId attached for convenience
+    // Return user with selected tenantId
     return {
       user: {
         ...user,
-        tenantId: tenantUser.tenantId,
+        tenantId: selectedTenant.tenantId,
       },
     }
   }
 
-  async register(data: {
-    email: string
-    password: string
-    tenantId: string
-    name?: string
-  }): Promise<any> {
+  async register(data: RegisterOptions): Promise<RegisterResponse> {
     // Check if user already exists
     const existing = await this.db.user.findUnique({
       where: { email: data.email },
@@ -90,7 +117,7 @@ export class AuthService {
     }
   }
 
-  async getUserById(id: string, tenantId?: string): Promise<any> {
+  async getUserById(id: string, tenantId?: string): Promise<UserProfile | null> {
     const user = await this.db.user.findUnique({
       include: {
         tenants: {

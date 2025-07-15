@@ -88,9 +88,23 @@ export function createMockAIResponse(content: string) {
   }
 }
 
+// Type definitions for WebSocket handlers
+type SocketEventHandler = (...args: any[]) => void | Promise<void>
+
+interface MockSocket {
+  id: string
+  rooms: Set<string>
+  emit: ReturnType<typeof vi.fn>
+  on: (event: string, handler: SocketEventHandler) => void
+  off: (event: string, handler: SocketEventHandler) => void
+  join: ReturnType<typeof vi.fn>
+  leave: ReturnType<typeof vi.fn>
+  disconnect: ReturnType<typeof vi.fn>
+}
+
 // Mock WebSocket connection
-export function createMockSocket() {
-  const events = new Map<string, Function[]>()
+export function createMockSocket(): MockSocket {
+  const events = new Map<string, SocketEventHandler[]>()
 
   return {
     disconnect: vi.fn(),
@@ -98,12 +112,12 @@ export function createMockSocket() {
     id: 'mock-socket-id',
     join: vi.fn(),
     leave: vi.fn(),
-    off: vi.fn((event: string, handler: Function) => {
+    off: vi.fn((event: string, handler: SocketEventHandler) => {
       const handlers = events.get(event) || []
       const index = handlers.indexOf(handler)
       if (index > -1) handlers.splice(index, 1)
     }),
-    on: vi.fn((event: string, handler: Function) => {
+    on: vi.fn((event: string, handler: SocketEventHandler) => {
       if (!events.has(event)) events.set(event, [])
       events.get(event)!.push(handler)
     }),

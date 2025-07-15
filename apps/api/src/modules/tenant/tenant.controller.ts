@@ -8,7 +8,9 @@ export class TenantController {
   constructor(@inject('ITenantService') private readonly tenantService: ITenantService) {}
 
   async create(request: FastifyRequest<{ Body: CreateTenantDto }>, reply: FastifyReply) {
-    const tenant = await this.tenantService.create(request.body)
+    // Get user ID from JWT token if available, otherwise use 'system'
+    const createdBy = request.user?.id || 'system'
+    const tenant = await this.tenantService.create(request.body, createdBy)
     return reply.status(201).send(tenant)
   }
 
