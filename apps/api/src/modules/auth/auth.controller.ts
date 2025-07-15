@@ -15,7 +15,7 @@ interface RegisterBody extends LoginBody {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  async login(request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) {
+  async login(request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply): Promise<any> {
     const { email, password } = request.body
     const result = await this.authService.login(email, password)
 
@@ -33,7 +33,10 @@ export class AuthController {
     }
   }
 
-  async register(request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) {
+  async register(
+    request: FastifyRequest<{ Body: RegisterBody }>,
+    reply: FastifyReply
+  ): Promise<any> {
     const user = await this.authService.register(request.body)
 
     return {
@@ -46,7 +49,7 @@ export class AuthController {
     }
   }
 
-  async getProfile(request: FastifyRequest, reply: FastifyReply) {
+  async getProfile(request: FastifyRequest, reply: FastifyReply): Promise<any> {
     const userId = request.user.id
     const user = await this.authService.getUserById(userId)
 

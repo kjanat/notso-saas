@@ -13,7 +13,7 @@ export class HealthController {
     this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
   }
 
-  async check(request: FastifyRequest, reply: FastifyReply) {
+  async check(_request: FastifyRequest, reply: FastifyReply) {
     const services: Record<string, string> = {}
     let overallStatus = 'healthy'
 
@@ -55,12 +55,12 @@ export class HealthController {
     return reply.status(overallStatus === 'healthy' ? 200 : 503).send(response)
   }
 
-  async ready(request: FastifyRequest, reply: FastifyReply) {
+  async ready(_request: FastifyRequest, reply: FastifyReply) {
     // Simple readiness check - if the API is responding, it's ready
     return reply.send({ ready: true })
   }
 
-  async live(request: FastifyRequest, reply: FastifyReply) {
+  async live(_request: FastifyRequest, reply: FastifyReply) {
     // Liveness check - if the API can process requests, it's alive
     return reply.send({ alive: true })
   }

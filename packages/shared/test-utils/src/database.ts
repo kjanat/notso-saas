@@ -2,7 +2,7 @@ import { PrismaClient } from '@saas/database'
 
 let prisma: PrismaClient
 
-export function getTestDatabase() {
+export function getTestDatabase(): PrismaClient {
   if (!prisma) {
     prisma = new PrismaClient({
       datasources: {

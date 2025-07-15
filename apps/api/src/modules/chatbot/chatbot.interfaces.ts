@@ -5,6 +5,9 @@ export interface CreateChatbotDto {
   tenantId: string
   name: string
   purpose?: 'sales' | 'support' | 'onboarding' | 'general'
+  description?: string
+  welcomeMessage?: string
+  theme?: Record<string, any>
   avatar?: {
     modelUrl: string
     scale?: number
@@ -41,7 +44,7 @@ export interface IChatbotRepository
   extends IBaseRepository<Chatbot, CreateChatbotDto, UpdateChatbotDto> {
   findByEmbedId(embedId: string): Promise<Chatbot | null>
   findAllByTenant(tenantId: string): Promise<Chatbot[]>
-  generateEmbedId(): string
+  generateDeploymentKey(): string
 }
 
 export interface IChatbotService {

@@ -1,14 +1,10 @@
 import { container, injectable } from 'tsyringe'
-import type {
-  IAIProvider,
-  IChatRequest,
-  IChatResponse,
-  IStreamResponse,
-} from '../interfaces/ai.interfaces.js'
+import type { IAIProvider, IChatRequest, IChatResponse, IStreamResponse } from '../ai.interfaces.js'
 import { BaseAIProvider } from './base.provider.js'
 
 @injectable()
 export class VertexAIProvider extends BaseAIProvider implements IAIProvider {
+  name = 'vertex'
   private readonly projectId: string
   private readonly location: string
   private readonly apiKey: string | undefined
@@ -21,6 +17,30 @@ export class VertexAIProvider extends BaseAIProvider implements IAIProvider {
     this.projectId = config.vertex.projectId
     this.location = config.vertex.location
     this.apiKey = config.vertex.apiKey
+  }
+
+  async generateResponse(
+    messages: Array<{ role: string; content: string }>,
+    options?: {
+      temperature?: number
+      maxTokens?: number
+      stream?: boolean
+      model?: string
+    }
+  ): Promise<string | AsyncGenerator<IStreamResponse>> {
+    const request: IChatRequest = {
+      maxTokens: options?.maxTokens,
+      messages,
+      model: options?.model,
+      temperature: options?.temperature,
+    }
+
+    if (options?.stream) {
+      return this.streamChat(request)
+    }
+
+    const response = await this.chat(request)
+    return response.content
   }
 
   async chat(request: IChatRequest): Promise<IChatResponse> {
@@ -62,7 +82,7 @@ export class VertexAIProvider extends BaseAIProvider implements IAIProvider {
 
     if (request.messages.length > 1) {
       // Convert message history to Vertex AI format
-      vertexRequest.contents = request.messages.map(msg => ({
+      vertexRequest.contents = request.messages.map((msg: { role: string; content: string }) => ({
         parts: [{ text: msg.content }],
         role: msg.role === 'assistant' ? 'model' : 'user',
       }))
@@ -108,7 +128,7 @@ export class VertexAIProvider extends BaseAIProvider implements IAIProvider {
     const endpoint = `https://${this.location}-aiplatform.googleapis.com/v1/projects/${this.projectId}/locations/${this.location}/publishers/google/models/${model}:streamGenerateContent`
 
     const vertexRequest = {
-      contents: request.messages.map(msg => ({
+      contents: request.messages.map((msg: { role: string; content: string }) => ({
         parts: [{ text: msg.content }],
         role: msg.role === 'assistant' ? 'model' : 'user',
       })),

@@ -23,19 +23,28 @@ export class ConversationRepository implements IConversationRepository {
     const conversation = await this.db.conversation.create({
       data: {
         chatbotId: data.chatbotId,
-        pageUrl: data.pageUrl,
-        referrer: data.referrer,
+        metadata: {
+          pageUrl: data.pageUrl,
+          referrer: data.referrer,
+          userAgent: data.userAgent,
+        },
         sessionId: data.sessionId,
         startedAt: new Date(),
         status: ConversationStatus.ACTIVE,
-        userAgent: data.userAgent,
       },
       include: {
         messages: true,
       },
     })
 
-    return this.toDomain(conversation)
+    return this.toDomain({
+      ...conversation,
+      createdAt: conversation.startedAt,
+      pageUrl: null,
+      referrer: null,
+      updatedAt: conversation.lastActivityAt,
+      userAgent: null,
+    })
   }
 
   async findById(id: string): Promise<Conversation | null> {
@@ -46,7 +55,16 @@ export class ConversationRepository implements IConversationRepository {
       where: { id },
     })
 
-    return conversation ? this.toDomain(conversation) : null
+    return conversation
+      ? this.toDomain({
+          ...conversation,
+          createdAt: conversation.startedAt,
+          pageUrl: null,
+          referrer: null,
+          updatedAt: conversation.lastActivityAt,
+          userAgent: null,
+        })
+      : null
   }
 
   async findBySessionId(sessionId: string): Promise<Conversation | null> {
@@ -58,7 +76,16 @@ export class ConversationRepository implements IConversationRepository {
       where: { sessionId },
     })
 
-    return conversation ? this.toDomain(conversation) : null
+    return conversation
+      ? this.toDomain({
+          ...conversation,
+          createdAt: conversation.startedAt,
+          pageUrl: null,
+          referrer: null,
+          updatedAt: conversation.lastActivityAt,
+          userAgent: null,
+        })
+      : null
   }
 
   async findActiveBySession(sessionId: string, chatbotId: string): Promise<Conversation | null> {
@@ -74,7 +101,16 @@ export class ConversationRepository implements IConversationRepository {
       },
     })
 
-    return conversation ? this.toDomain(conversation) : null
+    return conversation
+      ? this.toDomain({
+          ...conversation,
+          createdAt: conversation.startedAt,
+          pageUrl: null,
+          referrer: null,
+          updatedAt: conversation.lastActivityAt,
+          userAgent: null,
+        })
+      : null
   }
 
   async findByChatbot(
@@ -93,7 +129,17 @@ export class ConversationRepository implements IConversationRepository {
       },
     })
 
-    return conversations.map(conv => this.toDomain(conv))
+    return conversations.map(conv =>
+      this.toDomain({
+        ...conv,
+        createdAt: conv.startedAt,
+        messages: conv.messages || [],
+        pageUrl: null,
+        referrer: null,
+        updatedAt: conv.lastActivityAt,
+        userAgent: null,
+      })
+    )
   }
 
   async findAll(filters?: {
@@ -110,7 +156,17 @@ export class ConversationRepository implements IConversationRepository {
       where: filters,
     })
 
-    return conversations.map(conv => this.toDomain(conv))
+    return conversations.map(conv =>
+      this.toDomain({
+        ...conv,
+        createdAt: conv.startedAt,
+        messages: conv.messages || [],
+        pageUrl: null,
+        referrer: null,
+        updatedAt: conv.lastActivityAt,
+        userAgent: null,
+      })
+    )
   }
 
   async count(filters?: {
@@ -133,7 +189,14 @@ export class ConversationRepository implements IConversationRepository {
       where: { id },
     })
 
-    return this.toDomain(conversation)
+    return this.toDomain({
+      ...conversation,
+      createdAt: conversation.startedAt,
+      pageUrl: null,
+      referrer: null,
+      updatedAt: conversation.lastActivityAt,
+      userAgent: null,
+    })
   }
 
   async delete(id: string): Promise<void> {
@@ -151,12 +214,12 @@ export class ConversationRepository implements IConversationRepository {
         completionTokens: message.completionTokens,
         content: message.content,
         conversationId,
+        cost: message.totalCost,
         latencyMs: message.latencyMs,
         model: message.model,
         promptTokens: message.promptTokens,
         role: message.role,
-        sentiment: message.sentiment,
-        totalCost: message.totalCost,
+        sentiment: message.sentiment ? Number.parseFloat(message.sentiment) : null,
         triggeredAnimation: message.triggeredAnimation,
       },
     })
@@ -169,10 +232,10 @@ export class ConversationRepository implements IConversationRepository {
       latencyMs: newMessage.latencyMs || undefined,
       model: newMessage.model || undefined,
       promptTokens: newMessage.promptTokens || undefined,
-      role: newMessage.role as 'USER' | 'ASSISTANT' | 'SYSTEM',
-      sentiment: newMessage.sentiment || undefined,
-      timestamp: newMessage.timestamp,
-      totalCost: newMessage.totalCost ? Number(newMessage.totalCost) : undefined,
+      role: newMessage.role as any,
+      sentiment: newMessage.sentiment ? newMessage.sentiment.toString() : undefined,
+      timestamp: newMessage.createdAt,
+      totalCost: newMessage.cost || undefined,
       triggeredAnimation: newMessage.triggeredAnimation || undefined,
     }
   }
@@ -197,11 +260,12 @@ export class ConversationRepository implements IConversationRepository {
       model?: string | null
       promptTokens?: number | null
       completionTokens?: number | null
-      totalCost?: number | null
+      totalTokens?: number | null
+      cost?: number | null
       latencyMs?: number | null
-      sentiment?: string | null
+      sentiment?: number | null
       triggeredAnimation?: string | null
-      timestamp: Date
+      createdAt: Date
     }>
   }): Conversation {
     const messages: Message[] = (data.messages || []).map(msg => ({
@@ -212,10 +276,10 @@ export class ConversationRepository implements IConversationRepository {
       latencyMs: msg.latencyMs || undefined,
       model: msg.model || undefined,
       promptTokens: msg.promptTokens || undefined,
-      role: msg.role as 'USER' | 'ASSISTANT' | 'SYSTEM',
-      sentiment: msg.sentiment || undefined,
-      timestamp: msg.timestamp,
-      totalCost: msg.totalCost ? Number(msg.totalCost) : undefined,
+      role: msg.role as any,
+      sentiment: msg.sentiment ? msg.sentiment.toString() : undefined,
+      timestamp: msg.createdAt,
+      totalCost: msg.cost || undefined,
       triggeredAnimation: msg.triggeredAnimation || undefined,
     }))
 

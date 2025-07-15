@@ -42,7 +42,7 @@ export class KnowledgeBase extends BaseEntity {
     createdAt?: Date
     updatedAt?: Date
   }) {
-    super(data.id, data.createdAt, data.updatedAt)
+    super({ createdAt: data.createdAt, id: data.id, updatedAt: data.updatedAt })
     this.tenantId = data.tenantId
     this.name = data.name
     this.type = data.type

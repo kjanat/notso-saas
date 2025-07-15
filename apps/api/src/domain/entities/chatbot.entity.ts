@@ -126,6 +126,9 @@ export class Chatbot extends AggregateRoot<ChatbotProps> {
       isActive: boolean
       createdAt: Date
       updatedAt: Date
+      welcomeMessage?: string
+      theme?: Record<string, any>
+      description?: string
     }
   ): Chatbot {
     return new Chatbot(

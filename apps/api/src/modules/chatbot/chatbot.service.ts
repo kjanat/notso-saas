@@ -24,11 +24,10 @@ export class ChatbotService implements IChatbotService {
     await this.cacheService.delete(`chatbots:tenant:${data.tenantId}`)
 
     // Emit event for analytics
-    await this.queueService.addJob('analytics', {
+    await this.queueService.addJob('analytics', 'chatbot.created', {
       chatbotId: chatbot.id,
       tenantId: data.tenantId,
       timestamp: new Date(),
-      type: 'chatbot.created',
     })
 
     logger.info('Chatbot created', { chatbotId: chatbot.id, tenantId: data.tenantId })
@@ -87,12 +86,11 @@ export class ChatbotService implements IChatbotService {
     await this.cacheService.delete(`chatbots:tenant:${chatbot.tenantId}`)
 
     // Emit event for analytics
-    await this.queueService.addJob('analytics', {
+    await this.queueService.addJob('analytics', 'chatbot.updated', {
       changes: Object.keys(data),
       chatbotId: chatbot.id,
       tenantId: chatbot.tenantId,
       timestamp: new Date(),
-      type: 'chatbot.updated',
     })
 
     logger.info('Chatbot updated', { chatbotId: id })
@@ -113,11 +111,10 @@ export class ChatbotService implements IChatbotService {
     await this.cacheService.delete(`chatbots:tenant:${chatbot.tenantId}`)
 
     // Emit event for analytics
-    await this.queueService.addJob('analytics', {
+    await this.queueService.addJob('analytics', 'chatbot.deleted', {
       chatbotId: id,
       tenantId: chatbot.tenantId,
       timestamp: new Date(),
-      type: 'chatbot.deleted',
     })
 
     logger.info('Chatbot deleted', { chatbotId: id })

@@ -1,4 +1,4 @@
-import type { Tenant } from '@saas/domain'
+import type { Tenant } from '../../domain/entities/tenant.entity.js'
 import type { IBaseRepository, IBaseService } from '../../shared/interfaces/base.interfaces.js'
 import type { CreateTenantDto, UpdateTenantDto } from './tenant.dto.js'
 

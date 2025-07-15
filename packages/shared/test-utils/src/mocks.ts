@@ -1,10 +1,6 @@
 import type { Job } from 'bullmq'
 import { vi } from 'vitest'
-import type {
-  ICacheService,
-  ILogger,
-  IQueueService,
-} from '../../../apps/api/src/shared/interfaces/base.interfaces'
+import type { ICacheService, ILogger, IQueueService } from './interfaces'
 
 export function createMockLogger(): ILogger {
   return {
@@ -26,7 +22,7 @@ export function createMockCache(): ICacheService {
     flush: vi.fn(async () => {
       cache.clear()
     }),
-    get: vi.fn(async <T>(key: string) => cache.get(key) as T | null),
+    get: vi.fn().mockImplementation(async (key: string) => cache.get(key) ?? null),
     set: vi.fn(async <T>(key: string, value: T) => {
       cache.set(key, value)
     }),

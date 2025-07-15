@@ -1,5 +1,4 @@
 export * from './database.js'
-export * from './fastify-test-app.js'
 export * from './fixtures.js'
 export * from './mocks.js'
 export { createVitestConfig } from './vitest.config.js'

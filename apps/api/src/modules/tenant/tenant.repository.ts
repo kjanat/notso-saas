@@ -15,94 +15,145 @@ export class TenantRepository implements ITenantRepository {
 
   async create(data: CreateTenantDto): Promise<Tenant> {
     const apiKey = ApiKey.generate().value
-    const tenant = Tenant.create(data.name, data.slug, apiKey, data.plan)
+    const subscriptionPlan = data.plan || 'TRIAL'
+    const maxChatbots = this.getMaxChatbotsForPlan(subscriptionPlan)
+
+    // Create tenant with generated ID
+    const tenantId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
     const dbTenant = await this.db.tenant.create({
       data: {
-        apiKey: tenant.apiKey,
-        id: tenant.id,
-        maxChatbots: tenant.maxChatbots,
-        name: tenant.name,
-        plan: tenant.subscriptionPlan,
-        slug: tenant.slug,
+        databaseName: `db_${data.slug.replace(/-/g, '_')}`,
+        id: tenantId,
+        isActive: true,
+        maxChatbots,
+        name: data.name,
+        slug: data.slug,
+        subscriptionPlan: subscriptionPlan.toUpperCase() as any,
+      },
+    })
+
+    // Create the initial API key for this tenant
+    const hashedKey = await this.hashApiKey(apiKey)
+    await this.db.apiKey.create({
+      data: {
+        createdBy: 'system', // System-generated
+        keyHash: hashedKey,
+        name: 'Default API Key',
+        permissions: ['*'], // Full permissions for now
+        tenantId: dbTenant.id,
       },
     })
 
     return Tenant.reconstitute(dbTenant.id, {
-      apiKey: dbTenant.apiKey,
+      apiKey,
       createdAt: dbTenant.createdAt,
-      currentChatbots: await this.getChatbotCount(dbTenant.id),
+      currentChatbots: 0,
       isActive: dbTenant.isActive,
-      maxChatbots: dbTenant.maxChatbots || 1,
+      maxChatbots: dbTenant.maxChatbots,
       name: dbTenant.name,
       slug: dbTenant.slug,
-      subscriptionPlan: dbTenant.plan || 'free',
+      subscriptionPlan: dbTenant.subscriptionPlan.toLowerCase(),
       updatedAt: dbTenant.updatedAt,
     })
   }
 
+  private getMaxChatbotsForPlan(plan: string): number {
+    const planLimits: Record<string, number> = {
+      enterprise: 100,
+      professional: 10,
+      starter: 3,
+      trial: 1,
+    }
+    return planLimits[plan.toLowerCase()] || 1
+  }
+
+  private async hashApiKey(key: string): Promise<string> {
+    // Simple hash for now - in production use proper hashing
+    return Buffer.from(key).toString('base64')
+  }
+
   async findById(id: string): Promise<Tenant | null> {
     const dbTenant = await this.db.tenant.findUnique({
+      include: {
+        apiKeys: {
+          orderBy: { createdAt: 'asc' },
+          take: 1,
+        },
+      },
       where: { id },
     })
 
     if (!dbTenant) return null
 
     const currentChatbots = await this.getChatbotCount(id)
+    // Get the first API key for backward compatibility
+    const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
 
     return Tenant.reconstitute(dbTenant.id, {
-      apiKey: dbTenant.apiKey,
+      apiKey,
       createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      maxChatbots: dbTenant.maxChatbots || 1,
+      maxChatbots: dbTenant.maxChatbots,
       name: dbTenant.name,
       slug: dbTenant.slug,
-      subscriptionPlan: dbTenant.plan || 'free',
+      subscriptionPlan: dbTenant.subscriptionPlan.toLowerCase(),
       updatedAt: dbTenant.updatedAt,
     })
   }
 
   async findBySlug(slug: string): Promise<Tenant | null> {
     const dbTenant = await this.db.tenant.findUnique({
+      include: {
+        apiKeys: {
+          orderBy: { createdAt: 'asc' },
+          take: 1,
+        },
+      },
       where: { slug },
     })
 
     if (!dbTenant) return null
 
     const currentChatbots = await this.getChatbotCount(dbTenant.id)
+    const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
 
     return Tenant.reconstitute(dbTenant.id, {
-      apiKey: dbTenant.apiKey,
+      apiKey,
       createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      maxChatbots: dbTenant.maxChatbots || 1,
+      maxChatbots: dbTenant.maxChatbots,
       name: dbTenant.name,
       slug: dbTenant.slug,
-      subscriptionPlan: dbTenant.plan || 'free',
+      subscriptionPlan: dbTenant.subscriptionPlan.toLowerCase(),
       updatedAt: dbTenant.updatedAt,
     })
   }
 
   async findByApiKey(apiKey: string): Promise<Tenant | null> {
-    const dbTenant = await this.db.tenant.findFirst({
-      where: { apiKey },
+    const hashedKey = await this.hashApiKey(apiKey)
+    const apiKeyRecord = await this.db.apiKey.findUnique({
+      include: { tenant: true },
+      where: { keyHash: hashedKey },
     })
 
-    if (!dbTenant) return null
+    if (!apiKeyRecord || !apiKeyRecord.tenant) return null
+
+    const dbTenant = apiKeyRecord.tenant
 
     const currentChatbots = await this.getChatbotCount(dbTenant.id)
 
     return Tenant.reconstitute(dbTenant.id, {
-      apiKey: dbTenant.apiKey,
+      apiKey, // Use the original unhashed key
       createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      maxChatbots: dbTenant.maxChatbots || 1,
+      maxChatbots: dbTenant.maxChatbots,
       name: dbTenant.name,
       slug: dbTenant.slug,
-      subscriptionPlan: dbTenant.plan || 'free',
+      subscriptionPlan: dbTenant.subscriptionPlan.toLowerCase(),
       updatedAt: dbTenant.updatedAt,
     })
   }
@@ -115,6 +166,12 @@ export class TenantRepository implements ITenantRepository {
 
   async findAll(filters?: TenantFilters): Promise<Tenant[]> {
     const tenants = await this.db.tenant.findMany({
+      include: {
+        apiKeys: {
+          orderBy: { createdAt: 'asc' },
+          take: 1,
+        },
+      },
       orderBy: { createdAt: 'desc' },
       where: filters,
     })
@@ -122,15 +179,16 @@ export class TenantRepository implements ITenantRepository {
     return Promise.all(
       tenants.map(async dbTenant => {
         const currentChatbots = await this.getChatbotCount(dbTenant.id)
+        const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
         return Tenant.reconstitute(dbTenant.id, {
-          apiKey: dbTenant.apiKey,
+          apiKey,
           createdAt: dbTenant.createdAt,
           currentChatbots,
           isActive: dbTenant.isActive,
-          maxChatbots: dbTenant.maxChatbots || 1,
+          maxChatbots: dbTenant.maxChatbots,
           name: dbTenant.name,
           slug: dbTenant.slug,
-          subscriptionPlan: dbTenant.plan || 'free',
+          subscriptionPlan: dbTenant.subscriptionPlan.toLowerCase(),
           updatedAt: dbTenant.updatedAt,
         })
       })
@@ -138,46 +196,67 @@ export class TenantRepository implements ITenantRepository {
   }
 
   async update(id: string, data: UpdateTenantDto): Promise<Tenant> {
+    const updateData: any = {}
+    if (data.name) updateData.name = data.name
+    if (data.plan) {
+      updateData.subscriptionPlan = data.plan.toUpperCase()
+      updateData.maxChatbots = this.getMaxChatbotsForPlan(data.plan)
+    }
+
     const dbTenant = await this.db.tenant.update({
-      data: {
-        name: data.name,
-        plan: data.plan,
+      data: updateData,
+      include: {
+        apiKeys: {
+          orderBy: { createdAt: 'asc' },
+          take: 1,
+        },
       },
       where: { id },
     })
 
     const currentChatbots = await this.getChatbotCount(id)
+    const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
 
     return Tenant.reconstitute(dbTenant.id, {
-      apiKey: dbTenant.apiKey,
+      apiKey,
       createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
       maxChatbots: dbTenant.maxChatbots || 1,
       name: dbTenant.name,
       slug: dbTenant.slug,
-      subscriptionPlan: dbTenant.plan || 'free',
+      subscriptionPlan: dbTenant.subscriptionPlan.toLowerCase(),
       updatedAt: dbTenant.updatedAt,
     })
   }
 
   async updateSubscription(id: string, plan: string): Promise<Tenant> {
     const dbTenant = await this.db.tenant.update({
-      data: { plan },
+      data: {
+        maxChatbots: this.getMaxChatbotsForPlan(plan),
+        subscriptionPlan: plan.toUpperCase() as any,
+      },
+      include: {
+        apiKeys: {
+          orderBy: { createdAt: 'asc' },
+          take: 1,
+        },
+      },
       where: { id },
     })
 
     const currentChatbots = await this.getChatbotCount(id)
+    const apiKey = dbTenant.apiKeys[0]?.keyHash || 'no-api-key'
 
     return Tenant.reconstitute(dbTenant.id, {
-      apiKey: dbTenant.apiKey,
+      apiKey,
       createdAt: dbTenant.createdAt,
       currentChatbots,
       isActive: dbTenant.isActive,
-      maxChatbots: dbTenant.maxChatbots || 1,
+      maxChatbots: dbTenant.maxChatbots,
       name: dbTenant.name,
       slug: dbTenant.slug,
-      subscriptionPlan: dbTenant.plan || 'free',
+      subscriptionPlan: dbTenant.subscriptionPlan.toLowerCase(),
       updatedAt: dbTenant.updatedAt,
     })
   }

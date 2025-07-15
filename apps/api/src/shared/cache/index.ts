@@ -65,4 +65,8 @@ export class CacheService {
     const result = await this.redis.exists(key)
     return result === 1
   }
+
+  async flush(): Promise<void> {
+    await this.redis.flushdb()
+  }
 }

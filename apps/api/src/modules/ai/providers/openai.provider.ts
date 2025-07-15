@@ -9,7 +9,7 @@ export class OpenAIProvider extends BaseAIProvider {
 
   constructor() {
     super()
-    this.apiKey = config.openaiApiKey
+    this.apiKey = config.ai.openai.apiKey || ''
   }
 
   async generateResponse(

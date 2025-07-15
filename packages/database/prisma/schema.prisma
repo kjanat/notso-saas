@@ -18,6 +18,8 @@ model Tenant {
   databaseName       String             @unique
   subscriptionStatus SubscriptionStatus @default(TRIAL)
   subscriptionPlan   SubscriptionTier   @default(TRIAL)
+  maxChatbots        Int                @default(1)
+  isActive           Boolean            @default(true)
   trialEndsAt        DateTime?
   metadata           Json               @default("{}")
   settings           Json               @default("{}")
@@ -28,6 +30,7 @@ model Tenant {
   apiKeys            ApiKey[]
   usageMetrics       TenantUsage[]
   webhooks           Webhook[]
+  chatbots           Chatbot[]
   
   @@index([slug])
   @@index([subscriptionStatus])
@@ -179,6 +182,85 @@ model AuditLog {
   @@index([timestamp])
 }
 
+// Chatbot models
+model Chatbot {
+  id              String         @id @default(cuid())
+  tenantId        String
+  name            String
+  slug            String
+  deploymentKey   String         @unique
+  description     String?
+  avatarUrl       String?
+  systemPrompt    String         @db.Text
+  welcomeMessage  String?
+  provider        AIProvider
+  model           String
+  temperature     Float          @default(0.7)
+  maxTokens       Int            @default(500)
+  responseTimeout Int            @default(30000)
+  metadata        Json           @default("{}")
+  settings        Json           @default("{}")
+  appearance      Json           @default("{}")
+  behavior        Json           @default("{}")
+  placement       Json           @default("{}")
+  knowledgeBase   Json           @default("[]")
+  purpose         ChatbotPurpose @default(GENERAL)
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversations   Conversation[]
+  
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([deploymentKey])
+  @@index([isActive])
+}
+
+model Conversation {
+  id               String             @id @default(cuid())
+  chatbotId        String
+  sessionId        String
+  status           ConversationStatus @default(ACTIVE)
+  sentiment        Float?
+  metadata         Json               @default("{}")
+  startedAt        DateTime           @default(now())
+  endedAt          DateTime?
+  lastActivityAt   DateTime           @default(now())
+  
+  chatbot          Chatbot            @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  messages         Message[]
+  
+  @@unique([chatbotId, sessionId])
+  @@index([chatbotId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model Message {
+  id                  String      @id @default(cuid())
+  conversationId      String
+  role                MessageRole
+  content             String      @db.Text
+  metadata            Json?
+  model               String?
+  promptTokens        Int?
+  completionTokens    Int?
+  totalTokens         Int?
+  cost                Float?
+  latencyMs           Int?
+  sentiment           Float?
+  triggeredAnimation  String?
+  createdAt           DateTime    @default(now())
+  
+  conversation        Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@index([conversationId])
+  @@index([role])
+  @@index([createdAt])
+}
+
 // Enums
 enum SubscriptionStatus {
   TRIAL
@@ -199,4 +281,29 @@ enum UserRole {
   TENANT_ADMIN
   TENANT_USER
   TENANT_VIEWER
+}
+
+enum AIProvider {
+  OPENAI
+  ANTHROPIC
+  VERTEX
+}
+
+enum ChatbotPurpose {
+  SALES
+  SUPPORT
+  ONBOARDING
+  GENERAL
+}
+
+enum ConversationStatus {
+  ACTIVE
+  ENDED
+  ARCHIVED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

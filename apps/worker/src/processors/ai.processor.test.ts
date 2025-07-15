@@ -1,6 +1,6 @@
 import type { Job } from 'bullmq'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { aiProcessor } from './ai.processor'
+import { aiProcessor } from './ai.processor.js'
 
 // Mock fetch globally
 global.fetch = vi.fn()

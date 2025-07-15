@@ -1,7 +1,7 @@
 import { injectable } from 'tsyringe'
 
 import { Chatbot } from '../../domain/entities/chatbot.entity.js'
-import { EmbedId } from '../../domain/value-objects/embed-id.value-object.js'
+import { DeploymentKey } from '../../domain/value-objects/deployment-key.value-object.js'
 import { getDatabase } from '../../shared/database/index.js'
 
 import type {
@@ -17,38 +17,46 @@ export class ChatbotRepository implements IChatbotRepository {
   }
 
   async create(data: CreateChatbotDto): Promise<Chatbot> {
-    const embedId = this.generateEmbedId()
+    const deploymentKey = this.generateDeploymentKey()
+    const slug = data.name.toLowerCase().replace(/\s+/g, '-')
 
     const chatbot = await this.db.chatbot.create({
       data: {
-        animationMap: data.avatar?.animationMap || {},
-        avatarModelUrl: data.avatar?.modelUrl,
-        avatarPosition: data.avatar?.position || { x: 0, y: -0.5, z: 0 },
-        avatarScale: data.avatar?.scale || 1,
-        behaviors: data.behavior || {
+        appearance: data.theme || {},
+        avatarUrl: data.avatar?.modelUrl,
+        behavior: data.behavior || {
           greetingDelay: 3000,
           idleAnimationInterval: 15000,
           lookAtCursor: true,
           proximityReactions: true,
           respondToScroll: true,
         },
-        embedId,
-        knowledgeBaseId: data.knowledgeBaseId,
+        deploymentKey,
+        description: data.description,
+        isActive: true,
+        knowledgeBase: data.knowledgeBaseId ? [data.knowledgeBaseId] : [],
+        maxTokens: 500,
+        metadata: {},
         model: data.aiModel || 'gpt-4',
         name: data.name,
-        personalityTraits: data.personality?.traits || 'friendly, helpful',
         placement: data.placement || {
           mobilePosition: 'bottom-center',
           pages: ['/*'],
           position: 'bottom-right',
           zIndex: 9999,
         },
-        purpose: data.purpose || 'general',
-        responseStyle: data.personality?.responseStyle || 'concise',
+        provider: 'OPENAI', // Default to OpenAI for now
+        purpose: data.purpose ? (data.purpose.toUpperCase() as any) : 'GENERAL',
+        responseTimeout: 30000,
+        settings: {
+          avatar: data.avatar || {},
+          personality: data.personality || {},
+        },
+        slug,
         systemPrompt: data.personality?.systemPrompt || 'You are a helpful assistant.',
         temperature: data.temperature || 0.7,
         tenantId: data.tenantId,
-        voiceTone: data.personality?.voiceTone || 'professional',
+        welcomeMessage: data.welcomeMessage,
       },
     })
 
@@ -65,7 +73,7 @@ export class ChatbotRepository implements IChatbotRepository {
 
   async findByEmbedId(embedId: string): Promise<Chatbot | null> {
     const chatbot = await this.db.chatbot.findUnique({
-      where: { embedId },
+      where: { deploymentKey: embedId },
     })
 
     return chatbot ? this.toDomain(chatbot) : null
@@ -96,8 +104,30 @@ export class ChatbotRepository implements IChatbotRepository {
   }
 
   async update(id: string, data: UpdateChatbotDto): Promise<Chatbot> {
+    const updateData: any = {}
+
+    if (data.name) updateData.name = data.name
+    if (data.description) updateData.description = data.description
+    if (data.welcomeMessage) updateData.welcomeMessage = data.welcomeMessage
+    if (data.aiModel) updateData.model = data.aiModel
+    if (data.temperature !== undefined) updateData.temperature = data.temperature
+    if (data.purpose) updateData.purpose = data.purpose.toUpperCase()
+    if (data.avatar?.modelUrl) updateData.avatarUrl = data.avatar.modelUrl
+    if (data.personality?.systemPrompt) updateData.systemPrompt = data.personality.systemPrompt
+
+    // Complex objects stored as JSON
+    if (data.avatar) updateData.settings = { ...updateData.settings, avatar: data.avatar }
+    if (data.personality)
+      updateData.settings = { ...updateData.settings, personality: data.personality }
+    if (data.behavior) updateData.behavior = data.behavior
+    if (data.placement) updateData.placement = data.placement
+    if (data.theme) updateData.appearance = data.theme
+    if (data.knowledgeBaseId !== undefined) {
+      updateData.knowledgeBase = data.knowledgeBaseId ? [data.knowledgeBaseId] : []
+    }
+
     const chatbot = await this.db.chatbot.update({
-      data,
+      data: updateData,
       where: { id },
     })
 
@@ -110,42 +140,24 @@ export class ChatbotRepository implements IChatbotRepository {
     })
   }
 
-  generateEmbedId(): string {
-    return EmbedId.generate().value
+  generateDeploymentKey(): string {
+    return DeploymentKey.generate().value
   }
 
-  private toDomain(data: {
-    id: string
-    tenantId: string
-    embedId: string
-    name: string
-    purpose?: string | null
-    avatarModelUrl?: string | null
-    avatarScale?: number | null
-    avatarPosition?: unknown
-    animationMap?: unknown
-    personalityTraits?: string | null
-    voiceTone?: string | null
-    responseStyle?: string | null
-    systemPrompt?: string | null
-    behaviors?: unknown
-    placement?: unknown
-    model?: string | null
-    temperature?: number | null
-    knowledgeBaseId?: string | null
-    isActive?: boolean
-    createdAt: Date
-    updatedAt: Date
-  }): Chatbot {
+  private toDomain(data: any): Chatbot {
+    const settings = data.settings || {}
+    const personality = settings.personality || {}
+    const avatar = settings.avatar || {}
+
     return Chatbot.reconstitute(data.id, {
       aiModel: data.model || 'gpt-4',
       avatar: {
-        animationMap: data.animationMap || {},
-        modelUrl: data.avatarModelUrl || '',
-        position: data.avatarPosition || { x: 0, y: -0.5, z: 0 },
-        scale: data.avatarScale || 1,
+        animationMap: avatar.animationMap || {},
+        modelUrl: data.avatarUrl || '',
+        position: avatar.position || { x: 0, y: -0.5, z: 0 },
+        scale: avatar.scale || 1,
       },
-      behavior: data.behaviors || {
+      behavior: data.behavior || {
         greetingDelay: 3000,
         idleAnimationInterval: 15000,
         lookAtCursor: true,
@@ -153,15 +165,19 @@ export class ChatbotRepository implements IChatbotRepository {
         respondToScroll: true,
       },
       createdAt: data.createdAt,
-      embedId: data.embedId,
+      description: data.description,
+      embedId: data.deploymentKey,
       isActive: data.isActive ?? true,
-      knowledgeBaseId: data.knowledgeBaseId,
+      knowledgeBaseId:
+        Array.isArray(data.knowledgeBase) && data.knowledgeBase.length > 0
+          ? data.knowledgeBase[0]
+          : null,
       name: data.name,
       personality: {
-        responseStyle: data.responseStyle || 'concise',
+        responseStyle: personality.responseStyle || 'concise',
         systemPrompt: data.systemPrompt || 'You are a helpful assistant.',
-        traits: data.personalityTraits || 'friendly, helpful',
-        voiceTone: data.voiceTone || 'professional',
+        traits: personality.traits || 'friendly, helpful',
+        voiceTone: personality.voiceTone || 'professional',
       },
       placement: data.placement || {
         mobilePosition: 'bottom-center',
@@ -169,10 +185,12 @@ export class ChatbotRepository implements IChatbotRepository {
         position: 'bottom-right',
         zIndex: 9999,
       },
-      purpose: data.purpose || 'general',
+      purpose: data.purpose ? data.purpose.toLowerCase() : 'general',
       temperature: data.temperature || 0.7,
       tenantId: data.tenantId,
+      theme: data.appearance || {},
       updatedAt: data.updatedAt,
+      welcomeMessage: data.welcomeMessage,
     })
   }
 }
