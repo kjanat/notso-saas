@@ -18,6 +18,8 @@ jobs:
 
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '22'
 
       - name: Run linting
         run: pnpm lint
@@ -62,6 +64,8 @@ jobs:
     steps:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '22'
 
       - name: Run unit tests
         run: pnpm test:unit
@@ -112,6 +116,8 @@ jobs:
     steps:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '22'
 
       - name: Wait for database to be ready
         run: |
@@ -175,6 +181,8 @@ jobs:
     steps:
       - name: Setup Node.js and pnpm
         uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '22'
 
       - name: Wait for database to be ready
         run: |

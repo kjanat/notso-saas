@@ -5,8 +5,8 @@ This composite action sets up a consistent Node.js and pnpm environment for all 
 ## What it does
 
 1. Checks out the repository code
-2. Sets up pnpm (default: version 10)
-3. Sets up Node.js with pnpm caching (default: version 22)
+2. Sets up pnpm (default: latest version)
+3. Sets up Node.js with pnpm caching (default: latest version)
 4. Installs dependencies with `--frozen-lockfile` (optional)
 5. Generates Prisma Client (optional)
 
@@ -20,16 +20,18 @@ steps:
     uses: ./.github/actions/setup-node-pnpm
 ```
 
-### Custom versions
+### Custom versions (recommended for production)
 
 ```yaml
 steps:
   - name: Setup Node.js and pnpm
     uses: ./.github/actions/setup-node-pnpm
     with:
-      node-version: '20'
-      pnpm-version: '9'
+      node-version: '22'  # Specify exact version for consistency
+      pnpm-version: '10'  # Specify exact version for consistency
 ```
+
+**Note:** While the defaults use `latest`, it's recommended to specify exact versions in production workflows to ensure consistency and avoid unexpected breaking changes.
 
 ### Skip dependency installation or Prisma generation
 
@@ -46,8 +48,8 @@ steps:
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `node-version` | Node.js version to use | No | `22` |
-| `pnpm-version` | pnpm version to use | No | `10` |
+| `node-version` | Node.js version to use | No | `latest` |
+| `pnpm-version` | pnpm version to use | No | `latest` |
 | `install-dependencies` | Whether to install dependencies | No | `true` |
 | `generate-prisma` | Whether to generate Prisma client | No | `true` |
 
