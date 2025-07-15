@@ -11,7 +11,7 @@ export class HealthController {
     @inject('Redis') private redis: Redis
   ) {}
 
-  async check(request: FastifyRequest, reply: FastifyReply)
+  async check(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
     const services: Record<string, string> = {}
     let overallStatus = 'healthy'
 
@@ -20,10 +20,6 @@ export class HealthController {
       await this.prisma.$queryRaw`SELECT 1`
       services.database = 'connected'
     } catch (error) {
-      request.log.error('Worker health check failed:', error)
-      request.log.error('Redis health check failed:', error)
-      request.log.error('Database health check failed:', error)
-      request.log ? request.log.error('Database health check failed:', error) : logger.error('Database health check failed:', error)
       request.log.error('Database health check failed:', error)
       services.database = 'disconnected'
       overallStatus = 'unhealthy'
@@ -34,10 +30,6 @@ export class HealthController {
       await this.redis.ping()
       services.redis = 'connected'
     } catch (error) {
-      request.log.error('Worker health check failed:', error)
-      request.log.error('Redis health check failed:', error)
-      request.log.error('Database health check failed:', error)
-      request.log ? request.log.error('Redis health check failed:', error) : logger.error('Redis health check failed:', error)
       request.log.error('Redis health check failed:', error)
       services.redis = 'disconnected'
       overallStatus = 'unhealthy'
@@ -51,11 +43,7 @@ export class HealthController {
       const exists = await this.redis.exists(aiQueueKey)
       services.worker = exists ? 'running' : 'unknown'
     } catch (error) {
-      request.log.error('Worker health check failed:', error)
-      request.log.error('Redis health check failed:', error)
-      request.log.error('Database health check failed:', error)
-      request.log ? request.log.warn('Worker health check failed:', error) : logger.warn('Worker health check failed:', error)
-      request.log.error('Worker health check failed:', error)
+      request.log.warn('Worker health check failed:', error)
       services.worker = 'error'
     }
 

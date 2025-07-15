@@ -1,5 +1,4 @@
 import { Prisma, PrismaClient } from '@saas/database'
-import { PrismaClient, Prisma } from '@saas/database'
 
 let prisma: PrismaClient
 
