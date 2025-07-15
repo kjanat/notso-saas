@@ -73,7 +73,7 @@ export async function teardownTestDatabase(): Promise<void> {
 export async function cleanDatabase() {
   const prisma = getTestDatabase()
   const errors = []
-  let tables = []
+  let tables: Array<{ tablename: string }> = []
 
   try {
     // Get all table names except migrations in a single query
