@@ -1,11 +1,13 @@
 import { vi } from 'vitest'
-import type { Job } from 'bullmq'
 
 import type {
   ICacheService,
   ILogger,
   IQueueService,
 } from '../../../apps/api/src/shared/interfaces/base.interfaces'
+
+// Import Job type from the same location as the interfaces
+import type { Job } from 'bullmq'
 
 // Mock Logger
 export const createMockLogger = (): ILogger => ({
@@ -17,9 +19,9 @@ export const createMockLogger = (): ILogger => ({
 
 // Mock Cache Service
 export const createMockCacheService = (): ICacheService => ({
-  delete: vi.fn().mockResolvedValue(true),
+  delete: vi.fn().mockResolvedValue(undefined),
   get: vi.fn().mockResolvedValue(null),
-  set: vi.fn().mockResolvedValue(true),
+  set: vi.fn().mockResolvedValue(undefined),
   exists: vi.fn().mockResolvedValue(false),
   flush: vi.fn().mockResolvedValue(undefined),
 })
