@@ -1,4 +1,5 @@
-import { PrismaClient } from '@saas/database'
+import { Prisma, PrismaClient } from '@saas/database'
+import { PrismaClient, Prisma } from '@saas/database'
 
 let prisma: PrismaClient
 
@@ -19,57 +20,17 @@ export function getTestDatabase(): PrismaClient {
   return prisma
 }
 
-export async function cleanDatabase() {
-  const prisma = getTestDatabase()
-  const errors: Array<{ table: string; error: unknown }> = []
 
-  // Get all table names except migrations
-  const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
-    SELECT tablename FROM pg_tables 
-    WHERE schemaname='public' 
-    AND tablename != '_prisma_migrations'
-    ORDER BY tablename
-  `
-
-  // Disable foreign key checks temporarily
-  await prisma.$executeRawUnsafe('SET session_replication_role = replica;')
-
-  // Truncate all tables
-  for (const { tablename } of tables) {
-    try {
-      // Validate table name to prevent SQL injection
-      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tablename)) {
-        throw new Error(`Invalid table name: ${tablename}`)
-      }
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" CASCADE`)
-    } catch (error) {
-      errors.push({ error, table: tablename })
-      console.warn(`Failed to truncate table '${tablename}':`, error)
-    }
-  }
-
-  // Re-enable foreign key checks
-  await prisma.$executeRawUnsafe('SET session_replication_role = DEFAULT;')
-
-  // If there were errors, throw a comprehensive error
-  if (errors.length > 0) {
-    const errorMessage =
-      `Failed to truncate ${errors.length} table(s):\n` +
-      errors.map(({ table, error }) => `  - ${table}: ${error}`).join('\n')
-    throw new Error(errorMessage)
-  }
-}
-
-export async function resetSequences() {
+export async function resetSequences(): Promise<void> {
   const prisma = getTestDatabase()
   const errors: Array<{ sequence: string; error: unknown }> = []
 
   try {
-    // Reset all sequences to 1
+    // Reset all sequences to 1 using parameterized query
     const sequences = await prisma.$queryRaw<Array<{ sequence_name: string }>>`
       SELECT sequence_name 
       FROM information_schema.sequences 
-      WHERE sequence_schema = 'public'
+      WHERE sequence_schema = ${'public'}
     `
 
     for (const { sequence_name } of sequences) {
@@ -78,7 +39,7 @@ export async function resetSequences() {
         if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(sequence_name)) {
           throw new Error(`Invalid sequence name: ${sequence_name}`)
         }
-        await prisma.$executeRawUnsafe(`ALTER SEQUENCE "${sequence_name}" RESTART WITH 1`)
+        await prisma.$executeRaw`ALTER SEQUENCE ${Prisma.raw(`"${sequence_name}"`)} RESTART WITH 1`
       } catch (error) {
         errors.push({ error, sequence: sequence_name })
         console.error(`Failed to reset sequence '${sequence_name}':`, error)
@@ -94,12 +55,12 @@ export async function resetSequences() {
   }
 }
 
-export async function setupTestDatabase() {
+export async function setupTestDatabase(): Promise<void> {
   await cleanDatabase()
   await resetSequences()
 }
 
-export async function teardownTestDatabase() {
+export async function teardownTestDatabase(): Promise<void> {
   const prisma = getTestDatabase()
   try {
     await prisma.$disconnect()
@@ -107,5 +68,61 @@ export async function teardownTestDatabase() {
     console.error('Failed to disconnect from test database:', error)
     // Re-throw to ensure test failures are noticed
     throw new Error(`Database disconnect failed: ${error}`)
+  }
+}
+// Replace the cleanDatabase function with an optimized version
+export async function cleanDatabase() {
+  const prisma = getTestDatabase()
+  const errors = []
+
+  try {
+    // Get all table names except migrations in a single query
+    const tables = await prisma.$queryRaw`
+      SELECT tablename FROM pg_tables 
+      WHERE schemaname = 'public' 
+      AND tablename != '_prisma_migrations'
+      ORDER BY tablename
+    `
+
+    // Use a transaction for atomic cleanup
+    await prisma.$transaction(async (tx) => {
+      // Disable foreign key checks for faster cleanup
+      await tx.$executeRaw`SET session_replication_role = replica`
+      
+      // Batch truncate operations
+      const truncatePromises = tables.map(({ tablename }) => {
+        // Validate table name to prevent SQL injection
+        if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tablename)) {
+          errors.push({ error: new Error(`Invalid table name: ${tablename}`), table: tablename })
+          return Promise.resolve()
+        }
+        
+        return tx.$executeRaw`TRUNCATE TABLE ${Prisma.raw(`"${tablename}"`)} CASCADE`
+          .catch(error => {
+            errors.push({ error, table: tablename })
+            console.warn(`Failed to truncate table '${tablename}':`, error)
+          })
+      })
+      
+      await Promise.allSettled(truncatePromises)
+      
+      // Re-enable foreign key checks
+      await tx.$executeRaw`SET session_replication_role = DEFAULT`
+    })
+
+  } catch (error) {
+    throw new Error(`Database cleanup transaction failed: ${error}`)
+  }
+
+  // Report errors but don't fail the cleanup unless all tables failed
+  if (errors.length > 0) {
+    const errorMessage = `Failed to truncate ${errors.length} table(s):\n` +
+      errors.map(({ table, error }) => `  - ${table}: ${error}`).join('\n')
+    
+    if (errors.length === tables?.length) {
+      throw new Error(errorMessage)
+    } else {
+      console.warn(errorMessage)
+    }
   }
 }

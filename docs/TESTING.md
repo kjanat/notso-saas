@@ -21,7 +21,7 @@ pnpm test:affected
 
 # Run all test types in CI mode
 pnpm test:ci
-```
+```text
 
 ### By Test Type
 ```bash
@@ -39,18 +39,18 @@ pnpm test:watch
 
 # Coverage report
 pnpm test:coverage
-```
+```text
 
 ### By Package
 ```bash
 # Test specific package
 pnpm test:api          # API service tests
 pnpm --filter=@saas/worker test  # Worker tests
-```
+```text
 
 ## Test Structure
 
-```
+```text
 apps/
 ├── api/
 │   ├── src/
@@ -74,7 +74,7 @@ packages/
         ├── fixtures.ts        # Test data factories
         ├── mocks.ts          # Common mocks
         └── vitest.config.ts  # Shared Vitest config
-```
+```text
 
 ## Writing Tests
 
@@ -101,7 +101,7 @@ describe('TenantService', () => {
     expect(mockRepo.create).toHaveBeenCalledOnce()
   })
 })
-```
+```text
 
 ### Integration Tests
 
@@ -131,7 +131,7 @@ describe('Tenant API', () => {
     expect(response.statusCode).toBe(201)
   })
 })
-```
+```text
 
 ### E2E Tests
 
@@ -157,7 +157,7 @@ test('complete tenant lifecycle', async ({ request }) => {
   
   expect(chatbotRes.ok()).toBeTruthy()
 })
-```
+```text
 
 ## Test Utilities
 
@@ -170,7 +170,7 @@ import { getTestDatabase, setupTestDatabase } from '@saas/test-utils'
 beforeAll(async () => {
   await setupTestDatabase() // Cleans and resets DB
 })
-```
+```text
 
 ### Test Fixtures
 
@@ -183,7 +183,7 @@ import {
 
 const tenant = createTenantFixture({ plan: 'pro' })
 const user = createUserFixture({ email: 'test@example.com' })
-```
+```text
 
 ### Mocks
 
@@ -196,7 +196,7 @@ import {
 
 const logger = createMockLogger()
 logger.info('test') // Tracked by Vitest spy
-```
+```text
 
 ## CI/CD Integration
 
@@ -222,7 +222,7 @@ View coverage locally:
 ```bash
 pnpm test:coverage
 open coverage/index.html
-```
+```text
 
 ## Best Practices
 
@@ -246,7 +246,7 @@ pnpm db:push
 
 # Clear Turbo cache
 pnpm turbo run test --force
-```
+```text
 
 ### E2E tests timeout
 ```bash
@@ -254,7 +254,7 @@ pnpm turbo run test --force
 pnpm test:e2e:headed
 
 # Increase timeout in playwright.config.ts
-```
+```text
 
 ### Coverage not updating
 ```bash
@@ -263,4 +263,4 @@ rm -rf coverage/
 
 # Run with --no-cache
 pnpm test:coverage --no-cache
-```
+```text
