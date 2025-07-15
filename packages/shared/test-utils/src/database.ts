@@ -37,6 +37,10 @@ export async function cleanDatabase() {
   // Truncate all tables
   for (const { tablename } of tables) {
     try {
+      // Validate table name to prevent SQL injection
+      if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tablename)) {
+        throw new Error(`Invalid table name: ${tablename}`)
+      }
       await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${tablename}" CASCADE`)
     } catch (error) {
       errors.push({ error, table: tablename })
@@ -70,6 +74,10 @@ export async function resetSequences() {
 
     for (const { sequence_name } of sequences) {
       try {
+        // Validate sequence name to prevent SQL injection
+        if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(sequence_name)) {
+          throw new Error(`Invalid sequence name: ${sequence_name}`)
+        }
         await prisma.$executeRawUnsafe(`ALTER SEQUENCE "${sequence_name}" RESTART WITH 1`)
       } catch (error) {
         errors.push({ error, sequence: sequence_name })

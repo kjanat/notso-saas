@@ -2,6 +2,7 @@ import { PrismaClient } from '@saas/database'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { Redis } from 'ioredis'
 import { inject, injectable } from 'tsyringe'
+import { logger } from '../../shared/utils/logger.js'
 
 @injectable()
 export class HealthController {
@@ -18,7 +19,8 @@ export class HealthController {
     try {
       await this.prisma.$queryRaw`SELECT 1`
       services.database = 'connected'
-    } catch {
+    } catch (error) {
+      logger.error('Database health check failed:', error)
       services.database = 'disconnected'
       overallStatus = 'unhealthy'
     }
@@ -27,7 +29,8 @@ export class HealthController {
     try {
       await this.redis.ping()
       services.redis = 'connected'
-    } catch {
+    } catch (error) {
+      logger.error('Redis health check failed:', error)
       services.redis = 'disconnected'
       overallStatus = 'unhealthy'
     }
@@ -39,7 +42,8 @@ export class HealthController {
       const aiQueueKey = `${queuePrefix}:${queueName}:meta`
       const exists = await this.redis.exists(aiQueueKey)
       services.worker = exists ? 'running' : 'unknown'
-    } catch {
+    } catch (error) {
+      logger.warn('Worker health check failed:', error)
       services.worker = 'error'
     }
 

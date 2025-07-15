@@ -273,14 +273,39 @@ export class TenantRepository implements ITenantRepository {
   }
 
   async incrementUsage(id: string, metric: string, amount: number): Promise<void> {
-    // In a real implementation, this would update usage metrics
-    // For now, this is a placeholder
-    await this.db.$executeRaw`
-      INSERT INTO usage_metrics (tenant_id, metric, amount, date)
-      VALUES (${id}, ${metric}, ${amount}, CURRENT_DATE)
-      ON CONFLICT (tenant_id, metric, date)
-      DO UPDATE SET amount = usage_metrics.amount + ${amount}
-    `
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // Start of day
+
+    // Find or create usage record for today
+    const existingUsage = await this.db.tenantUsage.findUnique({
+      where: {
+        tenantId_period: {
+          period: today,
+          tenantId: id,
+        },
+      },
+    })
+
+    if (existingUsage) {
+      // Update existing metrics
+      const metrics = existingUsage.metrics as Record<string, number>
+      metrics[metric] = (metrics[metric] || 0) + amount
+
+      await this.db.tenantUsage.update({
+        data: { metrics },
+        where: { id: existingUsage.id },
+      })
+    } else {
+      // Create new usage record
+      await this.db.tenantUsage.create({
+        data: {
+          costs: {},
+          metrics: { [metric]: amount },
+          period: today,
+          tenantId: id,
+        },
+      })
+    }
   }
 
   async delete(id: string): Promise<void> {
