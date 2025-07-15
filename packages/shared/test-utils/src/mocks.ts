@@ -1,6 +1,5 @@
 import { vi } from 'vitest'
-
-
+import type { Job } from 'bullmq'
 
 import type {
   ICacheService,
@@ -18,20 +17,20 @@ export const createMockLogger = (): ILogger => ({
 
 // Mock Cache Service
 export const createMockCacheService = (): ICacheService => ({
-  del: vi.fn().mockResolvedValue(true),
+  delete: vi.fn().mockResolvedValue(true),
   get: vi.fn().mockResolvedValue(null),
   set: vi.fn().mockResolvedValue(true),
+  exists: vi.fn().mockResolvedValue(false),
+  flush: vi.fn().mockResolvedValue(undefined),
 })
 
 // Mock Queue Service
 export const createMockQueueService = (): IQueueService => ({
   addJob: vi.fn().mockResolvedValue('mock-job-id'),
   getJob: vi.fn().mockResolvedValue(null),
-  getQueue: vi.fn().mockReturnValue({
-    add: vi.fn().mockResolvedValue({ id: 'mock-job-id' }),
-    process: vi.fn(),
-  }),
-  process: vi.fn(),
+  getJobs: vi.fn().mockResolvedValue([]),
+  registerWorker: vi.fn(),
+  removeJob: vi.fn().mockResolvedValue(undefined),
 })
 
 // Mock Job

@@ -73,10 +73,11 @@ export async function teardownTestDatabase(): Promise<void> {
 export async function cleanDatabase() {
   const prisma = getTestDatabase()
   const errors = []
+  let tables = []
 
   try {
     // Get all table names except migrations in a single query
-    const tables = await prisma.$queryRaw`
+    tables = await prisma.$queryRaw`
       SELECT tablename FROM pg_tables 
       WHERE schemaname = 'public' 
       AND tablename != '_prisma_migrations'
