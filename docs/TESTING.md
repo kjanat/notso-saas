@@ -50,7 +50,7 @@ pnpm --filter=@saas/worker test  # Worker tests
 
 ## Test Structure
 
-```
+```text
 apps/
 ├── api/
 │   ├── src/
