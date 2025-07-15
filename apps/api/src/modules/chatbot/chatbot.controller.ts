@@ -57,7 +57,7 @@ export class ChatbotController {
     }
   }
 
-  async findAllByTenant(request: FastifyRequest, reply: FastifyReply) {
+  async findAllByTenant(request: FastifyRequest, _reply: FastifyReply) {
     const chatbots = await this.chatbotService.findAllByTenant(request.user.tenantId)
     return chatbots
   }

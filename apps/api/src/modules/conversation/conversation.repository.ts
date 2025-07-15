@@ -1,10 +1,12 @@
 import { injectable } from 'tsyringe'
+
 import {
   Conversation,
   ConversationStatus,
   type Message,
 } from '../../domain/entities/conversation.entity.js'
 import { getDatabase } from '../../shared/database/index.js'
+
 import type {
   CreateConversationDto,
   IConversationRepository,

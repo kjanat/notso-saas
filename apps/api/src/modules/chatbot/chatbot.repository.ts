@@ -1,7 +1,9 @@
 import { injectable } from 'tsyringe'
+
 import { Chatbot } from '../../domain/entities/chatbot.entity.js'
 import { EmbedId } from '../../domain/value-objects/embed-id.value-object.js'
 import { getDatabase } from '../../shared/database/index.js'
+
 import type {
   CreateChatbotDto,
   IChatbotRepository,

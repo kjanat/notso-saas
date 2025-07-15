@@ -35,7 +35,7 @@ export interface CreateChatbotDto {
   knowledgeBaseId?: string
 }
 
-export interface UpdateChatbotDto extends Partial<CreateChatbotDto> {}
+export type UpdateChatbotDto = Partial<CreateChatbotDto>
 
 export interface IChatbotRepository
   extends IBaseRepository<Chatbot, CreateChatbotDto, UpdateChatbotDto> {

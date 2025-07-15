@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
+
 import { Tenant } from '../../domain/entities/tenant.entity'
 import type { ICacheService, ILogger, IQueueService } from '../../shared/interfaces/base.interfaces'
+
 import type { ITenantRepository, ITenantService } from './tenant.interfaces'
 import { TenantService } from './tenant.service'
 

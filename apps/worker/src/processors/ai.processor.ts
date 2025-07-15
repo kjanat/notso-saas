@@ -1,7 +1,5 @@
 import type { Job } from 'bullmq'
-
 import { Redis } from 'ioredis'
-
 import { logger } from '../logger.js'
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')

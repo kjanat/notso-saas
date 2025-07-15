@@ -21,7 +21,7 @@ export class HealthController {
     try {
       await this.prisma.$queryRaw`SELECT 1`
       services.database = 'connected'
-    } catch (_error) {
+    } catch {
       services.database = 'disconnected'
       overallStatus = 'unhealthy'
     }
@@ -30,7 +30,7 @@ export class HealthController {
     try {
       await this.redis.ping()
       services.redis = 'connected'
-    } catch (_error) {
+    } catch {
       services.redis = 'disconnected'
       overallStatus = 'unhealthy'
     }
@@ -40,7 +40,7 @@ export class HealthController {
       const aiQueueKey = 'bull:ai-processing:meta'
       const exists = await this.redis.exists(aiQueueKey)
       services.worker = exists ? 'running' : 'unknown'
-    } catch (_error) {
+    } catch {
       services.worker = 'error'
     }
 

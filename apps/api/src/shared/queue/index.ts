@@ -1,7 +1,6 @@
-import type { Job, JobsOptions, Processor } from 'bullmq'
+import type { JobsOptions, Processor } from 'bullmq'
 import { Queue, Worker } from 'bullmq'
 import { Redis } from 'ioredis'
-
 import { config } from '../../config/index.js'
 import { logger } from '../utils/logger.js'
 

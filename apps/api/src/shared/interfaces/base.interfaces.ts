@@ -1,5 +1,3 @@
-import type { Job } from 'bullmq'
-
 export interface IBaseRepository<
   T,
   CreateDTO = Record<string, unknown>,
@@ -47,3 +45,5 @@ export interface ILogger {
   warn(message: string, meta?: Record<string, unknown>): void
   debug(message: string, meta?: Record<string, unknown>): void
 }
+
+import type { Job } from 'bullmq'
