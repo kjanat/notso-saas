@@ -131,6 +131,14 @@ S3_BUCKET=avatars
 # Feature Flags
 ENABLE_ANALYTICS=true
 ENABLE_RATE_LIMITING=true
+
+# Queue Configuration
+QUEUE_PREFIX=bull                    # Redis queue key prefix (default: bull)
+AI_QUEUE_NAME=ai-processing          # AI processing queue name (default: ai-processing)
+
+# Database Seeding (Development Only)
+ADMIN_PASSWORD=your-secure-password  # Admin user password for seed script
+DEMO_PASSWORD=your-demo-password     # Demo user password for seed script
 ```
 
 ## Project Structure
