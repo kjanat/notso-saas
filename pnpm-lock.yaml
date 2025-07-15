@@ -300,6 +300,9 @@ importers:
       '@types/node':
         specifier: ^24.0.13
         version: 24.0.13
+      '@vitest/coverage-v8':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4)
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
