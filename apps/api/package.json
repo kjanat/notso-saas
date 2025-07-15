@@ -26,6 +26,7 @@
     "zod": "^4.0.5"
   },
   "devDependencies": {
+    "@saas/test-utils": "workspace:*",
     "@saas/tsconfig": "workspace:*",
     "@types/node": "^24.0.13",
     "@vitest/coverage-v8": "^3.2.4",
@@ -46,8 +47,11 @@
     "dev": "tsx watch src/main.ts",
     "lint": "eslint .",
     "start": "node dist/main.js",
-    "test": "vitest",
-    "test:watch": "vitest --watch",
+    "test": "vitest run",
+    "test:unit": "vitest run src/**/*.test.ts",
+    "test:integration": "vitest run tests/integration/**/*.test.ts",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit"
   },
   "type": "module",

@@ -10,6 +10,7 @@
     "pino": "^9.7.0"
   },
   "devDependencies": {
+    "@saas/test-utils": "workspace:*",
     "@saas/tsconfig": "workspace:*",
     "@types/ioredis": "^5.0.0",
     "@types/node": "^24.0.13",
@@ -25,7 +26,10 @@
     "dev": "tsx watch src/main.ts",
     "lint": "eslint .",
     "start": "node dist/main.js",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:unit": "vitest run src/**/*.test.ts",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit"
   },
   "type": "module",

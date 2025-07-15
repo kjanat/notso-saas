@@ -1,0 +1,27 @@
+{
+  "name": "@saas/test-utils",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./vitest": "./src/vitest.config.ts",
+    "./database": "./src/database.ts",
+    "./fixtures": "./src/fixtures.ts",
+    "./mocks": "./src/mocks.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.9.0",
+    "@saas/database": "workspace:*",
+    "bullmq": "^5.56.4",
+    "vitest": "^3.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "typescript": "^5.8.3"
+  }
+}

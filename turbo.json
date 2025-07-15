@@ -35,13 +35,36 @@
       "outputs": []
     },
     "test": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "env": ["NODE_ENV", "DATABASE_URL", "REDIS_URL"],
+      "outputs": ["coverage/**"]
+    },
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "env": ["NODE_ENV", "DATABASE_URL", "REDIS_URL"],
+      "outputs": ["coverage/**", "coverage-final.json"]
+    },
+    "test:e2e": {
+      "cache": false,
       "dependsOn": ["build"],
+      "env": ["NODE_ENV", "DATABASE_URL", "REDIS_URL", "API_URL"]
+    },
+    "test:integration": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "env": ["NODE_ENV", "DATABASE_URL", "REDIS_URL"],
+      "outputs": ["coverage/**"]
+    },
+    "test:unit": {
+      "cache": true,
       "env": ["NODE_ENV"],
       "outputs": ["coverage/**"]
     },
-    "test:e2e": {
-      "dependsOn": ["build"],
-      "env": ["NODE_ENV", "DATABASE_URL"]
+    "test:watch": {
+      "cache": false,
+      "env": ["NODE_ENV"],
+      "persistent": true
     },
     "type-check": {
       "outputs": []
