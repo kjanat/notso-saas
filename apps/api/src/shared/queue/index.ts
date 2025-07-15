@@ -58,7 +58,10 @@ export class QueueService {
     logger.debug(`Job ${jobName} added to queue ${queueName}`, {
       jobId: job.id,
     })
-    return job.id || ''
+  if (!job.id) {
+    throw new Error(`Failed to create job ${jobName} in queue ${queueName}`)
+  }
+  return job.id
   }
 
   async removeJob(jobId: string): Promise<void> {

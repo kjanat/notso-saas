@@ -1,110 +1,52 @@
-import type { Job } from 'bullmq'
 import { vi } from 'vitest'
-import type { ICacheService, ILogger, IQueueService } from './interfaces'
+import type { Job } from 'bullmq'
 
-export function createMockLogger(): ILogger {
-  return {
-    debug: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-  }
-}
+import type {
+  ICacheService,
+  ILogger,
+  IQueueService,
+} from '../../../apps/api/src/shared/interfaces/base.interfaces'
 
-export function createMockCache(): ICacheService {
-  const cache = new Map<string, unknown>()
+// Mock Logger
+export const createMockLogger = (): ILogger => ({
+  debug: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+})
 
-  return {
-    delete: vi.fn(async (key: string) => {
-      cache.delete(key)
-    }),
-    exists: vi.fn(async (key: string) => cache.has(key)),
-    flush: vi.fn(async () => {
-      cache.clear()
-    }),
-    get: vi.fn().mockImplementation(async (key: string) => cache.get(key) ?? null),
-    set: vi.fn(async <T>(key: string, value: T) => {
-      cache.set(key, value)
-    }),
-  }
-}
+// Mock Cache Service
+export const createMockCacheService = (): ICacheService => ({
+  delete: vi.fn().mockResolvedValue(true),
+  get: vi.fn().mockResolvedValue(null),
+  set: vi.fn().mockResolvedValue(true),
+  exists: vi.fn().mockResolvedValue(false),
+  flush: vi.fn().mockResolvedValue(undefined),
+})
 
-export function createMockQueue(): IQueueService {
-  const jobs: Partial<Job>[] = []
+// Mock Queue Service
+export const createMockQueueService = (): IQueueService => ({
+  addJob: vi.fn().mockResolvedValue('mock-job-id'),
+  getJob: vi.fn().mockResolvedValue(null),
+  getJobs: vi.fn().mockResolvedValue([]),
+  registerWorker: vi.fn(),
+  removeJob: vi.fn().mockResolvedValue(undefined),
+})
 
-  return {
-    addJob: vi.fn(async <T>(_queue: string, name: string, data: T) => {
-      const job: Partial<Job> = {
-        data,
-        id: Date.now().toString(),
-        name,
-        queueName: _queue,
-      }
-      jobs.push(job)
-      return job.id as string
-    }),
-    getJob: vi.fn(async (jobId: string) => {
-      return jobs.find(j => j.id === jobId) as Job | null
-    }),
-    getJobs: vi.fn(async () => jobs as Job[]),
-    registerWorker: vi.fn(),
-    removeJob: vi.fn(async (jobId: string) => {
-      const index = jobs.findIndex(j => j.id === jobId)
-      if (index > -1) jobs.splice(index, 1)
-    }),
-  }
-}
+// Mock Job
+export const createMockJob = <T = any>(data: T): Job<T> =>
+  ({
+    data,
+    id: 'mock-job-id',
+    name: 'mock-job',
+    opts: {},
+    progress: vi.fn(),
+    update: vi.fn(),
+  }) as Job<T>
 
-export function createMockRepository<T>(methods: string[]) {
-  const repo: Record<string, ReturnType<typeof vi.fn>> = {}
-
-  methods.forEach(method => {
-    repo[method] = vi.fn()
-  })
-
-  return repo as T
-}
-
-// Common test setup helpers
-export function setupMockEnvironment() {
-  process.env.NODE_ENV = 'test'
-  process.env.JWT_SECRET = 'test-secret'
-  process.env.LOG_LEVEL = 'error'
-  process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/test'
-  process.env.REDIS_URL = 'redis://localhost:6379/1'
-}
-
-// Mock AI service responses
-export function createMockAIResponse(content: string) {
-  return {
-    content,
-    finishReason: 'stop',
-    model: 'gpt-4-turbo-preview',
-    usage: {
-      completionTokens: 50,
-      promptTokens: 100,
-      totalTokens: 150,
-    },
-  }
-}
-
-// Type definitions for WebSocket handlers
-type SocketEventHandler = (...args: any[]) => void | Promise<void>
-
-interface MockSocket {
-  id: string
-  rooms: Set<string>
-  emit: ReturnType<typeof vi.fn>
-  on: (event: string, handler: SocketEventHandler) => void
-  off: (event: string, handler: SocketEventHandler) => void
-  join: ReturnType<typeof vi.fn>
-  leave: ReturnType<typeof vi.fn>
-  disconnect: ReturnType<typeof vi.fn>
-}
-
-// Mock WebSocket connection
-export function createMockSocket(): MockSocket {
-  const events = new Map<string, SocketEventHandler[]>()
+// Mock Socket
+export function createMockSocket() {
+  const events = new Map<string, ((...args: any[]) => void)[]>()
 
   return {
     disconnect: vi.fn(),
@@ -112,15 +54,45 @@ export function createMockSocket(): MockSocket {
     id: 'mock-socket-id',
     join: vi.fn(),
     leave: vi.fn(),
-    off: vi.fn((event: string, handler: SocketEventHandler) => {
+    off: vi.fn((event: string, handler: (...args: any[]) => void) => {
       const handlers = events.get(event) || []
       const index = handlers.indexOf(handler)
       if (index > -1) handlers.splice(index, 1)
     }),
-    on: vi.fn((event: string, handler: SocketEventHandler) => {
+    on: vi.fn((event: string, handler: (...args: any[]) => void) => {
       if (!events.has(event)) events.set(event, [])
       events.get(event)!.push(handler)
     }),
     rooms: new Set<string>(),
+  }
+}
+
+// Improved type safety for job operations
+export function createTypedMockQueue<T = any>(): IQueueService {
+  const jobs: Array<Job<T>> = []
+
+  return {
+    addJob: vi.fn(async <TData>(queue: string, name: string, data: TData, options?: unknown) => {
+      const job = {
+        data,
+        id: `job-${Date.now()}-${Math.random()}`,
+        name,
+        queueName: queue,
+        timestamp: Date.now(),
+      } as Job<TData>
+      jobs.push(job as Job<T>)
+      return job.id
+    }),
+    getJob: vi.fn(async (jobId: string) => {
+      return jobs.find(j => j.id === jobId) || null
+    }),
+    getJobs: vi.fn(async () => [...jobs]),
+    registerWorker: vi.fn(),
+    removeJob: vi.fn(async (jobId: string): Promise<void> => {
+      const index = jobs.findIndex(j => j.id === jobId)
+      if (index > -1) {
+        jobs.splice(index, 1)
+      }
+    }),
   }
 }
