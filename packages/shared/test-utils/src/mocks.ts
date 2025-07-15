@@ -72,7 +72,7 @@ export function createTypedMockQueue<T = any>(): IQueueService {
   const jobs: Array<Job<T>> = []
 
   return {
-    addJob: vi.fn(async <TData>(queue: string, name: string, data: TData) => {
+    addJob: vi.fn(async <TData>(queue: string, name: string, data: TData, options?: unknown) => {
       const job = {
         data,
         id: `job-${Date.now()}-${Math.random()}`,
@@ -88,13 +88,11 @@ export function createTypedMockQueue<T = any>(): IQueueService {
     }),
     getJobs: vi.fn(async () => [...jobs]),
     registerWorker: vi.fn(),
-    removeJob: vi.fn(async (jobId: string) => {
+    removeJob: vi.fn(async (jobId: string): Promise<void> => {
       const index = jobs.findIndex(j => j.id === jobId)
       if (index > -1) {
         jobs.splice(index, 1)
-        return true
       }
-      return false
     }),
   }
 }
