@@ -1,6 +1,7 @@
 import js from '@eslint/js'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
+import biomeConfig from 'eslint-config-biome'
 import prettierConfig from 'eslint-config-prettier'
 import importPlugin from 'eslint-plugin-import'
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y'
@@ -93,33 +94,15 @@ export default [
     },
   },
 
-  // Import plugin configuration
+  // Import plugin configuration (disabled - handled by Biome)
   {
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
     plugins: {
       import: importPlugin,
     },
     rules: {
-      'import/order': [
-        'error',
-        {
-          alphabetize: {
-            caseInsensitive: true,
-            order: 'asc',
-          },
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-            'object',
-            'type',
-          ],
-          'newlines-between': 'always',
-        },
-      ],
+      // Disable import/order as it's handled by Biome
+      'import/order': 'off',
     },
   },
 
@@ -177,6 +160,9 @@ export default [
     },
   },
 
-  // Prettier configuration (must be last)
+  // Prettier configuration
   prettierConfig,
+
+  // Biome configuration (must be last to disable conflicting rules)
+  biomeConfig,
 ]
